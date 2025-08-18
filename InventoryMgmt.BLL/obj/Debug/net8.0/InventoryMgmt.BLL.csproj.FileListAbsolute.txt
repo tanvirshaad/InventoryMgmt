@@ -1,0 +1,15 @@
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.BLL\bin\Debug\net8.0\InventoryMgmt.BLL.deps.json
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.BLL\bin\Debug\net8.0\InventoryMgmt.BLL.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.BLL\bin\Debug\net8.0\InventoryMgmt.BLL.pdb
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.BLL\bin\Debug\net8.0\InventoryMgmt.DAL.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.BLL\bin\Debug\net8.0\InventoryMgmt.DAL.pdb
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.BLL\obj\Debug\net8.0\InventoryMgmt.BLL.csproj.AssemblyReference.cache
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.BLL\obj\Debug\net8.0\InventoryMgmt.BLL.GeneratedMSBuildEditorConfig.editorconfig
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.BLL\obj\Debug\net8.0\InventoryMgmt.BLL.AssemblyInfoInputs.cache
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.BLL\obj\Debug\net8.0\InventoryMgmt.BLL.AssemblyInfo.cs
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.BLL\obj\Debug\net8.0\InventoryMgmt.BLL.csproj.CoreCompileInputs.cache
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.BLL\obj\Debug\net8.0\Inventor.8DA404AF.Up2Date
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.BLL\obj\Debug\net8.0\InventoryMgmt.BLL.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.BLL\obj\Debug\net8.0\refint\InventoryMgmt.BLL.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.BLL\obj\Debug\net8.0\InventoryMgmt.BLL.pdb
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.BLL\obj\Debug\net8.0\ref\InventoryMgmt.BLL.dll
