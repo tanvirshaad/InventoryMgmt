@@ -13,3 +13,4 @@ D:\itransition\InventoryMgmt.MVC\InventoryMgmt.BLL\obj\Debug\net8.0\InventoryMgm
 D:\itransition\InventoryMgmt.MVC\InventoryMgmt.BLL\obj\Debug\net8.0\refint\InventoryMgmt.BLL.dll
 D:\itransition\InventoryMgmt.MVC\InventoryMgmt.BLL\obj\Debug\net8.0\InventoryMgmt.BLL.pdb
 D:\itransition\InventoryMgmt.MVC\InventoryMgmt.BLL\obj\Debug\net8.0\ref\InventoryMgmt.BLL.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.BLL\obj\Debug\net8.0\InventoryMgmt.BLL.sourcelink.json

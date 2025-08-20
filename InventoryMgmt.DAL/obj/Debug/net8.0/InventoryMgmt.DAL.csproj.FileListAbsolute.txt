@@ -12,3 +12,4 @@ D:\itransition\InventoryMgmt.MVC\InventoryMgmt.DAL\obj\Debug\net8.0\ref\Inventor
 D:\itransition\InventoryMgmt.MVC\InventoryMgmt.DAL\bin\Debug\net8.0\InventoryMgmt.DAL.runtimeconfig.json
 D:\itransition\InventoryMgmt.MVC\InventoryMgmt.DAL\obj\Debug\net8.0\InventoryMgmt.DAL.csproj.AssemblyReference.cache
 D:\itransition\InventoryMgmt.MVC\InventoryMgmt.DAL\obj\Debug\net8.0\InventoryMgmt.DAL.genruntimeconfig.cache
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.DAL\obj\Debug\net8.0\InventoryMgmt.DAL.sourcelink.json

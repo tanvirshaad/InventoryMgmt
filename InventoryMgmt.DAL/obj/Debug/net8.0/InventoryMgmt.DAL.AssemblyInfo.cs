@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("InventoryMgmt.DAL")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1dd702c909bcfbf35b1bfbf2fe58a97eccdb778e")]
 [assembly: System.Reflection.AssemblyProductAttribute("InventoryMgmt.DAL")]
 [assembly: System.Reflection.AssemblyTitleAttribute("InventoryMgmt.DAL")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
