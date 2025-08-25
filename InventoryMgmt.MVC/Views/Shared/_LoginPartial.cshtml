@@ -1,0 +1,39 @@
+﻿<ul class="navbar-nav ms-auto">
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                <i class="bi bi-person-circle me-2"></i>
+                @User.Identity?.Name
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <a class="dropdown-item" href="#">
+                        <i class="bi bi-person-gear me-2"></i>Profile
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <form class="dropdown-item p-0" asp-controller="Auth" asp-action="Logout" method="post">
+                        <button type="submit" class="btn btn-link dropdown-item">
+                            <i class="bi bi-box-arrow-right me-2"></i>Logout
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link" asp-controller="Auth" asp-action="Register">
+                <i class="bi bi-person-plus me-1"></i>Register
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" asp-controller="Auth" asp-action="Login">
+                <i class="bi bi-box-arrow-in-right me-1"></i>Login
+            </a>
+        </li>
+    }
+</ul>

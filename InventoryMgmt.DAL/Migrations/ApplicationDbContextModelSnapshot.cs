@@ -34,13 +34,16 @@ namespace InventoryMgmt.DAL.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -50,37 +53,42 @@ namespace InventoryMgmt.DAL.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2025, 8, 18, 18, 29, 44, 415, DateTimeKind.Utc).AddTicks(517),
-                            Description = "Office and technical equipment",
-                            Name = "Equipment"
+                            CreatedAt = new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9634),
+                            Description = "Office equipment and devices",
+                            Name = "Equipment",
+                            UpdatedAt = new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9637)
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2025, 8, 18, 18, 29, 44, 415, DateTimeKind.Utc).AddTicks(521),
+                            CreatedAt = new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9638),
                             Description = "Office furniture and fixtures",
-                            Name = "Furniture"
+                            Name = "Furniture",
+                            UpdatedAt = new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9639)
                         },
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(2025, 8, 18, 18, 29, 44, 415, DateTimeKind.Utc).AddTicks(522),
+                            CreatedAt = new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9640),
                             Description = "Books and publications",
-                            Name = "Books"
+                            Name = "Books",
+                            UpdatedAt = new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9640)
                         },
                         new
                         {
                             Id = 4,
-                            CreatedAt = new DateTime(2025, 8, 18, 18, 29, 44, 415, DateTimeKind.Utc).AddTicks(523),
-                            Description = "Important documents and files",
-                            Name = "Documents"
+                            CreatedAt = new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9641),
+                            Description = "Important documents and records",
+                            Name = "Documents",
+                            UpdatedAt = new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9642)
                         },
                         new
                         {
                             Id = 5,
-                            CreatedAt = new DateTime(2025, 8, 18, 18, 29, 44, 415, DateTimeKind.Utc).AddTicks(523),
-                            Description = "Miscellaneous items",
-                            Name = "Other"
+                            CreatedAt = new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9643),
+                            Description = "Other miscellaneous items",
+                            Name = "Other",
+                            UpdatedAt = new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9643)
                         });
                 });
 
@@ -94,26 +102,26 @@ namespace InventoryMgmt.DAL.Migrations
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatedById")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("CreatedById1")
+                    b.Property<int>("InventoryId")
                         .HasColumnType("int");
 
-                    b.Property<int>("InventoryId")
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedById1");
-
                     b.HasIndex("InventoryId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Comments");
                 });
@@ -126,34 +134,200 @@ namespace InventoryMgmt.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("BooleanField1Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("BooleanField1Name")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("BooleanField1ShowInTable")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("BooleanField2Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("BooleanField2Name")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("BooleanField2ShowInTable")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("BooleanField3Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("BooleanField3Name")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("BooleanField3ShowInTable")
+                        .HasColumnType("bit");
+
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatedById")
+                    b.Property<string>("CustomIdElements")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("CreatedById1")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Description")
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
+                    b.Property<string>("CustomIdFormat")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("DocumentField1Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("DocumentField1Name")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("DocumentField1ShowInTable")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("DocumentField2Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("DocumentField2Name")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("DocumentField2ShowInTable")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("DocumentField3Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("DocumentField3Name")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("DocumentField3ShowInTable")
+                        .HasColumnType("bit");
+
                     b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<bool>("IsPublic")
                         .HasColumnType("bit");
 
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
+                    b.Property<string>("MultiTextField1Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("MultiTextField1Name")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("MultiTextField1ShowInTable")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("MultiTextField2Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("MultiTextField2Name")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("MultiTextField2ShowInTable")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("MultiTextField3Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("MultiTextField3Name")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("MultiTextField3ShowInTable")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("NumericField1Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("NumericField1Name")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("NumericField1ShowInTable")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("NumericField2Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("NumericField2Name")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("NumericField2ShowInTable")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("NumericField3Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("NumericField3Name")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("NumericField3ShowInTable")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("OwnerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TextField1Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("TextField1Name")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("TextField1ShowInTable")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("TextField2Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("TextField2Name")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("TextField2ShowInTable")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("TextField3Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("TextField3Name")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("TextField3ShowInTable")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -163,215 +337,37 @@ namespace InventoryMgmt.DAL.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<byte[]>("Version")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("CreatedById1");
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("Inventories");
                 });
 
             modelBuilder.Entity("InventoryMgmt.DAL.EF.TableModels.InventoryAccess", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("InventoryId")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("GrantedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("InventoryId")
-                        .HasColumnType("int");
+                    b.HasKey("InventoryId", "UserId");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UserId1")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("InventoryId");
-
-                    b.HasIndex("UserId1");
+                    b.HasIndex("UserId");
 
                     b.ToTable("InventoryAccesses");
-                });
-
-            modelBuilder.Entity("InventoryMgmt.DAL.EF.TableModels.InventoryCustomIdFormat", b =>
-                {
-                    b.Property<int>("InventoryId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("FormatJson")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("InventoryId");
-
-                    b.ToTable("InventoryCustomIdFormats");
-                });
-
-            modelBuilder.Entity("InventoryMgmt.DAL.EF.TableModels.InventoryFieldConfiguration", b =>
-                {
-                    b.Property<int>("InventoryId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("BooleanField1Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("BooleanField1ShowInTable")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("BooleanField1Title")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("BooleanField2Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("BooleanField2ShowInTable")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("BooleanField2Title")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("BooleanField3Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("BooleanField3ShowInTable")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("BooleanField3Title")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DocumentField1Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("DocumentField1ShowInTable")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("DocumentField1Title")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DocumentField2Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("DocumentField2ShowInTable")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("DocumentField2Title")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DocumentField3Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("DocumentField3ShowInTable")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("DocumentField3Title")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FieldOrderJson")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MultilineTextField1Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("MultilineTextField1ShowInTable")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("MultilineTextField1Title")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MultilineTextField2Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("MultilineTextField2ShowInTable")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("MultilineTextField2Title")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MultilineTextField3Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("MultilineTextField3ShowInTable")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("MultilineTextField3Title")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("NumericField1Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("NumericField1ShowInTable")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("NumericField1Title")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("NumericField2Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("NumericField2ShowInTable")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("NumericField2Title")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("NumericField3Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("NumericField3ShowInTable")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("NumericField3Title")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TextField1Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("TextField1ShowInTable")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("TextField1Title")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TextField2Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("TextField2ShowInTable")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("TextField2Title")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TextField3Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("TextField3ShowInTable")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("TextField3Title")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("InventoryId");
-
-                    b.ToTable("InventoryFieldConfigurations");
                 });
 
             modelBuilder.Entity("InventoryMgmt.DAL.EF.TableModels.InventoryTag", b =>
@@ -409,11 +405,7 @@ namespace InventoryMgmt.DAL.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatedById")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("CreatedById1")
+                    b.Property<int>("CreatedById")
                         .HasColumnType("int");
 
                     b.Property<string>("CustomId")
@@ -422,95 +414,92 @@ namespace InventoryMgmt.DAL.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("DocumentField1Value")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("DocumentField2Value")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("DocumentField3Value")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int>("InventoryId")
                         .HasColumnType("int");
 
-                    b.Property<string>("MultilineTextField1Value")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("LikesCount")
+                        .HasColumnType("int");
 
-                    b.Property<string>("MultilineTextField2Value")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("MultiTextField1Value")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
-                    b.Property<string>("MultilineTextField3Value")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("MultiTextField2Value")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("MultiTextField3Value")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<decimal?>("NumericField1Value")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("NumericField2Value")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("NumericField3Value")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<byte[]>("RowVersion")
+                    b.Property<string>("TextField1Value")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("TextField2Value")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("TextField3Value")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<byte[]>("Version")
                         .IsConcurrencyToken()
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
-                    b.Property<string>("TextField1Value")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TextField2Value")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TextField3Value")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedById1");
+                    b.HasIndex("CreatedById");
 
                     b.HasIndex("InventoryId", "CustomId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("IX_Item_Inventory_CustomId");
 
                     b.ToTable("Items");
                 });
 
-            modelBuilder.Entity("InventoryMgmt.DAL.EF.TableModels.Like", b =>
+            modelBuilder.Entity("InventoryMgmt.DAL.EF.TableModels.ItemLike", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("ItemId")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("ItemId")
-                        .HasColumnType("int");
+                    b.HasKey("ItemId", "UserId");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.HasIndex("UserId");
 
-                    b.Property<int>("UserId1")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId1");
-
-                    b.HasIndex("ItemId", "UserId")
-                        .IsUnique();
-
-                    b.ToTable("Likes");
+                    b.ToTable("ItemLikes");
                 });
 
             modelBuilder.Entity("InventoryMgmt.DAL.EF.TableModels.Tag", b =>
@@ -553,56 +542,80 @@ namespace InventoryMgmt.DAL.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
 
                     b.Property<string>("FirstName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<bool>("IsBlocked")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime?>("LastLoginAt")
+                    b.Property<DateTime>("LastLoginAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("LastName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("PreferredLanguage")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<string>("PreferredTheme")
                         .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("Role")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ProfileImageUrl")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("User");
+                    b.HasIndex("UserName")
+                        .IsUnique();
+
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("InventoryMgmt.DAL.EF.TableModels.Comment", b =>
                 {
-                    b.HasOne("InventoryMgmt.DAL.EF.TableModels.User", "CreatedBy")
-                        .WithMany("Comments")
-                        .HasForeignKey("CreatedById1")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("InventoryMgmt.DAL.EF.TableModels.Inventory", "Inventory")
                         .WithMany("Comments")
                         .HasForeignKey("InventoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("CreatedBy");
+                    b.HasOne("InventoryMgmt.DAL.EF.TableModels.User", "User")
+                        .WithMany("Comments")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Inventory");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("InventoryMgmt.DAL.EF.TableModels.Inventory", b =>
@@ -613,56 +626,34 @@ namespace InventoryMgmt.DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("InventoryMgmt.DAL.EF.TableModels.User", "CreatedBy")
+                    b.HasOne("InventoryMgmt.DAL.EF.TableModels.User", "Owner")
                         .WithMany("OwnedInventories")
-                        .HasForeignKey("CreatedById1")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Category");
 
-                    b.Navigation("CreatedBy");
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("InventoryMgmt.DAL.EF.TableModels.InventoryAccess", b =>
                 {
                     b.HasOne("InventoryMgmt.DAL.EF.TableModels.Inventory", "Inventory")
-                        .WithMany("InventoryAccesses")
+                        .WithMany("UserAccesses")
                         .HasForeignKey("InventoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("InventoryMgmt.DAL.EF.TableModels.User", "User")
                         .WithMany("InventoryAccesses")
-                        .HasForeignKey("UserId1")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Inventory");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("InventoryMgmt.DAL.EF.TableModels.InventoryCustomIdFormat", b =>
-                {
-                    b.HasOne("InventoryMgmt.DAL.EF.TableModels.Inventory", "Inventory")
-                        .WithOne("CustomIdFormat")
-                        .HasForeignKey("InventoryMgmt.DAL.EF.TableModels.InventoryCustomIdFormat", "InventoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Inventory");
-                });
-
-            modelBuilder.Entity("InventoryMgmt.DAL.EF.TableModels.InventoryFieldConfiguration", b =>
-                {
-                    b.HasOne("InventoryMgmt.DAL.EF.TableModels.Inventory", "Inventory")
-                        .WithOne("FieldConfiguration")
-                        .HasForeignKey("InventoryMgmt.DAL.EF.TableModels.InventoryFieldConfiguration", "InventoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Inventory");
                 });
 
             modelBuilder.Entity("InventoryMgmt.DAL.EF.TableModels.InventoryTag", b =>
@@ -688,7 +679,7 @@ namespace InventoryMgmt.DAL.Migrations
                 {
                     b.HasOne("InventoryMgmt.DAL.EF.TableModels.User", "CreatedBy")
                         .WithMany("CreatedItems")
-                        .HasForeignKey("CreatedById1")
+                        .HasForeignKey("CreatedById")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -703,7 +694,7 @@ namespace InventoryMgmt.DAL.Migrations
                     b.Navigation("Inventory");
                 });
 
-            modelBuilder.Entity("InventoryMgmt.DAL.EF.TableModels.Like", b =>
+            modelBuilder.Entity("InventoryMgmt.DAL.EF.TableModels.ItemLike", b =>
                 {
                     b.HasOne("InventoryMgmt.DAL.EF.TableModels.Item", "Item")
                         .WithMany("Likes")
@@ -712,9 +703,9 @@ namespace InventoryMgmt.DAL.Migrations
                         .IsRequired();
 
                     b.HasOne("InventoryMgmt.DAL.EF.TableModels.User", "User")
-                        .WithMany("Likes")
-                        .HasForeignKey("UserId1")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .WithMany("ItemLikes")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Item");
@@ -731,15 +722,11 @@ namespace InventoryMgmt.DAL.Migrations
                 {
                     b.Navigation("Comments");
 
-                    b.Navigation("CustomIdFormat");
-
-                    b.Navigation("FieldConfiguration");
-
-                    b.Navigation("InventoryAccesses");
-
                     b.Navigation("InventoryTags");
 
                     b.Navigation("Items");
+
+                    b.Navigation("UserAccesses");
                 });
 
             modelBuilder.Entity("InventoryMgmt.DAL.EF.TableModels.Item", b =>
@@ -760,7 +747,7 @@ namespace InventoryMgmt.DAL.Migrations
 
                     b.Navigation("InventoryAccesses");
 
-                    b.Navigation("Likes");
+                    b.Navigation("ItemLikes");
 
                     b.Navigation("OwnedInventories");
                 });

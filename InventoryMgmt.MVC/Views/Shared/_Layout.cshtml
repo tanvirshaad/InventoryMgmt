@@ -3,46 +3,108 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - InventoryMgmt.MVC</title>
+    <title>@ViewData["Title"] - Inventory Management</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/InventoryMgmt.MVC.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/InventoryManagement.MVC.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-dark bg-primary fixed-top">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">InventoryMgmt.MVC</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-boxes me-2"></i>InventoryManager
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+
+                <!-- Search Form -->
+                <form class="d-flex flex-grow-1 mx-3" asp-controller="Home" asp-action="Search" method="get">
+                    <div class="input-group w-100" style="max-width: 500px;">
+                        <input class="form-control" type="search" name="q" placeholder="Search inventories..." value="@ViewBag.SearchTerm">
+                        <button class="btn btn-outline-light" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-end">
+                    <ul class="navbar-nav">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" asp-controller="Home" asp-action="Index">
+                                <i class="bi bi-house me-1"></i>Home
+                            </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+                        @if (User.Identity!.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Inventory" asp-action="MyInventories">
+                                    <i class="bi bi-person-workspace me-1"></i>My Inventories
+                                </a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-gear me-1"></i>Settings
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="#" id="theme-toggle">
+                                            <i class="bi bi-moon-fill me-2"></i>Dark Mode
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#" id="language-toggle">
+                                            <i class="bi bi-translate me-2"></i>Español
+                                        </a>
+                                    </li>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Admin" asp-action="Index">
+                                                <i class="bi bi-shield-check me-2"></i>Admin Panel
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </li>
+                        }
                     </ul>
+                    <partial name="_LoginPartial" />
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
+
+    <div class="container-fluid" style="margin-top: 80px;">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="border-top footer text-muted bg-light mt-5">
         <div class="container">
-            &copy; 2025 - InventoryMgmt.MVC - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <div class="row py-4">
+                <div class="col-md-6">
+                    <h6 class="fw-bold">Inventory Management System</h6>
+                    <p class="small mb-0">Professional inventory management for modern organizations.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="small mb-0">
+                        &copy; 2025 - Inventory Management -
+                        <a asp-controller="Home" asp-action="Privacy" class="text-decoration-none">Privacy</a>
+                    </p>
+                </div>
+            </div>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

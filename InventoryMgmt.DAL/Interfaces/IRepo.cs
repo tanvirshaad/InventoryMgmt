@@ -9,13 +9,23 @@ namespace InventoryMgmt.DAL.Interfaces
 {
     public interface IRepo<T> where T : class
     {
-        IEnumerable<T> GetAll();
-        T? Get(int id);
-        bool Create(T entity);
-        bool Update(T entity);
-        bool Delete(T entity);
-        bool Exists(Expression<Func<T, bool>> predicate);
-        IEnumerable<T> Find(Expression<Func<T, bool>> predicate);
-        public int Count(Expression<Func<T, bool>>? predicate = null);
+        Task<IEnumerable<T>> GetAllAsync();
+        Task<IEnumerable<T>> GetAllAsync(params Expression<Func<T, object>>[] includes);
+        Task<T?> GetByIdAsync(object id);
+        Task<T?> GetByIdAsync(object id, params Expression<Func<T, object>>[] includes);
+        Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate);
+        Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes);
+        Task<T?> FindFirstAsync(Expression<Func<T, bool>> predicate);
+        Task<T?> FindFirstAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes);
+        Task<int> CountAsync();
+        Task<int> CountAsync(Expression<Func<T, bool>> predicate);
+        Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate);
+        Task AddAsync(T entity);
+        Task AddRangeAsync(IEnumerable<T> entities);
+        void Update(T entity);
+        void UpdateRange(IEnumerable<T> entities);
+        void Remove(T entity);
+        void RemoveRange(IEnumerable<T> entities);
+        Task<int> SaveChangesAsync();
     }
 }

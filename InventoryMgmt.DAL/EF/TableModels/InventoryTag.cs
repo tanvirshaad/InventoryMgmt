@@ -13,7 +13,7 @@ namespace InventoryMgmt.DAL.EF.TableModels
         public int TagId { get; set; }
 
         // Navigation properties
-        public virtual Inventory Inventory { get; set; } = null!;
-        public virtual Tag Tag { get; set; } = null!;
+        public virtual Inventory Inventory { get; set; } = null;
+        public virtual Tag Tag { get; set; } 
     }
 }

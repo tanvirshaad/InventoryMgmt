@@ -1,12 +1,10 @@
-﻿using Azure;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using InventoryMgmt.DAL.EF.TableModels;
-
 
 namespace InventoryMgmt.DAL.Data
 {
@@ -17,124 +15,119 @@ namespace InventoryMgmt.DAL.Data
 
         }
 
+        public DbSet<User> Users { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<Inventory> Inventories { get; set; }
         public DbSet<InventoryTag> InventoryTags { get; set; }
         public DbSet<InventoryAccess> InventoryAccesses { get; set; }
-        public DbSet<InventoryCustomIdFormat> InventoryCustomIdFormats { get; set; }
-        public DbSet<InventoryFieldConfiguration> InventoryFieldConfigurations { get; set; }
         public DbSet<Item> Items { get; set; }
+        public DbSet<ItemLike> ItemLikes { get; set; }
         public DbSet<Comment> Comments { get; set; }
-        public DbSet<Like> Likes { get; set; }
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
 
-            // Configure composite keys and relationships
-            modelBuilder.Entity<InventoryTag>()
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            // Configure User entity
+            builder.Entity<User>(entity =>
+            {
+                entity.ToTable("Users");
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.Email).IsUnique();
+                entity.HasIndex(e => e.UserName).IsUnique();
+            });
+
+            // Configure composite keys
+            builder.Entity<InventoryTag>()
                 .HasKey(it => new { it.InventoryId, it.TagId });
 
-            modelBuilder.Entity<InventoryTag>()
+            builder.Entity<InventoryAccess>()
+                .HasKey(iua => new { iua.InventoryId, iua.UserId });
+
+            builder.Entity<ItemLike>()
+                .HasKey(il => new { il.ItemId, il.UserId });
+
+            // Configure relationships
+            builder.Entity<Inventory>()
+                .HasOne(i => i.Owner)
+                .WithMany(u => u.OwnedInventories)
+                .HasForeignKey(i => i.OwnerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Inventory>()
+                .HasOne(i => i.Category)
+                .WithMany(c => c.Inventories)
+                .HasForeignKey(i => i.CategoryId);
+
+            builder.Entity<InventoryTag>()
                 .HasOne(it => it.Inventory)
                 .WithMany(i => i.InventoryTags)
                 .HasForeignKey(it => it.InventoryId);
 
-            modelBuilder.Entity<InventoryTag>()
+            builder.Entity<InventoryTag>()
                 .HasOne(it => it.Tag)
                 .WithMany(t => t.InventoryTags)
                 .HasForeignKey(it => it.TagId);
 
-            // Configure one-to-one relationships
-            modelBuilder.Entity<InventoryCustomIdFormat>()
-                .HasKey(f => f.InventoryId);
+            builder.Entity<InventoryAccess>()
+                .HasOne(iua => iua.Inventory)
+                .WithMany(i => i.UserAccesses)
+                .HasForeignKey(iua => iua.InventoryId);
 
-            modelBuilder.Entity<InventoryCustomIdFormat>()
-                .HasOne(f => f.Inventory)
-                .WithOne(i => i.CustomIdFormat)
-                .HasForeignKey<InventoryCustomIdFormat>(f => f.InventoryId);
+            builder.Entity<InventoryAccess>()
+                .HasOne(iua => iua.User)
+                .WithMany(u => u.InventoryAccesses)
+                .HasForeignKey(iua => iua.UserId);
 
-            modelBuilder.Entity<InventoryFieldConfiguration>()
-                .HasKey(f => f.InventoryId);
+            builder.Entity<Item>()
+                .HasOne(i => i.Inventory)
+                .WithMany(inv => inv.Items)
+                .HasForeignKey(i => i.InventoryId);
 
-            modelBuilder.Entity<InventoryFieldConfiguration>()
-                .HasOne(f => f.Inventory)
-                .WithOne(i => i.FieldConfiguration)
-                .HasForeignKey<InventoryFieldConfiguration>(f => f.InventoryId);
+            builder.Entity<Item>()
+                .HasOne(i => i.CreatedBy)
+                .WithMany(u => u.CreatedItems)
+                .HasForeignKey(i => i.CreatedById)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            // Configure unique constraints
-            modelBuilder.Entity<Item>()
+            builder.Entity<ItemLike>()
+                .HasOne(il => il.Item)
+                .WithMany(i => i.Likes)
+                .HasForeignKey(il => il.ItemId);
+
+            builder.Entity<ItemLike>()
+                .HasOne(il => il.User)
+                .WithMany(u => u.ItemLikes)
+                .HasForeignKey(il => il.UserId);
+
+            builder.Entity<Comment>()
+                .HasOne(c => c.Inventory)
+                .WithMany(i => i.Comments)
+                .HasForeignKey(c => c.InventoryId);
+
+            builder.Entity<Comment>()
+                .HasOne(c => c.User)
+                .WithMany(u => u.Comments)
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure indexes
+            builder.Entity<Item>()
                 .HasIndex(i => new { i.InventoryId, i.CustomId })
-                .IsUnique();
+                .IsUnique()
+                .HasDatabaseName("IX_Item_Inventory_CustomId");
 
-            modelBuilder.Entity<Like>()
-                .HasIndex(l => new { l.ItemId, l.UserId })
-                .IsUnique();
-
-            modelBuilder.Entity<Tag>()
+            builder.Entity<Tag>()
                 .HasIndex(t => t.Name)
                 .IsUnique();
 
-            // Configure row version for optimistic locking
-            modelBuilder.Entity<Inventory>()
-                .Property(i => i.RowVersion)
-                .IsRowVersion();
-
-            modelBuilder.Entity<Item>()
-                .Property(i => i.RowVersion)
-                .IsRowVersion();
-
-            // Configure decimal precision
-            modelBuilder.Entity<Item>()
-                .Property(i => i.NumericField1Value)
-                .HasPrecision(18, 4);
-
-            modelBuilder.Entity<Item>()
-                .Property(i => i.NumericField2Value)
-                .HasPrecision(18, 4);
-
-            modelBuilder.Entity<Item>()
-                .Property(i => i.NumericField3Value)
-                .HasPrecision(18, 4);
-
-            // Seed default categories
-            modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 1, Name = "Equipment", Description = "Office and technical equipment" },
+            // Seed initial data
+            builder.Entity<Category>().HasData(
+                new Category { Id = 1, Name = "Equipment", Description = "Office equipment and devices" },
                 new Category { Id = 2, Name = "Furniture", Description = "Office furniture and fixtures" },
                 new Category { Id = 3, Name = "Books", Description = "Books and publications" },
-                new Category { Id = 4, Name = "Documents", Description = "Important documents and files" },
-                new Category { Id = 5, Name = "Other", Description = "Miscellaneous items" }
+                new Category { Id = 4, Name = "Documents", Description = "Important documents and records" },
+                new Category { Id = 5, Name = "Other", Description = "Other miscellaneous items" }
             );
-
-            // Modify relationships to avoid multiple cascade paths
-
-            // Fix for Comments table
-            modelBuilder.Entity<Comment>()
-                .HasOne(c => c.CreatedBy)
-                .WithMany(u => u.Comments)
-                .HasForeignKey("CreatedById1")
-                .OnDelete(DeleteBehavior.Restrict); // Change to Restrict instead of Cascade
-
-            // Fix for InventoryAccesses table
-            modelBuilder.Entity<InventoryAccess>()
-                .HasOne(ia => ia.User)
-                .WithMany(u => u.InventoryAccesses)
-                .HasForeignKey("UserId1")
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Fix for Items table
-            modelBuilder.Entity<Item>()
-                .HasOne(i => i.CreatedBy)
-                .WithMany(u => u.CreatedItems)
-                .HasForeignKey("CreatedById1")
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Fix for Likes table
-            modelBuilder.Entity<Like>()
-                .HasOne(l => l.User)
-                .WithMany(u => u.Likes)
-                .HasForeignKey("UserId1")
-                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

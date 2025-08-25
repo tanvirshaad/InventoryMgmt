@@ -8,9 +8,8 @@ namespace InventoryMgmt.DAL.EF.TableModels
 {
     public class InventoryAccess
     {
-        public int Id { get; set; }
         public int InventoryId { get; set; }
-        public string UserId { get; set; } = string.Empty;
+        public int UserId { get; set; }
         public DateTime GrantedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation properties

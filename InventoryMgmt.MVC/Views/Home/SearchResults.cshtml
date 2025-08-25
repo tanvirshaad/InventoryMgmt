@@ -1,0 +1,103 @@
+﻿@model IEnumerable<InventoryMgmt.BLL.DTOs.InventoryDto>
+@{
+    ViewData["Title"] = "Search Results";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2><i class="bi bi-search me-2 text-primary"></i>Search Results</h2>
+        @if (!string.IsNullOrEmpty(ViewBag.SearchTerm))
+        {
+            <p class="text-muted mb-0">Results for: <strong>"@ViewBag.SearchTerm"</strong></p>
+        }
+    </div>
+</div>
+
+@if (Model.Any())
+{
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th><i class="bi bi-box me-1"></i>Name</th>
+                            <th><i class="bi bi-tag me-1"></i>Category</th>
+                            <th><i class="bi bi-person me-1"></i>Owner</th>
+                            <th><i class="bi bi-calendar3 me-1"></i>Created</th>
+                            <th class="text-center"><i class="bi bi-collection me-1"></i>Items</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var inventory in Model)
+                        {
+                            <tr class="inventory-row" data-url="@Url.Action("Details", "Inventory", new { id = inventory.Id })">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        @if (!string.IsNullOrEmpty(inventory.ImageUrl))
+                                        {
+                                            <img src="@inventory.ImageUrl" class="rounded me-3" width="40" height="40" style="object-fit: cover;" />
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-secondary rounded me-3 d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;">
+                                                <i class="bi bi-box"></i>
+                                            </div>
+                                        }
+                                        <div>
+                                            <div class="fw-semibold">@inventory.Title</div>
+                                            @if (!string.IsNullOrEmpty(inventory.Description))
+                                            {
+                                                <small class="text-muted">@inventory.Description.Substring(0, Math.Min(80, inventory.Description.Length))@(inventory.Description.Length > 80 ? "..." : "")</small>
+                                            }
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">@inventory.Category?.Name</span>
+                                </td>
+                                <td>@inventory.Owner?.FullName</td>
+                                <td>
+                                    <small class="text-muted">@inventory.CreatedAt.ToString("MMM dd, yyyy")</small>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-primary">@inventory.ItemsCount</span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-search display-1 text-muted mb-3"></i>
+            <h4>No results found</h4>
+            @if (!string.IsNullOrEmpty(ViewBag.SearchTerm))
+            {
+                <p class="text-muted">We couldn't find any inventories matching "<strong>@ViewBag.SearchTerm</strong>"</p>
+            }
+            <p class="text-muted">Try adjusting your search terms or browse all inventories.</p>
+            <a class="btn btn-primary" asp-controller="Home" asp-action="Index">
+                <i class="bi bi-house me-2"></i>Back to Home
+            </a>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        // Make inventory rows clickable
+        document.querySelectorAll('.inventory-row').forEach(row => {
+            row.addEventListener('click', function(e) {
+                if (e.target.tagName !== 'A' && e.target.tagName !== 'BUTTON') {
+                    window.location.href = this.dataset.url;
+                }
+            });
+        });
+    </script>
+}

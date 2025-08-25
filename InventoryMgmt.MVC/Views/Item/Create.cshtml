@@ -1,0 +1,105 @@
+@model InventoryMgmt.BLL.DTOs.ItemDto
+
+@{
+    ViewData["Title"] = "Add New Item";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="text-center">Add New Item</h2>
+                @if (ViewBag.Inventory != null)
+                {
+                    <p class="text-center text-muted mb-0">
+                        Adding to: <strong>@ViewBag.Inventory.Title</strong>
+                    </p>
+                }
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="InventoryId" />
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="CustomId" class="form-label">Custom ID</label>
+                                <input asp-for="CustomId" class="form-control" placeholder="Leave empty for auto-generation" />
+                                <small class="form-text text-muted">Optional: Custom identifier for this item</small>
+                                <span asp-validation-for="CustomId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Text Field 1</label>
+                                <input asp-for="TextField1Value" class="form-control" placeholder="Enter text value" />
+                                <span asp-validation-for="TextField1Value" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label class="form-label">Multi-line Text Field 1</label>
+                        <textarea asp-for="MultiTextField1Value" class="form-control" rows="3" placeholder="Enter multi-line text"></textarea>
+                        <span asp-validation-for="MultiTextField1Value" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Numeric Field 1</label>
+                                <input asp-for="NumericField1Value" class="form-control" type="number" step="0.01" placeholder="Enter numeric value" />
+                                <span asp-validation-for="NumericField1Value" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Numeric Field 2</label>
+                                <input asp-for="NumericField2Value" class="form-control" type="number" step="0.01" placeholder="Enter numeric value" />
+                                <span asp-validation-for="NumericField2Value" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Text Field 2</label>
+                                <input asp-for="TextField2Value" class="form-control" placeholder="Enter text value" />
+                                <span asp-validation-for="TextField2Value" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Text Field 3</label>
+                                <input asp-for="TextField3Value" class="form-control" placeholder="Enter text value" />
+                                <span asp-validation-for="TextField3Value" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label class="form-label">Multi-line Text Field 2</label>
+                        <textarea asp-for="MultiTextField2Value" class="form-control" rows="2" placeholder="Enter multi-line text"></textarea>
+                        <span asp-validation-for="MultiTextField2Value" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <button type="submit" class="btn btn-primary w-100">Add Item</button>
+                    </div>
+                </form>
+                
+                <div class="text-center">
+                    <a asp-action="Details" asp-controller="Inventory" asp-route-id="@Model.InventoryId" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Inventory
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

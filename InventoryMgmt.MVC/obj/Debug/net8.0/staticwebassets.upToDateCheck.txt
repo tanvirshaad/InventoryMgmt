@@ -1,5 +1,8 @@
+wwwroot\css\inventory-detail.css
 wwwroot\css\site.css
 wwwroot\favicon.ico
+wwwroot\js\inventory-detail.js
+wwwroot\js\item-detail.js
 wwwroot\js\site.js
 wwwroot\lib\bootstrap\dist\css\bootstrap.css
 wwwroot\lib\bootstrap\dist\css\bootstrap.css.map
@@ -58,3 +61,7 @@ wwwroot\lib\jquery-validation\LICENSE.md
 wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.js
 wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.min.js
 wwwroot\lib\jquery-validation-unobtrusive\LICENSE.txt
+wwwroot\lib\microsoft\signalr\dist\browser\signalr.js
+wwwroot\lib\microsoft\signalr\dist\browser\signalr.js.map
+wwwroot\lib\microsoft\signalr\dist\browser\signalr.min.js
+wwwroot\lib\microsoft\signalr\dist\browser\signalr.min.js.map

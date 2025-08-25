@@ -1,0 +1,250 @@
+@model InventoryMgmt.BLL.DTOs.ItemDto
+
+@{
+    ViewData["Title"] = "Item Details";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+                    <li class="breadcrumb-item"><a asp-controller="Inventory" asp-action="Details" asp-route-id="@Model.InventoryId">@Model.InventoryTitle</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">@Model.CustomId</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h2>@(Model.Name ?? Model.TextField1Value ?? "Unnamed Item")</h2>
+                    <p class="text-muted">
+                        <i class="bi bi-hash me-2"></i>@Model.CustomId
+                        <span class="mx-2">•</span>
+                        <i class="bi bi-person me-2"></i>@(Model.CreatedByName ?? "Unknown")
+                        <span class="mx-2">•</span>
+                        <i class="bi bi-calendar me-2"></i>@Model.CreatedAt.ToString("MMM dd, yyyy")
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    @if (ViewBag.CanEdit == true)
+                    {
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">
+                            <i class="bi bi-pencil me-2"></i>Edit
+                        </a>
+                    }
+                    <button class="btn btn-outline-primary like-btn" data-item-id="@Model.Id">
+                        <i class="bi bi-heart@(Model.IsLikedByCurrentUser ? "-fill" : "")"></i>
+                        <span class="likes-count">@Model.LikesCount</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Item Details</h5>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.Description) || !string.IsNullOrEmpty(Model.MultiTextField1Value))
+                    {
+                        <div class="mb-4">
+                            <h6>Description</h6>
+                            <p>@(Model.Description ?? Model.MultiTextField1Value)</p>
+                        </div>
+                    }
+
+                    <!-- Display custom fields -->
+                    <div class="row">
+                        @if (!string.IsNullOrEmpty(Model.TextField1Value))
+                        {
+                            <div class="col-md-6 mb-3">
+                                <h6>Text Field 1</h6>
+                                <p>@Model.TextField1Value</p>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.TextField2Value))
+                        {
+                            <div class="col-md-6 mb-3">
+                                <h6>Text Field 2</h6>
+                                <p>@Model.TextField2Value</p>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.TextField3Value))
+                        {
+                            <div class="col-md-6 mb-3">
+                                <h6>Text Field 3</h6>
+                                <p>@Model.TextField3Value</p>
+                            </div>
+                        }
+                        @if (Model.NumericField1Value.HasValue)
+                        {
+                            <div class="col-md-6 mb-3">
+                                <h6>Numeric Field 1</h6>
+                                <p>@Model.NumericField1Value.Value</p>
+                            </div>
+                        }
+                        @if (Model.NumericField2Value.HasValue)
+                        {
+                            <div class="col-md-6 mb-3">
+                                <h6>Numeric Field 2</h6>
+                                <p>@Model.NumericField2Value.Value</p>
+                            </div>
+                        }
+                        @if (Model.NumericField3Value.HasValue)
+                        {
+                            <div class="col-md-6 mb-3">
+                                <h6>Numeric Field 3</h6>
+                                <p>@Model.NumericField3Value.Value</p>
+                            </div>
+                        }
+                        @if (Model.BooleanField1Value.HasValue)
+                        {
+                            <div class="col-md-6 mb-3">
+                                <h6>Boolean Field 1</h6>
+                                <p>@(Model.BooleanField1Value.Value ? "Yes" : "No")</p>
+                            </div>
+                        }
+                        @if (Model.BooleanField2Value.HasValue)
+                        {
+                            <div class="col-md-6 mb-3">
+                                <h6>Boolean Field 2</h6>
+                                <p>@(Model.BooleanField2Value.Value ? "Yes" : "No")</p>
+                            </div>
+                        }
+                        @if (Model.BooleanField3Value.HasValue)
+                        {
+                            <div class="col-md-6 mb-3">
+                                <h6>Boolean Field 3</h6>
+                                <p>@(Model.BooleanField3Value.Value ? "Yes" : "No")</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    <small>Last updated: @Model.UpdatedAt.ToString("MMM dd, yyyy HH:mm")</small>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Comments</h5>
+                </div>
+                <div class="card-body">
+                    <div id="comments-container" class="mb-3">
+                        <!-- Comments will be loaded here -->
+                    </div>
+                    <input type="hidden" id="item-id" value="@Model.Id" />
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <div class="input-group">
+                            <textarea class="form-control" id="new-comment" placeholder="Add a comment..." rows="2"></textarea>
+                            <button class="btn btn-primary" type="button" id="send-comment">
+                                <i class="bi bi-send"></i>
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Please <a href="/Auth/Login">login</a> to leave a comment.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6>Item ID</h6>
+                        <p><code>@Model.CustomId</code></p>
+                    </div>
+                    <div class="mb-3">
+                        <h6>Inventory</h6>
+                        <p>
+                            <a asp-controller="Inventory" asp-action="Details" asp-route-id="@Model.InventoryId">
+                                @Model.InventoryTitle
+                            </a>
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <h6>Created by</h6>
+                        <p>@Model.CreatedByName</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6>Created at</h6>
+                        <p>@Model.CreatedAt.ToString("MMM dd, yyyy HH:mm")</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6>Last updated</h6>
+                        <p>@Model.UpdatedAt.ToString("MMM dd, yyyy HH:mm")</p>
+                    </div>
+                </div>
+            </div>
+
+            @if (ViewBag.CanEdit == true)
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">
+                                <i class="bi bi-pencil me-2"></i>Edit item
+                            </a>
+                            <button type="button" class="btn btn-outline-primary duplicate-item" data-item-id="@Model.Id">
+                                <i class="bi bi-copy me-2"></i>Duplicate item
+                            </button>
+                            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                <i class="bi bi-trash me-2"></i>Delete item
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+@if (ViewBag.CanEdit == true)
+{
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Delete Item</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete "<strong>@Model.Name</strong>"?</p>
+                    <p class="text-danger">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+                        <button type="submit" class="btn btn-danger">Delete Item</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script src="~/js/item-detail.js"></script>
+}

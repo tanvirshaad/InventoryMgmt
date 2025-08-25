@@ -15,8 +15,9 @@ namespace InventoryMgmt.DAL.EF.TableModels
         [MaxLength(50)]
         public string Name { get; set; } = string.Empty;
 
+        public int UsageCount { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public int UsageCount { get; set; } = 0;
 
         // Navigation properties
         public virtual ICollection<InventoryTag> InventoryTags { get; set; } = new List<InventoryTag>();
