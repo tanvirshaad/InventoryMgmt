@@ -598,6 +598,7 @@ function initializeAutoComplete() {
 
 // Initialize all components when DOM is ready
 document.addEventListener('DOMContentLoaded', function () {
+    console.log("DOM ready in site.js");
     initializeDragAndDrop();
     initializeAutoComplete();
 
@@ -607,12 +608,43 @@ document.addEventListener('DOMContentLoaded', function () {
         customIdInput.addEventListener('input', updateCustomIdPreview);
         updateCustomIdPreview(); // Initial preview
     }
+    
+    // Direct event handlers for custom field buttons as a backup approach
+    $(document).ready(function() {
+        console.log("jQuery document ready in site.js");
+        console.log("Checking for field buttons directly in document.ready");
+        console.log("Text button exists:", $('#add-text-field').length);
+        console.log("Numeric button exists:", $('#add-numeric-field').length);
+        console.log("Boolean button exists:", $('#add-boolean-field').length);
+        
+        // Set direct click handlers
+        $('#add-text-field').on('click', function() {
+            console.log("Text field button clicked (from document.ready)");
+            addCustomField('text');
+            return false;
+        });
+        
+        $('#add-numeric-field').on('click', function() {
+            console.log("Numeric field button clicked (from document.ready)");
+            addCustomField('numeric');
+            return false;
+        });
+        
+        $('#add-boolean-field').on('click', function() {
+            console.log("Boolean field button clicked (from document.ready)");
+            addCustomField('boolean');
+            return false;
+        });
+    });
 });
 
 // Initialize inventory page functionality
 function initializeInventoryPage(inventoryId) {
+    console.log("Initializing inventory page with ID:", inventoryId);
     initializeCustomIdConfiguration();
+    console.log("About to initialize custom fields");
     initializeCustomFields();
+    console.log("Custom fields initialized");
     initializeChat(inventoryId);
     initializeItemSelection();
     initializeAutoSave();
@@ -785,18 +817,211 @@ function getCustomIdElements() {
 
 // Custom Fields Management
 function initializeCustomFields() {
-    const addTextBtn = document.getElementById('add-text-field');
-    const addNumericBtn = document.getElementById('add-numeric-field');
-    const addBooleanBtn = document.getElementById('add-boolean-field');
+    // Using jQuery instead of vanilla JavaScript to ensure consistent handling
+    console.log("Inside initializeCustomFields function");
+    const addTextBtn = $('#add-text-field');
+    const addNumericBtn = $('#add-numeric-field');
+    const addBooleanBtn = $('#add-boolean-field');
+    const saveFieldsBtn = $('#save-fields-button');
+    const reloadFieldsBtn = $('#reload-fields-button');
     
-    if (addTextBtn) addTextBtn.addEventListener('click', () => addCustomField('text'));
-    if (addNumericBtn) addNumericBtn.addEventListener('click', () => addCustomField('numeric'));
-    if (addBooleanBtn) addBooleanBtn.addEventListener('click', () => addCustomField('boolean'));
+    console.log("Text button found:", addTextBtn.length > 0);
+    console.log("Numeric button found:", addNumericBtn.length > 0);
+    console.log("Boolean button found:", addBooleanBtn.length > 0);
+    console.log("Save button found:", saveFieldsBtn.length > 0);
+    console.log("Reload button found:", reloadFieldsBtn.length > 0);
+    
+    if (addTextBtn.length) {
+        console.log("Adding click handler to text button");
+        addTextBtn.on('click', function() {
+            console.log("Text button clicked");
+            addCustomField('text');
+        });
+    }
+    
+    if (addNumericBtn.length) {
+        console.log("Adding click handler to numeric button");
+        addNumericBtn.on('click', function() {
+            console.log("Numeric button clicked");
+            addCustomField('numeric');
+        });
+    }
+    
+    if (addBooleanBtn.length) {
+        console.log("Adding click handler to boolean button");
+        addBooleanBtn.on('click', function() {
+            console.log("Boolean button clicked");
+            addCustomField('boolean');
+        });
+    }
+    
+    // Save button handler
+    if (saveFieldsBtn.length) {
+        console.log("Adding click handler to save button");
+        saveFieldsBtn.on('click', function() {
+            console.log("Save button clicked");
+            saveCustomFields();
+        });
+    }
+    
+    // Reload button handler
+    if (reloadFieldsBtn.length) {
+        console.log("Adding click handler to reload button");
+        reloadFieldsBtn.on('click', function() {
+            console.log("Reload button clicked");
+            const container = document.getElementById('custom-fields-list');
+            if (container) {
+                container.innerHTML = '<div class="alert alert-info">Loading fields...</div>';
+            }
+            loadCustomFields();
+        });
+    }
+    
+    // Clear all fields button handler
+    const clearAllFieldsBtn = $('#clear-all-fields-button');
+    if (clearAllFieldsBtn.length) {
+        console.log("Adding click handler to clear all fields button");
+        clearAllFieldsBtn.on('click', function() {
+            if (confirm("Are you sure you want to clear ALL custom fields? This action cannot be undone once saved.")) {
+                console.log("Clear all fields confirmed");
+                
+                const inventoryId = getInventoryIdFromUrl();
+                if (!inventoryId) {
+                    console.error("Could not determine inventory ID from URL");
+                    return;
+                }
+                
+                // Get the anti-forgery token
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                const headers = {
+                    'Content-Type': 'application/json',
+                };
+                
+                // Add the token if it exists
+                if (token) {
+                    headers['RequestVerificationToken'] = token;
+                }
+                
+                // Send empty fields array to clear all fields
+                fetch('/Inventory/SaveCustomFields', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({ inventoryId: parseInt(inventoryId), fields: [] })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Clear the UI
+                        const container = document.getElementById('custom-fields-list');
+                        if (container) {
+                            container.innerHTML = '';
+                        }
+                        
+                        showToast('All custom fields cleared successfully', 'success');
+                    } else {
+                        console.error("Error clearing custom fields:", data.error);
+                        showToast(`Error clearing fields: ${data.error || 'Unknown error'}`, 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error clearing custom fields:', err);
+                    showToast(`Error clearing fields: ${err.message}`, 'error');
+                });
+            }
+        });
+    }
+    
+    // Debug panel functionality
+    const toggleDebugBtn = $('#toggle-debug');
+    const showIdsBtn = $('#debug-show-ids');
+    const clearFieldsBtn = $('#debug-clear-fields');
+    const logFieldsBtn = $('#debug-log-fields');
+    
+    if (toggleDebugBtn.length) {
+        toggleDebugBtn.on('click', function() {
+            $('#debug-content').toggle();
+        });
+    }
+    
+    if (showIdsBtn.length) {
+        showIdsBtn.on('click', function() {
+            $('.field-debug').toggle();
+        });
+    }
+    
+    if (clearFieldsBtn.length) {
+        clearFieldsBtn.on('click', function() {
+            if (confirm('Are you sure you want to clear all fields? This cannot be undone.')) {
+                $('#custom-fields-list').empty();
+                saveCustomFields();
+            }
+        });
+    }
+    
+    if (logFieldsBtn.length) {
+        logFieldsBtn.on('click', function() {
+            const fields = getCustomFields();
+            console.log('Current custom fields:', fields);
+            
+            const debugOutput = JSON.stringify(fields, null, 2);
+            $('#debug-current-fields').html(`<pre>${debugOutput}</pre>`);
+        });
+    }
+    
+    // Debug Raw DB Values button
+    const debugRawDbBtn = $('#debug-raw-db');
+    if (debugRawDbBtn.length) {
+        debugRawDbBtn.on('click', function() {
+            const inventoryId = getInventoryIdFromUrl();
+            if (!inventoryId) {
+                console.error("Could not determine inventory ID from URL");
+                return;
+            }
+            
+            fetch(`/Inventory/DebugCustomFields/${inventoryId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Failed to load raw DB data: ${response.status} ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Raw DB data:", data);
+                    
+                    const debugOutput = JSON.stringify(data.customFields, null, 2);
+                    $('#debug-current-fields').html(`<pre>RAW DB VALUES (Last updated: ${new Date(data.lastUpdated).toLocaleString()}):\n${debugOutput}</pre>`);
+                })
+                .catch(err => {
+                    console.error('Error loading raw DB data:', err);
+                    showToast('Error loading raw DB data', 'error');
+                });
+        });
+    }
 }
 
 function addCustomField(type) {
-    const container = document.getElementById('custom-fields-list');
-    const fieldId = 'field-' + Date.now();
+    console.log("Adding custom field of type:", type);
+    const container = $('#custom-fields-list');
+    console.log("Container found:", container.length > 0);
+    
+    if (!container.length) {
+        console.error("Custom fields container not found!");
+        return;
+    }
+    
+    // Generate a proper field ID that matches the server pattern
+    const existingFields = container.find('.custom-field[data-field-type="' + type + '"]');
+    const fieldNumber = existingFields.length + 1;
+    const fieldId = `${type}-field-${fieldNumber}`;
+    
+    const defaultName = `${type.charAt(0).toUpperCase() + type.slice(1)} Field ${fieldNumber}`;
+    
+    console.log(`Generated field ID: ${fieldId} for type ${type}`);
     
     const fieldHtml = `
         <div class="custom-field field-item" draggable="true" data-field-id="${fieldId}" data-field-type="${type}">
@@ -807,7 +1032,7 @@ function addCustomField(type) {
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <input type="text" class="form-control field-name" placeholder="Field name" data-field-id="${fieldId}">
+                    <input type="text" class="form-control field-name" placeholder="Field name" data-field-id="${fieldId}" value="${defaultName}">
                 </div>
                 <div class="col-md-4">
                     <input type="text" class="form-control field-description" placeholder="Description (optional)" data-field-id="${fieldId}">
@@ -830,23 +1055,29 @@ function addCustomField(type) {
         </div>
     `;
     
-    container.insertAdjacentHTML('beforeend', fieldHtml);
+    console.log("About to append HTML to container");
+    container.append(fieldHtml);
+    console.log("HTML appended");
     initializeFieldEventListeners(fieldId);
+    console.log("Event listeners initialized");
+    
+    // Show toast to remind user to save
+    showToast('Field added. Remember to save your changes!', 'info');
 }
 
 function initializeFieldEventListeners(fieldId) {
-    const removeBtn = document.querySelector(`[data-field-id="${fieldId}"].remove-field`);
+    const removeBtn = $(`[data-field-id="${fieldId}"].remove-field`);
     
-    if (removeBtn) {
-        removeBtn.addEventListener('click', function() {
+    if (removeBtn.length) {
+        removeBtn.on('click', function() {
             removeCustomField(fieldId);
         });
     }
 }
 
 function removeCustomField(fieldId) {
-    const field = document.querySelector(`[data-field-id="${fieldId}"]`);
-    if (field) {
+    const field = $(`[data-field-id="${fieldId}"]`);
+    if (field.length) {
         field.remove();
     }
 }
@@ -1015,55 +1246,130 @@ function initializeAutoSave() {
 
 function saveCustomIdConfiguration() {
     const elements = getCustomIdElements();
+    const inventoryId = getInventoryIdFromUrl();
+    
+    if (!inventoryId || isNaN(inventoryId) || inventoryId <= 0) {
+        console.error("Invalid inventory ID:", inventoryId);
+        showToast('Error: Invalid inventory ID', 'error');
+        return;
+    }
+    
+    console.log("Saving custom ID configuration for inventory ID:", inventoryId);
+    console.log("Elements to save:", elements);
+    
+    // Get the anti-forgery token
+    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+    const headers = {
+        'Content-Type': 'application/json',
+    };
+    
+    // Add the token if it exists
+    if (token) {
+        headers['RequestVerificationToken'] = token;
+    }
     
     fetch('/Inventory/SaveCustomIdConfiguration', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ elements: elements })
+        headers: headers,
+        body: JSON.stringify({ inventoryId: parseInt(inventoryId), elements: elements })
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log("SaveCustomIdConfiguration response status:", response.status);
+        if (!response.ok) {
+            throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
     .then(data => {
+        console.log("SaveCustomIdConfiguration response data:", data);
         if (data.success) {
             showToast('Custom ID configuration saved', 'success');
         } else {
-            showToast('Error saving configuration', 'error');
+            console.error("Error saving custom ID configuration:", data.error);
+            showToast(`Error saving configuration: ${data.error || 'Unknown error'}`, 'error');
         }
     })
     .catch(err => {
         console.error('Error saving custom ID configuration:', err);
-        showToast('Error saving configuration', 'error');
+        showToast(`Error saving configuration: ${err.message}`, 'error');
     });
 }
 
 function saveCustomFields() {
     const fields = getCustomFields();
+    const inventoryId = getInventoryIdFromUrl();
+    
+    if (!inventoryId || isNaN(inventoryId) || inventoryId <= 0) {
+        console.error("Invalid inventory ID:", inventoryId);
+        showToast('Error: Invalid inventory ID', 'error');
+        return;
+    }
+    
+    console.log("Saving custom fields for inventory ID:", inventoryId);
+    console.log("Fields to save:", fields);
+    
+    // Show save indicator
+    const saveButton = document.getElementById('save-fields-button');
+    const originalText = saveButton ? saveButton.innerHTML : '';
+    if (saveButton) {
+        saveButton.innerHTML = '<i class="bi bi-clock me-2"></i>Saving...';
+        saveButton.disabled = true;
+    }
+    
+    // Get the anti-forgery token
+    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+    const headers = {
+        'Content-Type': 'application/json',
+    };
+    
+    // Add the token if it exists
+    if (token) {
+        headers['RequestVerificationToken'] = token;
+    }
     
     fetch('/Inventory/SaveCustomFields', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ fields: fields })
+        headers: headers,
+        body: JSON.stringify({ inventoryId: parseInt(inventoryId), fields: fields })
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log("SaveCustomFields response status:", response.status);
+        if (!response.ok) {
+            throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
     .then(data => {
+        console.log("SaveCustomFields response data:", data);
         if (data.success) {
-            showToast('Custom fields saved', 'success');
+            showToast(`Custom fields saved successfully (${fields.length} fields)`, 'success');
+            
+            // Update debug panel
+            const debugOutput = JSON.stringify(fields, null, 2);
+            $('#debug-current-fields').html(`<pre>Saved fields:\n${debugOutput}</pre>`);
         } else {
-            showToast('Error saving fields', 'error');
+            console.error("Error saving custom fields:", data.error);
+            showToast(`Error saving fields: ${data.error || 'Unknown error'}`, 'error');
         }
     })
     .catch(err => {
         console.error('Error saving custom fields:', err);
-        showToast('Error saving fields', 'error');
+        showToast(`Error saving fields: ${err.message}`, 'error');
+    })
+    .finally(() => {
+        // Restore save button
+        if (saveButton) {
+            saveButton.innerHTML = originalText;
+            saveButton.disabled = false;
+        }
     });
 }
 
 function getCustomFields() {
     const fields = [];
     const fieldDivs = document.querySelectorAll('.custom-field');
+    
+    console.log(`Found ${fieldDivs.length} custom field elements`);
     
     fieldDivs.forEach((div, index) => {
         const fieldId = div.getAttribute('data-field-id');
@@ -1072,29 +1378,47 @@ function getCustomFields() {
         const descriptionInput = div.querySelector('.field-description');
         const showInTableCheckbox = div.querySelector('.show-in-table');
         
-        if (nameInput) {
-            fields.push({
+        // Skip fields without a name
+        if (nameInput && nameInput.value && nameInput.value.trim() !== '') {
+            const fieldData = {
                 id: fieldId,
                 type: fieldType,
-                name: nameInput.value,
-                description: descriptionInput ? descriptionInput.value : '',
+                name: nameInput.value.trim(),
+                description: descriptionInput && descriptionInput.value ? descriptionInput.value.trim() : '',
                 showInTable: showInTableCheckbox ? showInTableCheckbox.checked : false,
                 order: index
-            });
+            };
+            
+            console.log(`Adding field: ${fieldData.type} - ${fieldData.name} (${fieldData.id})`);
+            fields.push(fieldData);
+        } else {
+            console.log(`Skipping empty field at index ${index}`);
         }
     });
     
+    console.log(`Total of ${fields.length} fields to save`);
     return fields;
 }
 
 // Load data functions
 function loadCustomIdElements() {
     const inventoryId = getInventoryIdFromUrl();
-    if (!inventoryId) return;
+    if (!inventoryId) {
+        console.error("Could not determine inventory ID from URL");
+        return;
+    }
+    
+    console.log(`Loading custom ID elements for inventory ID: ${inventoryId}`);
     
     fetch(`/Inventory/GetCustomIdElements/${inventoryId}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to load custom ID elements: ${response.status} ${response.statusText}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log("Custom ID elements loaded:", data);
             const container = document.getElementById('custom-id-elements');
             if (container && data.elements) {
                 container.innerHTML = '';
@@ -1102,30 +1426,79 @@ function loadCustomIdElements() {
                     addCustomIdElementFromData(element);
                 });
                 updateCustomIdPreview();
+                
+                // If elements were loaded, we should save them immediately to ensure format is correct
+                saveCustomIdConfiguration();
+            } else {
+                console.warn("Custom ID elements container not found or no elements in response");
             }
         })
         .catch(err => {
             console.error('Error loading custom ID elements:', err);
+            showToast('Error loading custom ID configuration', 'error');
         });
 }
 
 function loadCustomFields() {
     const inventoryId = getInventoryIdFromUrl();
-    if (!inventoryId) return;
+    if (!inventoryId) {
+        console.error("Could not determine inventory ID from URL");
+        return;
+    }
+    
+    console.log(`Loading custom fields for inventory ID: ${inventoryId}`);
     
     fetch(`/Inventory/GetCustomFields/${inventoryId}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to load custom fields: ${response.status} ${response.statusText}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log("Custom fields loaded:", data);
             const container = document.getElementById('custom-fields-list');
             if (container && data.fields) {
                 container.innerHTML = '';
+                // Clear any debug notification
+                if (document.getElementById('debug-notification')) {
+                    document.getElementById('debug-notification').remove();
+                }
+                
+                // Add a debug notification with the returned data
+                if (data.debug) {
+                    const debugElement = document.createElement('div');
+                    debugElement.id = 'debug-notification';
+                    debugElement.className = 'alert alert-info small';
+                    debugElement.innerHTML = `Loaded ${data.fields.length} fields for inventory #${data.debug.inventoryId}`;
+                    container.parentNode.insertBefore(debugElement, container);
+                    
+                    // Auto-hide after 5 seconds
+                    setTimeout(() => {
+                        if (document.getElementById('debug-notification')) {
+                            document.getElementById('debug-notification').remove();
+                        }
+                    }, 5000);
+                }
+                
+                // Process the fields
                 data.fields.forEach(field => {
+                    console.log("Processing field:", field);
                     addCustomFieldFromData(field);
                 });
+                
+                // Update the debug panel
+                const debugOutput = JSON.stringify(data.fields, null, 2);
+                $('#debug-current-fields').html(`<pre>${debugOutput}</pre>`);
+                
+                console.log(`Successfully loaded ${data.fields.length} custom fields`);
+            } else {
+                console.warn("Custom fields container not found or no fields in response");
             }
         })
         .catch(err => {
             console.error('Error loading custom fields:', err);
+            showToast('Error loading custom fields', 'error');
         });
 }
 
@@ -1156,16 +1529,163 @@ function loadAccessUsers(inventoryId) {
 // Utility functions
 function getInventoryIdFromUrl() {
     const urlParts = window.location.pathname.split('/');
+    console.log("URL parts:", urlParts);
+    
+    // Try to find 'Details' in the path
     const idIndex = urlParts.indexOf('Details') + 1;
-    return urlParts[idIndex];
+    
+    if (idIndex > 0 && idIndex < urlParts.length) {
+        console.log(`Found inventory ID ${urlParts[idIndex]} at index ${idIndex} (after 'Details')`);
+        return urlParts[idIndex];
+    }
+    
+    // If we couldn't find it after 'Details', try to look for a number in the URL
+    for (let i = 0; i < urlParts.length; i++) {
+        if (!isNaN(urlParts[i]) && urlParts[i] !== '') {
+            console.log(`Found inventory ID ${urlParts[i]} at index ${i} (numeric part in URL)`);
+            return urlParts[i];
+        }
+    }
+    
+    // If we still can't find it, look for a hidden input with inventory ID
+    const hiddenInventoryInput = document.querySelector('input[name="InventoryId"]');
+    if (hiddenInventoryInput) {
+        console.log(`Found inventory ID ${hiddenInventoryInput.value} in hidden input`);
+        return hiddenInventoryInput.value;
+    }
+    
+    // Look for it in the model value
+    const modelIdElement = document.querySelector('[data-inventory-id]');
+    if (modelIdElement) {
+        console.log(`Found inventory ID ${modelIdElement.dataset.inventoryId} in data attribute`);
+        return modelIdElement.dataset.inventoryId;
+    }
+    
+    console.error("Could not determine inventory ID from URL or DOM");
+    return null;
 }
 
 function addCustomIdElementFromData(element) {
-    // Implementation for adding element from server data
+    console.log("Adding custom ID element from data:", element);
+    const container = document.getElementById('custom-id-elements');
+    
+    if (!container) {
+        console.error("Custom ID elements container not found");
+        return;
+    }
+    
+    const elementId = element.id || 'element-' + Date.now();
+    
+    const elementHtml = `
+        <div class="custom-id-element field-item" draggable="true" data-element-id="${elementId}">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <div class="drag-handle">
+                        <i class="bi bi-grip-vertical"></i>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select element-type" data-element-id="${elementId}">
+                        <option value="fixed" ${element.type === 'fixed' ? 'selected' : ''}>Fixed</option>
+                        <option value="20-bit random" ${element.type === '20-bit random' ? 'selected' : ''}>20-bit random</option>
+                        <option value="32-bit random" ${element.type === '32-bit random' ? 'selected' : ''}>32-bit random</option>
+                        <option value="6-digit random" ${element.type === '6-digit random' ? 'selected' : ''}>6-digit random</option>
+                        <option value="9-digit random" ${element.type === '9-digit random' ? 'selected' : ''}>9-digit random</option>
+                        <option value="guid" ${element.type === 'guid' ? 'selected' : ''}>GUID</option>
+                        <option value="date/time" ${element.type === 'date/time' ? 'selected' : ''}>Date/time</option>
+                        <option value="sequence" ${element.type === 'sequence' ? 'selected' : ''}>Sequence</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <input type="text" class="form-control element-value" placeholder="Format or text" data-element-id="${elementId}" value="${element.value || ''}">
+                </div>
+                <div class="col-md-3">
+                    <div class="d-flex gap-1">
+                        <button class="btn btn-sm btn-outline-info help-btn" data-bs-toggle="tooltip" title="Help">
+                            <i class="bi bi-question-circle"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger remove-element" data-element-id="${elementId}">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="element-description mt-2 text-muted small"></div>
+        </div>
+    `;
+    
+    container.insertAdjacentHTML('beforeend', elementHtml);
+    initializeElementEventListeners(elementId);
 }
 
 function addCustomFieldFromData(field) {
-    // Implementation for adding field from server data
+    console.log("Adding custom field from data:", field);
+    const container = $('#custom-fields-list');
+    
+    if (!container.length) {
+        console.error("Custom fields container not found");
+        return;
+    }
+    
+    const fieldId = field.id || 'field-' + Date.now();
+    const fieldType = field.type || 'text';
+    
+    // Check if a field with this ID already exists - if so, remove it first to avoid duplicates
+    const existingField = document.querySelector(`.custom-field[data-field-id="${fieldId}"]`);
+    if (existingField) {
+        console.log(`Field with ID ${fieldId} already exists, removing it first`);
+        existingField.remove();
+    }
+    
+    // Add special styling for fields loaded from server
+    const loadedClass = field.id && field.id.includes('-field-') ? 'loaded-field' : '';
+    
+    const fieldHtml = `
+        <div class="custom-field field-item ${loadedClass}" draggable="true" data-field-id="${fieldId}" data-field-type="${fieldType}">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <div class="drag-handle">
+                        <i class="bi bi-grip-vertical"></i>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control field-name" placeholder="Field name" data-field-id="${fieldId}" value="${field.name || ''}">
+                </div>
+                <div class="col-md-4">
+                    <input type="text" class="form-control field-description" placeholder="Description (optional)" data-field-id="${fieldId}" value="${field.description || ''}">
+                </div>
+                <div class="col-md-2">
+                    <div class="form-check">
+                        <input class="form-check-input show-in-table" type="checkbox" data-field-id="${fieldId}" ${field.showInTable ? 'checked' : ''}>
+                        <label class="form-check-label">Show in table</label>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="d-flex gap-1">
+                        <span class="badge bg-secondary field-type-badge">${fieldType}</span>
+                        <button class="btn btn-sm btn-outline-danger remove-field" data-field-id="${fieldId}">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="field-debug text-muted small" style="display: none;">
+                ID: ${fieldId}, Type: ${fieldType}, Order: ${field.order || 0}
+            </div>
+        </div>
+    `;
+    
+    container.append(fieldHtml);
+    initializeFieldEventListeners(fieldId);
+    
+    // Flash the field to indicate it was added
+    const addedField = document.querySelector(`.custom-field[data-field-id="${fieldId}"]`);
+    if (addedField) {
+        addedField.classList.add('field-flash');
+        setTimeout(() => {
+            addedField.classList.remove('field-flash');
+        }, 1000);
+    }
 }
 
 // Export functions

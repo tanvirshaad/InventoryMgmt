@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InventoryMgmt.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250825061043_initial migration")]
-    partial class initialmigration
+    [Migration("20250826090934_Numeric field config added")]
+    partial class Numericfieldconfigadded
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -56,42 +56,42 @@ namespace InventoryMgmt.DAL.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9634),
+                            CreatedAt = new DateTime(2025, 8, 26, 9, 9, 33, 459, DateTimeKind.Utc).AddTicks(7564),
                             Description = "Office equipment and devices",
                             Name = "Equipment",
-                            UpdatedAt = new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9637)
+                            UpdatedAt = new DateTime(2025, 8, 26, 9, 9, 33, 459, DateTimeKind.Utc).AddTicks(7568)
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9638),
+                            CreatedAt = new DateTime(2025, 8, 26, 9, 9, 33, 459, DateTimeKind.Utc).AddTicks(7574),
                             Description = "Office furniture and fixtures",
                             Name = "Furniture",
-                            UpdatedAt = new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9639)
+                            UpdatedAt = new DateTime(2025, 8, 26, 9, 9, 33, 459, DateTimeKind.Utc).AddTicks(7574)
                         },
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9640),
+                            CreatedAt = new DateTime(2025, 8, 26, 9, 9, 33, 459, DateTimeKind.Utc).AddTicks(7575),
                             Description = "Books and publications",
                             Name = "Books",
-                            UpdatedAt = new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9640)
+                            UpdatedAt = new DateTime(2025, 8, 26, 9, 9, 33, 459, DateTimeKind.Utc).AddTicks(7575)
                         },
                         new
                         {
                             Id = 4,
-                            CreatedAt = new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9641),
+                            CreatedAt = new DateTime(2025, 8, 26, 9, 9, 33, 459, DateTimeKind.Utc).AddTicks(7576),
                             Description = "Important documents and records",
                             Name = "Documents",
-                            UpdatedAt = new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9642)
+                            UpdatedAt = new DateTime(2025, 8, 26, 9, 9, 33, 459, DateTimeKind.Utc).AddTicks(7576)
                         },
                         new
                         {
                             Id = 5,
-                            CreatedAt = new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9643),
+                            CreatedAt = new DateTime(2025, 8, 26, 9, 9, 33, 459, DateTimeKind.Utc).AddTicks(7577),
                             Description = "Other miscellaneous items",
                             Name = "Other",
-                            UpdatedAt = new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9643)
+                            UpdatedAt = new DateTime(2025, 8, 26, 9, 9, 33, 459, DateTimeKind.Utc).AddTicks(7577)
                         });
                 });
 
@@ -267,6 +267,19 @@ namespace InventoryMgmt.DAL.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<string>("NumericField1DisplayFormat")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("NumericField1IsInteger")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("NumericField1MaxValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("NumericField1MinValue")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("NumericField1Name")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -274,9 +287,25 @@ namespace InventoryMgmt.DAL.Migrations
                     b.Property<bool>("NumericField1ShowInTable")
                         .HasColumnType("bit");
 
+                    b.Property<decimal>("NumericField1StepValue")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("NumericField2Description")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("NumericField2DisplayFormat")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("NumericField2IsInteger")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("NumericField2MaxValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("NumericField2MinValue")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("NumericField2Name")
                         .HasMaxLength(100)
@@ -285,9 +314,25 @@ namespace InventoryMgmt.DAL.Migrations
                     b.Property<bool>("NumericField2ShowInTable")
                         .HasColumnType("bit");
 
+                    b.Property<decimal>("NumericField2StepValue")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("NumericField3Description")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("NumericField3DisplayFormat")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("NumericField3IsInteger")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("NumericField3MaxValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("NumericField3MinValue")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("NumericField3Name")
                         .HasMaxLength(100)
@@ -295,6 +340,9 @@ namespace InventoryMgmt.DAL.Migrations
 
                     b.Property<bool>("NumericField3ShowInTable")
                         .HasColumnType("bit");
+
+                    b.Property<decimal>("NumericField3StepValue")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("OwnerId")
                         .HasColumnType("int");

@@ -89,8 +89,8 @@ namespace InventoryMgmt.DAL.EF.TableModels
         public bool NumericField1IsInteger { get; set; }
         public decimal? NumericField1MinValue { get; set; }
         public decimal? NumericField1MaxValue { get; set; }
-        public decimal NumericField1StepValue { get; set; } = 0.01m;
-        [MaxLength(20)]
+        public decimal NumericField1StepValue { get; set; } = 1;
+        [MaxLength(50)]
         public string? NumericField1DisplayFormat { get; set; }
 
         [MaxLength(100)]
@@ -101,8 +101,8 @@ namespace InventoryMgmt.DAL.EF.TableModels
         public bool NumericField2IsInteger { get; set; }
         public decimal? NumericField2MinValue { get; set; }
         public decimal? NumericField2MaxValue { get; set; }
-        public decimal NumericField2StepValue { get; set; } = 0.01m;
-        [MaxLength(20)]
+        public decimal NumericField2StepValue { get; set; } = 1;
+        [MaxLength(50)]
         public string? NumericField2DisplayFormat { get; set; }
 
         [MaxLength(100)]
@@ -113,8 +113,8 @@ namespace InventoryMgmt.DAL.EF.TableModels
         public bool NumericField3IsInteger { get; set; }
         public decimal? NumericField3MinValue { get; set; }
         public decimal? NumericField3MaxValue { get; set; }
-        public decimal NumericField3StepValue { get; set; } = 0.01m;
-        [MaxLength(20)]
+        public decimal NumericField3StepValue { get; set; } = 1;
+        [MaxLength(50)]
         public string? NumericField3DisplayFormat { get; set; }
 
         // Document/Image fields (up to 3)

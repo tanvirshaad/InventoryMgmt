@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "ContainingType": "InventoryMgmt.MVC.Controllers.CustomFieldTestController",
+    "Method": "TestAddField",
+    "RelativePath": "api/CustomFieldTest/testfield/{inventoryId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "inventoryId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]

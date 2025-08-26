@@ -289,26 +289,138 @@ namespace InventoryMgmt.BLL.Services
 
         public async Task<bool> UpdateCustomFieldsAsync(int inventoryId, List<CustomFieldData> fields)
         {
-            var inventory = await _inventoryRepository.GetByIdAsync(inventoryId);
-            if (inventory == null) return false;
+            System.Diagnostics.Debug.WriteLine($"UpdateCustomFieldsAsync called for inventory {inventoryId} with {fields?.Count ?? 0} fields");
 
-            // Reset all field configurations
-            ResetCustomFieldConfigurations(inventory);
-
-            // Apply new field configurations
-            foreach (var field in fields.OrderBy(f => f.Order))
+            try
             {
-                ApplyCustomFieldConfiguration(inventory, field);
-            }
+                // Validate input
+                if (inventoryId <= 0)
+                {
+                    System.Diagnostics.Debug.WriteLine($"ERROR: Invalid inventory ID: {inventoryId}");
+                    return false;
+                }
+                
+                if (fields == null)
+                {
+                    fields = new List<CustomFieldData>();
+                    System.Diagnostics.Debug.WriteLine("WARNING: fields parameter was null, created empty list");
+                }
+                
+                // Get the inventory record
+                var inventory = await _inventoryRepository.GetByIdAsync(inventoryId);
+                if (inventory == null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"ERROR: Inventory with ID {inventoryId} not found");
+                    return false;
+                }
+                
+                System.Diagnostics.Debug.WriteLine($"Found inventory: ID={inventory.Id}, Title={inventory.Title}, OwnerId={inventory.OwnerId}");
 
-            inventory.UpdatedAt = DateTime.UtcNow;
-            _inventoryRepository.Update(inventory);
-            await _inventoryRepository.SaveChangesAsync();
-            return true;
+                // Debug log current state before modification
+                LogCurrentFieldState(inventory);
+                
+                // IMPORTANT: Instead of resetting all fields, we'll only update the ones provided
+                // and preserve existing values for fields not included in the current update
+                
+                // Create a dictionary of fields by ID for quick lookup
+                var fieldDictionary = new Dictionary<string, CustomFieldData>();
+                foreach (var field in fields)
+                {
+                    if (!string.IsNullOrEmpty(field.Id))
+                    {
+                        fieldDictionary[field.Id] = field;
+                    }
+                }
+                
+                // Check each possible field to see if we have an update for it
+                System.Diagnostics.Debug.WriteLine($"Processing {fields.Count} field configurations");
+                
+                // Process text fields
+                UpdateFieldIfProvided(fieldDictionary, "text-field-1", inventory, ApplyTextField1);
+                UpdateFieldIfProvided(fieldDictionary, "text-field-2", inventory, ApplyTextField2);
+                UpdateFieldIfProvided(fieldDictionary, "text-field-3", inventory, ApplyTextField3);
+                
+                // Process numeric fields
+                UpdateFieldIfProvided(fieldDictionary, "numeric-field-1", inventory, ApplyNumericField1);
+                UpdateFieldIfProvided(fieldDictionary, "numeric-field-2", inventory, ApplyNumericField2);
+                UpdateFieldIfProvided(fieldDictionary, "numeric-field-3", inventory, ApplyNumericField3);
+                
+                // Process boolean fields
+                UpdateFieldIfProvided(fieldDictionary, "boolean-field-1", inventory, ApplyBooleanField1);
+                UpdateFieldIfProvided(fieldDictionary, "boolean-field-2", inventory, ApplyBooleanField2);
+                UpdateFieldIfProvided(fieldDictionary, "boolean-field-3", inventory, ApplyBooleanField3);
+                
+                // Process multitext fields
+                UpdateFieldIfProvided(fieldDictionary, "multitext-field-1", inventory, ApplyMultiTextField1);
+                UpdateFieldIfProvided(fieldDictionary, "multitext-field-2", inventory, ApplyMultiTextField2);
+                UpdateFieldIfProvided(fieldDictionary, "multitext-field-3", inventory, ApplyMultiTextField3);
+                
+                // Process document fields
+                UpdateFieldIfProvided(fieldDictionary, "document-field-1", inventory, ApplyDocumentField1);
+                UpdateFieldIfProvided(fieldDictionary, "document-field-2", inventory, ApplyDocumentField2);
+                UpdateFieldIfProvided(fieldDictionary, "document-field-3", inventory, ApplyDocumentField3);
+
+                // Log final state after applying changes
+                LogCurrentFieldState(inventory);
+
+                inventory.UpdatedAt = DateTime.UtcNow;
+                _inventoryRepository.Update(inventory);
+                
+                System.Diagnostics.Debug.WriteLine("Saving changes to database");
+                await _inventoryRepository.SaveChangesAsync();
+                System.Diagnostics.Debug.WriteLine("Changes saved successfully");
+                
+                // Verify the changes were saved by re-fetching the inventory
+                var savedInventory = await _inventoryRepository.GetByIdAsync(inventoryId);
+                if (savedInventory != null)
+                {
+                    System.Diagnostics.Debug.WriteLine("Verification: Re-fetched inventory after save");
+                    LogCurrentFieldState(savedInventory);
+                }
+                
+                return true;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ERROR in UpdateCustomFieldsAsync: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+                throw; // Rethrow to let controller handle it
+            }
+        }
+        
+        private void LogCurrentFieldState(Inventory inventory)
+        {
+            System.Diagnostics.Debug.WriteLine("Current Field State:");
+            
+            // Text fields
+            System.Diagnostics.Debug.WriteLine($"TextField1: {(string.IsNullOrEmpty(inventory.TextField1Name) ? "Empty" : inventory.TextField1Name)}");
+            System.Diagnostics.Debug.WriteLine($"TextField2: {(string.IsNullOrEmpty(inventory.TextField2Name) ? "Empty" : inventory.TextField2Name)}");
+            System.Diagnostics.Debug.WriteLine($"TextField3: {(string.IsNullOrEmpty(inventory.TextField3Name) ? "Empty" : inventory.TextField3Name)}");
+            
+            // MultiText fields
+            System.Diagnostics.Debug.WriteLine($"MultiTextField1: {(string.IsNullOrEmpty(inventory.MultiTextField1Name) ? "Empty" : inventory.MultiTextField1Name)}");
+            System.Diagnostics.Debug.WriteLine($"MultiTextField2: {(string.IsNullOrEmpty(inventory.MultiTextField2Name) ? "Empty" : inventory.MultiTextField2Name)}");
+            System.Diagnostics.Debug.WriteLine($"MultiTextField3: {(string.IsNullOrEmpty(inventory.MultiTextField3Name) ? "Empty" : inventory.MultiTextField3Name)}");
+            
+            // Numeric fields
+            System.Diagnostics.Debug.WriteLine($"NumericField1: {(string.IsNullOrEmpty(inventory.NumericField1Name) ? "Empty" : inventory.NumericField1Name)}");
+            System.Diagnostics.Debug.WriteLine($"NumericField2: {(string.IsNullOrEmpty(inventory.NumericField2Name) ? "Empty" : inventory.NumericField2Name)}");
+            System.Diagnostics.Debug.WriteLine($"NumericField3: {(string.IsNullOrEmpty(inventory.NumericField3Name) ? "Empty" : inventory.NumericField3Name)}");
+            
+            // Boolean fields
+            System.Diagnostics.Debug.WriteLine($"BooleanField1: {(string.IsNullOrEmpty(inventory.BooleanField1Name) ? "Empty" : inventory.BooleanField1Name)}");
+            System.Diagnostics.Debug.WriteLine($"BooleanField2: {(string.IsNullOrEmpty(inventory.BooleanField2Name) ? "Empty" : inventory.BooleanField2Name)}");
+            System.Diagnostics.Debug.WriteLine($"BooleanField3: {(string.IsNullOrEmpty(inventory.BooleanField3Name) ? "Empty" : inventory.BooleanField3Name)}");
         }
 
+        /// <summary>
+        /// Completely clears all custom field configurations from the inventory.
+        /// Use this only when the user explicitly wants to reset all fields.
+        /// </summary>
         private void ResetCustomFieldConfigurations(Inventory inventory)
         {
+            System.Diagnostics.Debug.WriteLine("!!!! RESETTING ALL CUSTOM FIELDS TO NULL !!!!");
+            
             // Text fields
             inventory.TextField1Name = null;
             inventory.TextField1Description = null;
@@ -367,139 +479,219 @@ namespace InventoryMgmt.BLL.Services
 
         private void ApplyCustomFieldConfiguration(Inventory inventory, CustomFieldData field)
         {
-            switch (field.Type.ToLower())
+            if (field == null)
             {
-                case "text":
-                    if (string.IsNullOrEmpty(inventory.TextField1Name))
-                    {
-                        inventory.TextField1Name = field.Name;
-                        inventory.TextField1Description = field.Description;
-                        inventory.TextField1ShowInTable = field.ShowInTable;
-                    }
-                    else if (string.IsNullOrEmpty(inventory.TextField2Name))
-                    {
-                        inventory.TextField2Name = field.Name;
-                        inventory.TextField2Description = field.Description;
-                        inventory.TextField2ShowInTable = field.ShowInTable;
-                    }
-                    else if (string.IsNullOrEmpty(inventory.TextField3Name))
-                    {
-                        inventory.TextField3Name = field.Name;
-                        inventory.TextField3Description = field.Description;
-                        inventory.TextField3ShowInTable = field.ShowInTable;
-                    }
-                    break;
+                System.Diagnostics.Debug.WriteLine("WARNING: Attempted to apply null field");
+                return;
+            }
 
-                case "multitext":
-                    if (string.IsNullOrEmpty(inventory.MultiTextField1Name))
-                    {
-                        inventory.MultiTextField1Name = field.Name;
-                        inventory.MultiTextField1Description = field.Description;
-                        inventory.MultiTextField1ShowInTable = field.ShowInTable;
-                    }
-                    else if (string.IsNullOrEmpty(inventory.MultiTextField2Name))
-                    {
-                        inventory.MultiTextField2Name = field.Name;
-                        inventory.MultiTextField2Description = field.Description;
-                        inventory.MultiTextField2ShowInTable = field.ShowInTable;
-                    }
-                    else if (string.IsNullOrEmpty(inventory.MultiTextField3Name))
-                    {
-                        inventory.MultiTextField3Name = field.Name;
-                        inventory.MultiTextField3Description = field.Description;
-                        inventory.MultiTextField3ShowInTable = field.ShowInTable;
-                    }
-                    break;
+            if (string.IsNullOrEmpty(field.Name))
+            {
+                System.Diagnostics.Debug.WriteLine("WARNING: Attempted to apply field with empty name");
+                return;
+            }
 
-                case "numeric":
-                    if (string.IsNullOrEmpty(inventory.NumericField1Name))
+            System.Diagnostics.Debug.WriteLine($"Applying field configuration: Type={field.Type}, Name={field.Name}, Description={field.Description}, ShowInTable={field.ShowInTable}, ID={field.Id}");
+            
+            try
+            {
+                // If the field has a specific ID like "text-field-1", place it in the corresponding slot
+                if (!string.IsNullOrEmpty(field.Id) && field.Id.Contains("-field-"))
+                {
+                    var idParts = field.Id.Split('-');
+                    if (idParts.Length >= 3)
                     {
-                        inventory.NumericField1Name = field.Name;
-                        inventory.NumericField1Description = field.Description;
-                        inventory.NumericField1ShowInTable = field.ShowInTable;
+                        var fieldType = idParts[0];  // e.g., "text"
+                        var fieldNumber = int.TryParse(idParts[2], out int num) ? num : 0; // e.g., "1" from "text-field-1"
                         
-                        if (field.NumericConfig != null)
-                        {
-                            inventory.NumericField1IsInteger = field.NumericConfig.IsInteger;
-                            inventory.NumericField1MinValue = field.NumericConfig.MinValue;
-                            inventory.NumericField1MaxValue = field.NumericConfig.MaxValue;
-                            inventory.NumericField1StepValue = field.NumericConfig.StepValue;
-                            inventory.NumericField1DisplayFormat = field.NumericConfig.DisplayFormat;
-                        }
-                    }
-                    else if (string.IsNullOrEmpty(inventory.NumericField2Name))
-                    {
-                        inventory.NumericField2Name = field.Name;
-                        inventory.NumericField2Description = field.Description;
-                        inventory.NumericField2ShowInTable = field.ShowInTable;
+                        System.Diagnostics.Debug.WriteLine($"Field has explicit ID pattern: type={fieldType}, number={fieldNumber}");
                         
-                        if (field.NumericConfig != null)
-                        {
-                            inventory.NumericField2IsInteger = field.NumericConfig.IsInteger;
-                            inventory.NumericField2MinValue = field.NumericConfig.MinValue;
-                            inventory.NumericField2MaxValue = field.NumericConfig.MaxValue;
-                            inventory.NumericField2StepValue = field.NumericConfig.StepValue;
-                            inventory.NumericField2DisplayFormat = field.NumericConfig.DisplayFormat;
-                        }
+                        // Apply the field to the specific slot based on ID
+                        ApplyFieldToSpecificSlot(inventory, field, fieldType, fieldNumber);
+                        return;
                     }
-                    else if (string.IsNullOrEmpty(inventory.NumericField3Name))
-                    {
-                        inventory.NumericField3Name = field.Name;
-                        inventory.NumericField3Description = field.Description;
-                        inventory.NumericField3ShowInTable = field.ShowInTable;
+                }
+                
+                // Default application logic if no specific ID pattern
+                switch (field.Type.ToLower())
+                {
+                    case "text":
+                        System.Diagnostics.Debug.WriteLine("Processing TEXT field");
+                        if (string.IsNullOrEmpty(inventory.TextField1Name))
+                        {
+                            System.Diagnostics.Debug.WriteLine("Using TextField1");
+                            inventory.TextField1Name = field.Name;
+                            inventory.TextField1Description = field.Description;
+                            inventory.TextField1ShowInTable = field.ShowInTable;
+                        }
+                        else if (string.IsNullOrEmpty(inventory.TextField2Name))
+                        {
+                            System.Diagnostics.Debug.WriteLine("Using TextField2");
+                            inventory.TextField2Name = field.Name;
+                            inventory.TextField2Description = field.Description;
+                            inventory.TextField2ShowInTable = field.ShowInTable;
+                        }
+                        else if (string.IsNullOrEmpty(inventory.TextField3Name))
+                        {
+                            System.Diagnostics.Debug.WriteLine("Using TextField3");
+                            inventory.TextField3Name = field.Name;
+                            inventory.TextField3Description = field.Description;
+                            inventory.TextField3ShowInTable = field.ShowInTable;
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine("WARNING: All text fields are already in use, skipping");
+                        }
+                        break;
+
+                    case "multitext":
+                        System.Diagnostics.Debug.WriteLine("Processing MULTITEXT field");
+                        if (string.IsNullOrEmpty(inventory.MultiTextField1Name))
+                        {
+                            System.Diagnostics.Debug.WriteLine("Using MultiTextField1");
+                            inventory.MultiTextField1Name = field.Name;
+                            inventory.MultiTextField1Description = field.Description;
+                            inventory.MultiTextField1ShowInTable = field.ShowInTable;
+                        }
+                        else if (string.IsNullOrEmpty(inventory.MultiTextField2Name))
+                        {
+                            System.Diagnostics.Debug.WriteLine("Using MultiTextField2");
+                            inventory.MultiTextField2Name = field.Name;
+                            inventory.MultiTextField2Description = field.Description;
+                            inventory.MultiTextField2ShowInTable = field.ShowInTable;
+                        }
+                        else if (string.IsNullOrEmpty(inventory.MultiTextField3Name))
+                        {
+                            System.Diagnostics.Debug.WriteLine("Using MultiTextField3");
+                            inventory.MultiTextField3Name = field.Name;
+                            inventory.MultiTextField3Description = field.Description;
+                            inventory.MultiTextField3ShowInTable = field.ShowInTable;
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine("WARNING: All multitext fields are already in use, skipping");
+                        }
+                        break;
+
+                    case "numeric":
+                        System.Diagnostics.Debug.WriteLine("Processing NUMERIC field");
+                        if (string.IsNullOrEmpty(inventory.NumericField1Name))
+                        {
+                            System.Diagnostics.Debug.WriteLine("Using NumericField1");
+                            inventory.NumericField1Name = field.Name;
+                            inventory.NumericField1Description = field.Description;
+                            inventory.NumericField1ShowInTable = field.ShowInTable;
+                            
+                            // Set numeric-specific properties
+                            if (field.NumericConfig != null)
+                            {
+                                inventory.NumericField1IsInteger = field.NumericConfig.IsInteger;
+                                inventory.NumericField1MinValue = field.NumericConfig.MinValue;
+                                inventory.NumericField1MaxValue = field.NumericConfig.MaxValue;
+                            }
+                        }
+                        else if (string.IsNullOrEmpty(inventory.NumericField2Name))
+                        {
+                            System.Diagnostics.Debug.WriteLine("Using NumericField2");
+                            inventory.NumericField2Name = field.Name;
+                            inventory.NumericField2Description = field.Description;
+                            inventory.NumericField2ShowInTable = field.ShowInTable;
+                            
+                            // Set numeric-specific properties
+                            if (field.NumericConfig != null)
+                            {
+                                inventory.NumericField2IsInteger = field.NumericConfig.IsInteger;
+                                inventory.NumericField2MinValue = field.NumericConfig.MinValue;
+                                inventory.NumericField2MaxValue = field.NumericConfig.MaxValue;
+                            }
+                        }
+                        else if (string.IsNullOrEmpty(inventory.NumericField3Name))
+                        {
+                            System.Diagnostics.Debug.WriteLine("Using NumericField3");
+                            inventory.NumericField3Name = field.Name;
+                            inventory.NumericField3Description = field.Description;
+                            inventory.NumericField3ShowInTable = field.ShowInTable;
+                            
+                            // Set numeric-specific properties
+                            if (field.NumericConfig != null)
+                            {
+                                inventory.NumericField3IsInteger = field.NumericConfig.IsInteger;
+                                inventory.NumericField3MinValue = field.NumericConfig.MinValue;
+                                inventory.NumericField3MaxValue = field.NumericConfig.MaxValue;
+                            }
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine("WARNING: All numeric fields are already in use, skipping");
+                        }
+                        break;
+
+                    case "document":
+                        System.Diagnostics.Debug.WriteLine("Processing DOCUMENT field");
+                        if (string.IsNullOrEmpty(inventory.DocumentField1Name))
+                        {
+                            System.Diagnostics.Debug.WriteLine("Using DocumentField1");
+                            inventory.DocumentField1Name = field.Name;
+                            inventory.DocumentField1Description = field.Description;
+                            inventory.DocumentField1ShowInTable = field.ShowInTable;
+                        }
+                        else if (string.IsNullOrEmpty(inventory.DocumentField2Name))
+                        {
+                            System.Diagnostics.Debug.WriteLine("Using DocumentField2");
+                            inventory.DocumentField2Name = field.Name;
+                            inventory.DocumentField2Description = field.Description;
+                            inventory.DocumentField2ShowInTable = field.ShowInTable;
+                        }
+                        else if (string.IsNullOrEmpty(inventory.DocumentField3Name))
+                        {
+                            System.Diagnostics.Debug.WriteLine("Using DocumentField3");
+                            inventory.DocumentField3Name = field.Name;
+                            inventory.DocumentField3Description = field.Description;
+                            inventory.DocumentField3ShowInTable = field.ShowInTable;
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine("WARNING: All document fields are already in use, skipping");
+                        }
+                        break;
+
+                    case "boolean":
+                        System.Diagnostics.Debug.WriteLine("Processing BOOLEAN field");
+                        if (string.IsNullOrEmpty(inventory.BooleanField1Name))
+                        {
+                            System.Diagnostics.Debug.WriteLine("Using BooleanField1");
+                            inventory.BooleanField1Name = field.Name;
+                            inventory.BooleanField1Description = field.Description;
+                            inventory.BooleanField1ShowInTable = field.ShowInTable;
+                        }
+                        else if (string.IsNullOrEmpty(inventory.BooleanField2Name))
+                        {
+                            System.Diagnostics.Debug.WriteLine("Using BooleanField2");
+                            inventory.BooleanField2Name = field.Name;
+                            inventory.BooleanField2Description = field.Description;
+                            inventory.BooleanField2ShowInTable = field.ShowInTable;
+                        }
+                        else if (string.IsNullOrEmpty(inventory.BooleanField3Name))
+                        {
+                            System.Diagnostics.Debug.WriteLine("Using BooleanField3");
+                            inventory.BooleanField3Name = field.Name;
+                            inventory.BooleanField3Description = field.Description;
+                            inventory.BooleanField3ShowInTable = field.ShowInTable;
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine("WARNING: All boolean fields are already in use, skipping");
+                        }
+                        break;
                         
-                        if (field.NumericConfig != null)
-                        {
-                            inventory.NumericField3IsInteger = field.NumericConfig.IsInteger;
-                            inventory.NumericField3MinValue = field.NumericConfig.MinValue;
-                            inventory.NumericField3MaxValue = field.NumericConfig.MaxValue;
-                            inventory.NumericField3StepValue = field.NumericConfig.StepValue;
-                            inventory.NumericField3DisplayFormat = field.NumericConfig.DisplayFormat;
-                        }
-                    }
-                    break;
-
-                case "document":
-                    if (string.IsNullOrEmpty(inventory.DocumentField1Name))
-                    {
-                        inventory.DocumentField1Name = field.Name;
-                        inventory.DocumentField1Description = field.Description;
-                        inventory.DocumentField1ShowInTable = field.ShowInTable;
-                    }
-                    else if (string.IsNullOrEmpty(inventory.DocumentField2Name))
-                    {
-                        inventory.DocumentField2Name = field.Name;
-                        inventory.DocumentField2Description = field.Description;
-                        inventory.DocumentField2ShowInTable = field.ShowInTable;
-                    }
-                    else if (string.IsNullOrEmpty(inventory.DocumentField3Name))
-                    {
-                        inventory.DocumentField3Name = field.Name;
-                        inventory.DocumentField3Description = field.Description;
-                        inventory.DocumentField3ShowInTable = field.ShowInTable;
-                    }
-                    break;
-
-                case "boolean":
-                    if (string.IsNullOrEmpty(inventory.BooleanField1Name))
-                    {
-                        inventory.BooleanField1Name = field.Name;
-                        inventory.BooleanField1Description = field.Description;
-                        inventory.BooleanField1ShowInTable = field.ShowInTable;
-                    }
-                    else if (string.IsNullOrEmpty(inventory.BooleanField2Name))
-                    {
-                        inventory.BooleanField2Name = field.Name;
-                        inventory.BooleanField2Description = field.Description;
-                        inventory.BooleanField2ShowInTable = field.ShowInTable;
-                    }
-                    else if (string.IsNullOrEmpty(inventory.BooleanField3Name))
-                    {
-                        inventory.BooleanField3Name = field.Name;
-                        inventory.BooleanField3Description = field.Description;
-                        inventory.BooleanField3ShowInTable = field.ShowInTable;
-                    }
-                    break;
+                    default:
+                        System.Diagnostics.Debug.WriteLine($"WARNING: Unknown field type: {field.Type}");
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ERROR in ApplyCustomFieldConfiguration: {ex.Message}");
             }
         }
 
@@ -521,6 +713,406 @@ namespace InventoryMgmt.BLL.Services
                 var userIds = accessUsers.Select(ua => ua.UserId);
                 var users = await _userRepository.FindAsync(u => userIds.Contains(u.Id));
                 return _mapper.Map<IEnumerable<UserDto>>(users);
+            }
+        }
+        private void UpdateFieldIfProvided(Dictionary<string, CustomFieldData> fieldDictionary, string fieldId, Inventory inventory, Action<Inventory, CustomFieldData> applyFunc)
+        {
+            if (fieldDictionary.TryGetValue(fieldId, out var field))
+            {
+                System.Diagnostics.Debug.WriteLine($"Updating field {fieldId} with value: {field.Name}");
+                applyFunc(inventory, field);
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"No update provided for field {fieldId}, preserving existing value");
+            }
+        }
+        
+        public async Task<bool> ClearAllCustomFieldsAsync(int inventoryId)
+        {
+            System.Diagnostics.Debug.WriteLine($"ClearAllCustomFieldsAsync called for inventory {inventoryId}");
+
+            try
+            {
+                // Validate input
+                if (inventoryId <= 0)
+                {
+                    System.Diagnostics.Debug.WriteLine($"ERROR: Invalid inventory ID: {inventoryId}");
+                    return false;
+                }
+                
+                // Get the inventory record
+                var inventory = await _inventoryRepository.GetByIdAsync(inventoryId);
+                if (inventory == null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"ERROR: Inventory with ID {inventoryId} not found");
+                    return false;
+                }
+                
+                System.Diagnostics.Debug.WriteLine($"Found inventory: ID={inventory.Id}, Title={inventory.Title}, OwnerId={inventory.OwnerId}");
+
+                // Reset all field configurations
+                ResetCustomFieldConfigurations(inventory);
+                
+                // Save changes
+                inventory.UpdatedAt = DateTime.UtcNow;
+                _inventoryRepository.Update(inventory);
+                
+                System.Diagnostics.Debug.WriteLine("Saving changes to database after clearing all fields");
+                await _inventoryRepository.SaveChangesAsync();
+                System.Diagnostics.Debug.WriteLine("Changes saved successfully");
+                
+                return true;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ERROR in ClearAllCustomFieldsAsync: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+                throw; // Rethrow to let controller handle it
+            }
+        }
+        
+        private void ApplyTextField1(Inventory inventory, CustomFieldData field)
+        {
+            inventory.TextField1Name = field.Name;
+            inventory.TextField1Description = field.Description;
+            inventory.TextField1ShowInTable = field.ShowInTable;
+        }
+        
+        private void ApplyTextField2(Inventory inventory, CustomFieldData field)
+        {
+            inventory.TextField2Name = field.Name;
+            inventory.TextField2Description = field.Description;
+            inventory.TextField2ShowInTable = field.ShowInTable;
+        }
+        
+        private void ApplyTextField3(Inventory inventory, CustomFieldData field)
+        {
+            inventory.TextField3Name = field.Name;
+            inventory.TextField3Description = field.Description;
+            inventory.TextField3ShowInTable = field.ShowInTable;
+        }
+        
+        private void ApplyNumericField1(Inventory inventory, CustomFieldData field)
+        {
+            inventory.NumericField1Name = field.Name;
+            inventory.NumericField1Description = field.Description;
+            inventory.NumericField1ShowInTable = field.ShowInTable;
+            if (field.NumericConfig != null)
+            {
+                inventory.NumericField1IsInteger = field.NumericConfig.IsInteger;
+                inventory.NumericField1MinValue = field.NumericConfig.MinValue;
+                inventory.NumericField1MaxValue = field.NumericConfig.MaxValue;
+            }
+        }
+        
+        private void ApplyNumericField2(Inventory inventory, CustomFieldData field)
+        {
+            inventory.NumericField2Name = field.Name;
+            inventory.NumericField2Description = field.Description;
+            inventory.NumericField2ShowInTable = field.ShowInTable;
+            if (field.NumericConfig != null)
+            {
+                inventory.NumericField2IsInteger = field.NumericConfig.IsInteger;
+                inventory.NumericField2MinValue = field.NumericConfig.MinValue;
+                inventory.NumericField2MaxValue = field.NumericConfig.MaxValue;
+            }
+        }
+        
+        private void ApplyNumericField3(Inventory inventory, CustomFieldData field)
+        {
+            inventory.NumericField3Name = field.Name;
+            inventory.NumericField3Description = field.Description;
+            inventory.NumericField3ShowInTable = field.ShowInTable;
+            if (field.NumericConfig != null)
+            {
+                inventory.NumericField3IsInteger = field.NumericConfig.IsInteger;
+                inventory.NumericField3MinValue = field.NumericConfig.MinValue;
+                inventory.NumericField3MaxValue = field.NumericConfig.MaxValue;
+            }
+        }
+        
+        private void ApplyBooleanField1(Inventory inventory, CustomFieldData field)
+        {
+            inventory.BooleanField1Name = field.Name;
+            inventory.BooleanField1Description = field.Description;
+            inventory.BooleanField1ShowInTable = field.ShowInTable;
+        }
+        
+        private void ApplyBooleanField2(Inventory inventory, CustomFieldData field)
+        {
+            inventory.BooleanField2Name = field.Name;
+            inventory.BooleanField2Description = field.Description;
+            inventory.BooleanField2ShowInTable = field.ShowInTable;
+        }
+        
+        private void ApplyBooleanField3(Inventory inventory, CustomFieldData field)
+        {
+            inventory.BooleanField3Name = field.Name;
+            inventory.BooleanField3Description = field.Description;
+            inventory.BooleanField3ShowInTable = field.ShowInTable;
+        }
+        
+        private void ApplyMultiTextField1(Inventory inventory, CustomFieldData field)
+        {
+            inventory.MultiTextField1Name = field.Name;
+            inventory.MultiTextField1Description = field.Description;
+            inventory.MultiTextField1ShowInTable = field.ShowInTable;
+        }
+        
+        private void ApplyMultiTextField2(Inventory inventory, CustomFieldData field)
+        {
+            inventory.MultiTextField2Name = field.Name;
+            inventory.MultiTextField2Description = field.Description;
+            inventory.MultiTextField2ShowInTable = field.ShowInTable;
+        }
+        
+        private void ApplyMultiTextField3(Inventory inventory, CustomFieldData field)
+        {
+            inventory.MultiTextField3Name = field.Name;
+            inventory.MultiTextField3Description = field.Description;
+            inventory.MultiTextField3ShowInTable = field.ShowInTable;
+        }
+        
+        private void ApplyDocumentField1(Inventory inventory, CustomFieldData field)
+        {
+            inventory.DocumentField1Name = field.Name;
+            inventory.DocumentField1Description = field.Description;
+            inventory.DocumentField1ShowInTable = field.ShowInTable;
+        }
+        
+        private void ApplyDocumentField2(Inventory inventory, CustomFieldData field)
+        {
+            inventory.DocumentField2Name = field.Name;
+            inventory.DocumentField2Description = field.Description;
+            inventory.DocumentField2ShowInTable = field.ShowInTable;
+        }
+        
+        private void ApplyDocumentField3(Inventory inventory, CustomFieldData field)
+        {
+            inventory.DocumentField3Name = field.Name;
+            inventory.DocumentField3Description = field.Description;
+            inventory.DocumentField3ShowInTable = field.ShowInTable;
+        }
+        
+        private void ApplyFieldToSpecificSlot(Inventory inventory, CustomFieldData field, string fieldType, int fieldNumber)
+        {
+            System.Diagnostics.Debug.WriteLine($"Applying field to specific slot: type={fieldType}, number={fieldNumber}");
+            
+            switch (fieldType.ToLower())
+            {
+                case "text":
+                    switch (fieldNumber)
+                    {
+                        case 1:
+                            System.Diagnostics.Debug.WriteLine("Setting TextField1");
+                            inventory.TextField1Name = field.Name;
+                            inventory.TextField1Description = field.Description;
+                            inventory.TextField1ShowInTable = field.ShowInTable;
+                            break;
+                        case 2:
+                            System.Diagnostics.Debug.WriteLine("Setting TextField2");
+                            inventory.TextField2Name = field.Name;
+                            inventory.TextField2Description = field.Description;
+                            inventory.TextField2ShowInTable = field.ShowInTable;
+                            break;
+                        case 3:
+                            System.Diagnostics.Debug.WriteLine("Setting TextField3");
+                            inventory.TextField3Name = field.Name;
+                            inventory.TextField3Description = field.Description;
+                            inventory.TextField3ShowInTable = field.ShowInTable;
+                            break;
+                        default:
+                            System.Diagnostics.Debug.WriteLine($"Invalid text field number: {fieldNumber}");
+                            break;
+                    }
+                    break;
+                    
+                case "multitext":
+                    switch (fieldNumber)
+                    {
+                        case 1:
+                            System.Diagnostics.Debug.WriteLine("Setting MultiTextField1");
+                            inventory.MultiTextField1Name = field.Name;
+                            inventory.MultiTextField1Description = field.Description;
+                            inventory.MultiTextField1ShowInTable = field.ShowInTable;
+                            break;
+                        case 2:
+                            System.Diagnostics.Debug.WriteLine("Setting MultiTextField2");
+                            inventory.MultiTextField2Name = field.Name;
+                            inventory.MultiTextField2Description = field.Description;
+                            inventory.MultiTextField2ShowInTable = field.ShowInTable;
+                            break;
+                        case 3:
+                            System.Diagnostics.Debug.WriteLine("Setting MultiTextField3");
+                            inventory.MultiTextField3Name = field.Name;
+                            inventory.MultiTextField3Description = field.Description;
+                            inventory.MultiTextField3ShowInTable = field.ShowInTable;
+                            break;
+                        default:
+                            System.Diagnostics.Debug.WriteLine($"Invalid multitext field number: {fieldNumber}");
+                            break;
+                    }
+                    break;
+                    
+                case "numeric":
+                    switch (fieldNumber)
+                    {
+                        case 1:
+                            System.Diagnostics.Debug.WriteLine("Setting NumericField1");
+                            inventory.NumericField1Name = field.Name;
+                            inventory.NumericField1Description = field.Description;
+                            inventory.NumericField1ShowInTable = field.ShowInTable;
+                            
+                            if (field.NumericConfig != null)
+                            {
+                                inventory.NumericField1IsInteger = field.NumericConfig.IsInteger;
+                                inventory.NumericField1MinValue = field.NumericConfig.MinValue;
+                                inventory.NumericField1MaxValue = field.NumericConfig.MaxValue;
+                            }
+                            break;
+                        case 2:
+                            System.Diagnostics.Debug.WriteLine("Setting NumericField2");
+                            inventory.NumericField2Name = field.Name;
+                            inventory.NumericField2Description = field.Description;
+                            inventory.NumericField2ShowInTable = field.ShowInTable;
+                            
+                            if (field.NumericConfig != null)
+                            {
+                                inventory.NumericField2IsInteger = field.NumericConfig.IsInteger;
+                                inventory.NumericField2MinValue = field.NumericConfig.MinValue;
+                                inventory.NumericField2MaxValue = field.NumericConfig.MaxValue;
+                            }
+                            break;
+                        case 3:
+                            System.Diagnostics.Debug.WriteLine("Setting NumericField3");
+                            inventory.NumericField3Name = field.Name;
+                            inventory.NumericField3Description = field.Description;
+                            inventory.NumericField3ShowInTable = field.ShowInTable;
+                            
+                            if (field.NumericConfig != null)
+                            {
+                                inventory.NumericField3IsInteger = field.NumericConfig.IsInteger;
+                                inventory.NumericField3MinValue = field.NumericConfig.MinValue;
+                                inventory.NumericField3MaxValue = field.NumericConfig.MaxValue;
+                            }
+                            break;
+                        default:
+                            System.Diagnostics.Debug.WriteLine($"Invalid numeric field number: {fieldNumber}");
+                            break;
+                    }
+                    break;
+                    
+                case "document":
+                    switch (fieldNumber)
+                    {
+                        case 1:
+                            System.Diagnostics.Debug.WriteLine("Setting DocumentField1");
+                            inventory.DocumentField1Name = field.Name;
+                            inventory.DocumentField1Description = field.Description;
+                            inventory.DocumentField1ShowInTable = field.ShowInTable;
+                            break;
+                        case 2:
+                            System.Diagnostics.Debug.WriteLine("Setting DocumentField2");
+                            inventory.DocumentField2Name = field.Name;
+                            inventory.DocumentField2Description = field.Description;
+                            inventory.DocumentField2ShowInTable = field.ShowInTable;
+                            break;
+                        case 3:
+                            System.Diagnostics.Debug.WriteLine("Setting DocumentField3");
+                            inventory.DocumentField3Name = field.Name;
+                            inventory.DocumentField3Description = field.Description;
+                            inventory.DocumentField3ShowInTable = field.ShowInTable;
+                            break;
+                        default:
+                            System.Diagnostics.Debug.WriteLine($"Invalid document field number: {fieldNumber}");
+                            break;
+                    }
+                    break;
+                    
+                case "boolean":
+                    switch (fieldNumber)
+                    {
+                        case 1:
+                            System.Diagnostics.Debug.WriteLine("Setting BooleanField1");
+                            inventory.BooleanField1Name = field.Name;
+                            inventory.BooleanField1Description = field.Description;
+                            inventory.BooleanField1ShowInTable = field.ShowInTable;
+                            break;
+                        case 2:
+                            System.Diagnostics.Debug.WriteLine("Setting BooleanField2");
+                            inventory.BooleanField2Name = field.Name;
+                            inventory.BooleanField2Description = field.Description;
+                            inventory.BooleanField2ShowInTable = field.ShowInTable;
+                            break;
+                        case 3:
+                            System.Diagnostics.Debug.WriteLine("Setting BooleanField3");
+                            inventory.BooleanField3Name = field.Name;
+                            inventory.BooleanField3Description = field.Description;
+                            inventory.BooleanField3ShowInTable = field.ShowInTable;
+                            break;
+                        default:
+                            System.Diagnostics.Debug.WriteLine($"Invalid boolean field number: {fieldNumber}");
+                            break;
+                    }
+                    break;
+                    
+                default:
+                    System.Diagnostics.Debug.WriteLine($"Unknown field type in specific slot assignment: {fieldType}");
+                    break;
+            }
+        }
+        
+        /// <summary>
+        /// Gets raw inventory data directly from the database, bypassing DTOs.
+        /// This is useful for debugging database storage issues.
+        /// </summary>
+        public async Task<Inventory?> GetRawInventoryDataAsync(int id)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"Fetching raw inventory data for ID: {id}");
+                
+                // Get the inventory entity directly from the database
+                var inventory = await _inventoryRepository.GetByIdAsync(id);
+                
+                if (inventory == null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Inventory with ID {id} not found");
+                    return null;
+                }
+                
+                System.Diagnostics.Debug.WriteLine($"Found inventory: {inventory.Title} (ID: {inventory.Id})");
+                System.Diagnostics.Debug.WriteLine($"Custom field values from DB:");
+                
+                // Log all the field values for debugging
+                System.Diagnostics.Debug.WriteLine($"TextField1Name: '{inventory.TextField1Name ?? "null"}'");
+                System.Diagnostics.Debug.WriteLine($"TextField2Name: '{inventory.TextField2Name ?? "null"}'");
+                System.Diagnostics.Debug.WriteLine($"TextField3Name: '{inventory.TextField3Name ?? "null"}'");
+                
+                System.Diagnostics.Debug.WriteLine($"MultiTextField1Name: '{inventory.MultiTextField1Name ?? "null"}'");
+                System.Diagnostics.Debug.WriteLine($"MultiTextField2Name: '{inventory.MultiTextField2Name ?? "null"}'");
+                System.Diagnostics.Debug.WriteLine($"MultiTextField3Name: '{inventory.MultiTextField3Name ?? "null"}'");
+                
+                System.Diagnostics.Debug.WriteLine($"NumericField1Name: '{inventory.NumericField1Name ?? "null"}'");
+                System.Diagnostics.Debug.WriteLine($"NumericField2Name: '{inventory.NumericField2Name ?? "null"}'");
+                System.Diagnostics.Debug.WriteLine($"NumericField3Name: '{inventory.NumericField3Name ?? "null"}'");
+                
+                System.Diagnostics.Debug.WriteLine($"DocumentField1Name: '{inventory.DocumentField1Name ?? "null"}'");
+                System.Diagnostics.Debug.WriteLine($"DocumentField2Name: '{inventory.DocumentField2Name ?? "null"}'");
+                System.Diagnostics.Debug.WriteLine($"DocumentField3Name: '{inventory.DocumentField3Name ?? "null"}'");
+                
+                System.Diagnostics.Debug.WriteLine($"BooleanField1Name: '{inventory.BooleanField1Name ?? "null"}'");
+                System.Diagnostics.Debug.WriteLine($"BooleanField2Name: '{inventory.BooleanField2Name ?? "null"}'");
+                System.Diagnostics.Debug.WriteLine($"BooleanField3Name: '{inventory.BooleanField3Name ?? "null"}'");
+                
+                return inventory;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ERROR in GetRawInventoryDataAsync: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+                throw;
             }
         }
     }

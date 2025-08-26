@@ -280,9 +280,15 @@
                         <!-- Custom ID elements will be loaded here -->
                     </div>
                     
-                    <button type="button" class="btn btn-primary" id="add-custom-id-element">
-                        <i class="bi bi-plus-circle me-2"></i>Add element
-                    </button>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-primary" id="add-custom-id-element">
+                            <i class="bi bi-plus-circle me-2"></i>Add element
+                        </button>
+                        
+                        <button type="button" class="btn btn-success" id="save-custom-id-button" onclick="saveCustomIdConfiguration()">
+                            <i class="bi bi-save me-2"></i>Save Configuration
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -294,6 +300,15 @@
                 <div class="card-body">
                     <h5>Custom Fields Configuration</h5>
                     <p class="text-muted">Configure custom fields for items in this inventory.</p>
+                    
+                    <!-- Hidden inventory ID for forms -->
+                    <input type="hidden" name="InventoryId" value="@Model.Id" />
+                    <div class="mb-3" data-inventory-id="@Model.Id">
+                        <div class="alert alert-info">
+                            <strong>Note:</strong> Add custom fields to specify what data each item in this inventory can store. 
+                            Changes are automatically saved.
+                        </div>
+                    </div>
                     
                     <div id="custom-fields-list">
                         <!-- Custom fields will be loaded here -->
@@ -309,6 +324,58 @@
                         <button type="button" class="btn btn-outline-primary me-2" id="add-boolean-field">
                             <i class="bi bi-plus-circle me-2"></i>Add Boolean Field
                         </button>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <button type="button" class="btn btn-primary" id="save-fields-button">
+                            <i class="bi bi-save me-2"></i>Save Fields
+                        </button>
+                        
+                        <button type="button" class="btn btn-outline-secondary ms-2" id="reload-fields-button">
+                            <i class="bi bi-arrow-clockwise me-2"></i>Reload Fields
+                        </button>
+                        
+                        <button type="button" class="btn btn-outline-danger ms-2" id="clear-all-fields-button">
+                            <i class="bi bi-trash me-2"></i>Clear All Fields
+                        </button>
+                        
+                        <div class="alert alert-info mt-2">
+                            <strong>Inventory ID:</strong> <span id="debug-inventory-id">@Model.Id</span>
+                        </div>
+                        
+                        <div class="card mt-3" id="debug-panel">
+                            <div class="card-header bg-secondary text-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Debug Panel</span>
+                                    <button class="btn btn-sm btn-light" id="toggle-debug">Show/Hide</button>
+                                </div>
+                            </div>
+                            <div class="card-body" id="debug-content" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Current Fields:</h6>
+                                        <div class="small pre-scrollable" id="debug-current-fields">
+                                            No fields loaded yet
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Actions:</h6>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary mb-2" id="debug-show-ids">
+                                            Show Field IDs
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary mb-2" id="debug-clear-fields">
+                                            Clear All Fields
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary mb-2" id="debug-log-fields">
+                                            Log Fields to Console
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-info mb-2" id="debug-raw-db">
+                                            Check Raw DB Values
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -499,17 +566,82 @@
 }
 
 @section Scripts {
-    <script src="~/js/site.js"></script>
     <script src="~/js/inventory-detail.js"></script>
+    <script src="~/js/custom-fields-manager.js"></script>
     <script>
-        // Initialize inventory page functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeInventoryPage(@Model.Id);
+        // Wait for jQuery to be fully loaded
+        $(function() {
+            console.log("jQuery ready in Details view");
+            
+            // Store inventory ID in a global variable for easy access
+            window.currentInventoryId = @Model.Id;
+            console.log("Current inventory ID set to:", window.currentInventoryId);
+            
+            // Remove any conflicting handlers from site.js
+            $('#add-text-field').off('click');
+            $('#add-numeric-field').off('click');
+            $('#add-boolean-field').off('click');
+            $('#save-fields-button').off('click');
+            $('#reload-fields-button').off('click');
+            $('#clear-all-fields-button').off('click');
+            
+            // Initialize custom fields manager with the inventory ID
+            initCustomFieldsManager(window.currentInventoryId);
+            
+            // Direct handler for save custom ID button
+            $(document).on('click', '#save-custom-id-button', function(e) {
+                console.log("Save custom ID button clicked directly");
+                e.preventDefault();
+                saveCustomIdDirectly();
+                return false;
+            });
+            
+            // Initialize the page
+            initializeInventoryPage(window.currentInventoryId);
         });
+        
+        // Direct save function for custom ID
+        function saveCustomIdDirectly() {
+            console.log("saveCustomIdDirectly called");
+            const inventoryId = window.currentInventoryId;
+            console.log("Using inventory ID:", inventoryId);
+            
+            if (!inventoryId) {
+                alert("ERROR: Could not determine inventory ID!");
+                return;
+            }
+            
+            const elements = getCustomIdElements();
+            console.log("Elements to save:", elements);
+            
+            // Send the request directly
+            $.ajax({
+                url: '/Inventory/SaveCustomIdConfiguration',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ inventoryId: parseInt(inventoryId), elements: elements }),
+                success: function(response) {
+                    console.log("Save response:", response);
+                    if (response.success) {
+                        alert("Custom ID configuration saved successfully!");
+                        window.location.reload(); // Reload to verify persistence
+                    } else {
+                        alert("Error saving custom ID configuration: " + (response.error || "Unknown error"));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Ajax error:", error);
+                    console.error("Status:", status);
+                    console.error("Response:", xhr.responseText);
+                    alert("Error saving custom ID configuration. See console for details.");
+                }
+            });
+        }
     </script>
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/inventory-detail.css" />
+    <link rel="stylesheet" href="~/css/custom-fields.css" />
 }
 

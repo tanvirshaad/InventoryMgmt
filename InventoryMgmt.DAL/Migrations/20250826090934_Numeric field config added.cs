@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace InventoryMgmt.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class initialmigration : Migration
+    public partial class Numericfieldconfigadded : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -107,12 +107,27 @@ namespace InventoryMgmt.DAL.Migrations
                     NumericField1Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     NumericField1Description = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     NumericField1ShowInTable = table.Column<bool>(type: "bit", nullable: false),
+                    NumericField1IsInteger = table.Column<bool>(type: "bit", nullable: false),
+                    NumericField1MinValue = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    NumericField1MaxValue = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    NumericField1StepValue = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    NumericField1DisplayFormat = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     NumericField2Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     NumericField2Description = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     NumericField2ShowInTable = table.Column<bool>(type: "bit", nullable: false),
+                    NumericField2IsInteger = table.Column<bool>(type: "bit", nullable: false),
+                    NumericField2MinValue = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    NumericField2MaxValue = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    NumericField2StepValue = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    NumericField2DisplayFormat = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     NumericField3Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     NumericField3Description = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     NumericField3ShowInTable = table.Column<bool>(type: "bit", nullable: false),
+                    NumericField3IsInteger = table.Column<bool>(type: "bit", nullable: false),
+                    NumericField3MinValue = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    NumericField3MaxValue = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    NumericField3StepValue = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    NumericField3DisplayFormat = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     DocumentField1Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     DocumentField1Description = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     DocumentField1ShowInTable = table.Column<bool>(type: "bit", nullable: false),
@@ -303,11 +318,11 @@ namespace InventoryMgmt.DAL.Migrations
                 columns: new[] { "Id", "CreatedAt", "Description", "Name", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9634), "Office equipment and devices", "Equipment", new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9637) },
-                    { 2, new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9638), "Office furniture and fixtures", "Furniture", new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9639) },
-                    { 3, new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9640), "Books and publications", "Books", new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9640) },
-                    { 4, new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9641), "Important documents and records", "Documents", new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9642) },
-                    { 5, new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9643), "Other miscellaneous items", "Other", new DateTime(2025, 8, 25, 6, 10, 43, 184, DateTimeKind.Utc).AddTicks(9643) }
+                    { 1, new DateTime(2025, 8, 26, 9, 9, 33, 459, DateTimeKind.Utc).AddTicks(7564), "Office equipment and devices", "Equipment", new DateTime(2025, 8, 26, 9, 9, 33, 459, DateTimeKind.Utc).AddTicks(7568) },
+                    { 2, new DateTime(2025, 8, 26, 9, 9, 33, 459, DateTimeKind.Utc).AddTicks(7574), "Office furniture and fixtures", "Furniture", new DateTime(2025, 8, 26, 9, 9, 33, 459, DateTimeKind.Utc).AddTicks(7574) },
+                    { 3, new DateTime(2025, 8, 26, 9, 9, 33, 459, DateTimeKind.Utc).AddTicks(7575), "Books and publications", "Books", new DateTime(2025, 8, 26, 9, 9, 33, 459, DateTimeKind.Utc).AddTicks(7575) },
+                    { 4, new DateTime(2025, 8, 26, 9, 9, 33, 459, DateTimeKind.Utc).AddTicks(7576), "Important documents and records", "Documents", new DateTime(2025, 8, 26, 9, 9, 33, 459, DateTimeKind.Utc).AddTicks(7576) },
+                    { 5, new DateTime(2025, 8, 26, 9, 9, 33, 459, DateTimeKind.Utc).AddTicks(7577), "Other miscellaneous items", "Other", new DateTime(2025, 8, 26, 9, 9, 33, 459, DateTimeKind.Utc).AddTicks(7577) }
                 });
 
             migrationBuilder.CreateIndex(

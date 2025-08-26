@@ -1,5 +1,80 @@
 // inventory-detail.js - Handles selection and actions for inventory items
 
+// Initialize the inventory page
+function initializeInventoryPage(inventoryId) {
+    console.log("Initializing inventory page with ID:", inventoryId);
+    
+    // Handle tab switching
+    $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+        const tabId = $(e.target).attr('id');
+        console.log("Tab activated:", tabId);
+        
+        // If we're switching to the fields tab, ensure custom fields are loaded
+        if (tabId === 'fields-tab') {
+            // The custom fields manager will handle this
+        }
+    });
+    
+    // Load custom ID elements if that tab is active
+    if ($('#customid-tab').hasClass('active')) {
+        loadCustomIdElements(inventoryId);
+    }
+    
+    // Load comments if chat tab is active
+    if ($('#chat-tab').hasClass('active')) {
+        loadComments(inventoryId);
+    }
+}
+
+// Load custom ID elements
+function loadCustomIdElements(inventoryId) {
+    $.ajax({
+        url: `/Inventory/GetCustomIdElements?id=${inventoryId}`,
+        type: 'GET',
+        success: function(response) {
+            console.log("Loaded custom ID elements:", response);
+            renderCustomIdElements(response.elements || []);
+        },
+        error: function(xhr, status, error) {
+            console.error("Error loading custom ID elements:", error);
+        }
+    });
+}
+
+// Render custom ID elements
+function renderCustomIdElements(elements) {
+    // Implementation would go here
+    console.log("Custom ID elements:", elements);
+}
+
+// Get custom ID elements for saving
+function getCustomIdElements() {
+    // This would collect the custom ID elements from the UI
+    // For now, just return a placeholder
+    return [];
+}
+
+// Load comments for the chat tab
+function loadComments(inventoryId) {
+    $.ajax({
+        url: `/Inventory/GetComments?id=${inventoryId}`,
+        type: 'GET',
+        success: function(response) {
+            console.log("Loaded comments:", response);
+            renderComments(response.comments || []);
+        },
+        error: function(xhr, status, error) {
+            console.error("Error loading comments:", error);
+        }
+    });
+}
+
+// Render comments
+function renderComments(comments) {
+    // Implementation would go here
+    console.log("Comments:", comments);
+}
+
 $(document).ready(function () {
     // Selection management
     const selectionToolbar = $('#selectionToolbar');

@@ -267,6 +267,49 @@ body {
     border-radius: 0.25rem;
 }
 
+/* Custom field styling */
+.custom-field {
+    border: 1px solid var(--theme-border);
+    border-radius: 0.5rem;
+    padding: 1rem 0.5rem;
+    margin-bottom: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.loaded-field {
+    border-left: 4px solid var(--bs-success);
+}
+
+.field-flash {
+    animation: field-flash-animation 1s ease;
+}
+
+@keyframes field-flash-animation {
+    0% {
+        background-color: rgba(var(--bs-success-rgb), 0.3);
+    }
+    50% {
+        background-color: rgba(var(--bs-success-rgb), 0.1);
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+.field-debug {
+    padding: 0.25rem 0.5rem;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--theme-text-muted);
+    border-top: 1px dashed var(--theme-border);
+}
+
+#debug-notification {
+    margin-bottom: 1rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
 /* Custom ID preview */
 .custom-id-preview {
     background-color: var(--theme-bg-secondary);
