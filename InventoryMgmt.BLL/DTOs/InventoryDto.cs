@@ -62,6 +62,7 @@ namespace InventoryMgmt.BLL.DTOs
         public string? Name { get; set; }
         public string? Description { get; set; }
         public bool ShowInTable { get; set; }
+        public bool Required { get; set; }
         public NumericFieldConfig? NumericConfig { get; set; }
     }
 }

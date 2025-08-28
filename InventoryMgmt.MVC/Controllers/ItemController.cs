@@ -3,6 +3,7 @@ using InventoryMgmt.BLL.Services;
 using InventoryMgmt.DAL.EF.TableModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Text.Json;
@@ -62,7 +63,9 @@ namespace InventoryMgmt.MVC.Controllers
                 return NotFound();
             }
 
-            ViewBag.Inventory = inventory;
+            // Prepare the custom fields for the view
+            await PrepareCustomFieldsForView(inventoryId, ViewBag);
+            
             return View(new ItemDto { InventoryId = inventoryId });
         }
 
@@ -85,6 +88,35 @@ namespace InventoryMgmt.MVC.Controllers
                 // Fix: Initialize CreatedById with a valid value to prevent validation errors
                 itemDto.CreatedById = currentUserId ?? "1"; // Use a default ID if no user ID is found
                 
+                // Make sure we have a name value
+                if (string.IsNullOrWhiteSpace(itemDto.Name))
+                {
+                    // Fall back to TextField1Value if no name provided
+                    itemDto.Name = itemDto.TextField1Value ?? "Unnamed Item";
+                }
+                
+                // Store the Name in TextField1Value for database persistence
+                itemDto.TextField1Value = itemDto.Name;
+                
+                // Validate custom fields
+                var inventory = await _inventoryService.GetInventoryByIdAsync(itemDto.InventoryId);
+                if (inventory != null)
+                {
+                    // Validate numeric fields
+                    ValidateNumericFields(itemDto, inventory, ModelState);
+                    
+                    // Validate text fields (for max length)
+                    ValidateTextFields(itemDto, inventory, ModelState);
+                }
+                
+                if (!ModelState.IsValid)
+                {
+                    // Get the custom fields for the form and return the view with validation errors
+                    await PrepareCustomFieldsForView(itemDto.InventoryId, ViewBag);
+                    ViewBag.Inventory = inventory;
+                    return View(itemDto);
+                }
+                
                 try
                 {
                     var result = await _itemService.CreateItemAsync(itemDto);
@@ -106,8 +138,8 @@ namespace InventoryMgmt.MVC.Controllers
                 }
             }
 
-            var inventory = await _inventoryService.GetInventoryByIdAsync(itemDto.InventoryId);
-            ViewBag.Inventory = inventory;
+            // Prepare the custom fields for the view
+            await PrepareCustomFieldsForView(itemDto.InventoryId, ViewBag);
             return View(itemDto);
         }
 
@@ -128,6 +160,16 @@ namespace InventoryMgmt.MVC.Controllers
             {
                 return Forbid();
             }
+            
+            // Get the inventory to get custom field configurations
+            var inventory = await _inventoryService.GetInventoryByIdAsync(item.InventoryId);
+            if (inventory == null)
+            {
+                return NotFound();
+            }
+            
+            // Prepare the custom fields for the view
+            await PrepareCustomFieldsForView(item.InventoryId, ViewBag);
 
             return View(item);
         }
@@ -151,6 +193,35 @@ namespace InventoryMgmt.MVC.Controllers
                 if (!canEdit)
                 {
                     return Forbid();
+                }
+                
+                // Make sure we have a name value
+                if (string.IsNullOrWhiteSpace(itemDto.Name))
+                {
+                    // Fall back to TextField1Value if no name provided
+                    itemDto.Name = itemDto.TextField1Value ?? "Unnamed Item";
+                }
+                
+                // Store the Name in TextField1Value for database persistence
+                itemDto.TextField1Value = itemDto.Name;
+                
+                // Validate custom fields
+                var inventory = await _inventoryService.GetInventoryByIdAsync(itemDto.InventoryId);
+                if (inventory != null)
+                {
+                    // Validate numeric fields
+                    ValidateNumericFields(itemDto, inventory, ModelState);
+                    
+                    // Validate text fields (for max length)
+                    ValidateTextFields(itemDto, inventory, ModelState);
+                }
+                
+                if (!ModelState.IsValid)
+                {
+                    // Get the custom fields for the form and return the view with validation errors
+                    await PrepareCustomFieldsForView(itemDto.InventoryId, ViewBag);
+                    ViewBag.Inventory = inventory;
+                    return View(itemDto);
                 }
 
                 var result = await _itemService.UpdateItemAsync(itemDto);
@@ -396,5 +467,341 @@ namespace InventoryMgmt.MVC.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+        
+        [HttpGet]
+        public async Task<IActionResult> GenerateItemCustomId(int inventoryId)
+        {
+            try
+            {
+                var inventory = await _inventoryService.GetInventoryByIdAsync(inventoryId);
+                if (inventory == null)
+                {
+                    return Json(new { success = false, message = "Inventory not found" });
+                }
+                
+                string customId;
+                if (!string.IsNullOrEmpty(inventory.CustomIdFormat))
+                {
+                    // Use the inventory's custom ID format
+                    customId = _inventoryService.GenerateCustomId(inventory.CustomIdFormat, new Random().Next(1, 9999));
+                }
+                else
+                {
+                    // Use a default format
+                    customId = $"ITEM-{Guid.NewGuid().ToString("N").Substring(0, 8)}";
+                }
+                
+                return Json(new { success = true, customId = customId });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+        
+        #region Private Helper Methods
+        
+        private void ValidateNumericFields(ItemDto itemDto, InventoryDto inventory, Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary modelState)
+        {
+            // Validate NumericField1
+            if (inventory.NumericField1.NumericConfig != null && itemDto.NumericField1Value.HasValue)
+            {
+                if (inventory.NumericField1.NumericConfig.IsInteger && itemDto.NumericField1Value % 1 != 0)
+                {
+                    modelState.AddModelError("NumericField1Value", $"{inventory.NumericField1.Name} must be an integer.");
+                }
+                
+                if (inventory.NumericField1.NumericConfig.MinValue.HasValue && 
+                    itemDto.NumericField1Value < inventory.NumericField1.NumericConfig.MinValue)
+                {
+                    modelState.AddModelError("NumericField1Value", 
+                        $"{inventory.NumericField1.Name} must be at least {inventory.NumericField1.NumericConfig.MinValue}.");
+                }
+                
+                if (inventory.NumericField1.NumericConfig.MaxValue.HasValue && 
+                    itemDto.NumericField1Value > inventory.NumericField1.NumericConfig.MaxValue)
+                {
+                    modelState.AddModelError("NumericField1Value", 
+                        $"{inventory.NumericField1.Name} must be at most {inventory.NumericField1.NumericConfig.MaxValue}.");
+                }
+            }
+            
+            // Validate NumericField2
+            if (inventory.NumericField2.NumericConfig != null && itemDto.NumericField2Value.HasValue)
+            {
+                if (inventory.NumericField2.NumericConfig.IsInteger && itemDto.NumericField2Value % 1 != 0)
+                {
+                    modelState.AddModelError("NumericField2Value", $"{inventory.NumericField2.Name} must be an integer.");
+                }
+                
+                if (inventory.NumericField2.NumericConfig.MinValue.HasValue && 
+                    itemDto.NumericField2Value < inventory.NumericField2.NumericConfig.MinValue)
+                {
+                    modelState.AddModelError("NumericField2Value", 
+                        $"{inventory.NumericField2.Name} must be at least {inventory.NumericField2.NumericConfig.MinValue}.");
+                }
+                
+                if (inventory.NumericField2.NumericConfig.MaxValue.HasValue && 
+                    itemDto.NumericField2Value > inventory.NumericField2.NumericConfig.MaxValue)
+                {
+                    modelState.AddModelError("NumericField2Value", 
+                        $"{inventory.NumericField2.Name} must be at most {inventory.NumericField2.NumericConfig.MaxValue}.");
+                }
+            }
+            
+            // Validate NumericField3
+            if (inventory.NumericField3.NumericConfig != null && itemDto.NumericField3Value.HasValue)
+            {
+                if (inventory.NumericField3.NumericConfig.IsInteger && itemDto.NumericField3Value % 1 != 0)
+                {
+                    modelState.AddModelError("NumericField3Value", $"{inventory.NumericField3.Name} must be an integer.");
+                }
+                
+                if (inventory.NumericField3.NumericConfig.MinValue.HasValue && 
+                    itemDto.NumericField3Value < inventory.NumericField3.NumericConfig.MinValue)
+                {
+                    modelState.AddModelError("NumericField3Value", 
+                        $"{inventory.NumericField3.Name} must be at least {inventory.NumericField3.NumericConfig.MinValue}.");
+                }
+                
+                if (inventory.NumericField3.NumericConfig.MaxValue.HasValue && 
+                    itemDto.NumericField3Value > inventory.NumericField3.NumericConfig.MaxValue)
+                {
+                    modelState.AddModelError("NumericField3Value", 
+                        $"{inventory.NumericField3.Name} must be at most {inventory.NumericField3.NumericConfig.MaxValue}.");
+                }
+            }
+        }
+        
+        private void ValidateTextFields(ItemDto itemDto, InventoryDto inventory, Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary modelState)
+        {
+            // Example max lengths - adjust as needed
+            const int MaxShortTextLength = 255;
+            const int MaxLongTextLength = 2000;
+            
+            // Validate text fields
+            if (!string.IsNullOrEmpty(inventory.TextField1.Name) && 
+                !string.IsNullOrEmpty(itemDto.TextField1Value) && 
+                itemDto.TextField1Value.Length > MaxShortTextLength)
+            {
+                modelState.AddModelError("TextField1Value", 
+                    $"{inventory.TextField1.Name} must be at most {MaxShortTextLength} characters.");
+            }
+            
+            if (!string.IsNullOrEmpty(inventory.TextField2.Name) && 
+                !string.IsNullOrEmpty(itemDto.TextField2Value) && 
+                itemDto.TextField2Value.Length > MaxShortTextLength)
+            {
+                modelState.AddModelError("TextField2Value", 
+                    $"{inventory.TextField2.Name} must be at most {MaxShortTextLength} characters.");
+            }
+            
+            if (!string.IsNullOrEmpty(inventory.TextField3.Name) && 
+                !string.IsNullOrEmpty(itemDto.TextField3Value) && 
+                itemDto.TextField3Value.Length > MaxShortTextLength)
+            {
+                modelState.AddModelError("TextField3Value", 
+                    $"{inventory.TextField3.Name} must be at most {MaxShortTextLength} characters.");
+            }
+            
+            // Validate multitext fields
+            if (!string.IsNullOrEmpty(inventory.MultiTextField1.Name) && 
+                !string.IsNullOrEmpty(itemDto.MultiTextField1Value) && 
+                itemDto.MultiTextField1Value.Length > MaxLongTextLength)
+            {
+                modelState.AddModelError("MultiTextField1Value", 
+                    $"{inventory.MultiTextField1.Name} must be at most {MaxLongTextLength} characters.");
+            }
+            
+            if (!string.IsNullOrEmpty(inventory.MultiTextField2.Name) && 
+                !string.IsNullOrEmpty(itemDto.MultiTextField2Value) && 
+                itemDto.MultiTextField2Value.Length > MaxLongTextLength)
+            {
+                modelState.AddModelError("MultiTextField2Value", 
+                    $"{inventory.MultiTextField2.Name} must be at most {MaxLongTextLength} characters.");
+            }
+            
+            if (!string.IsNullOrEmpty(inventory.MultiTextField3.Name) && 
+                !string.IsNullOrEmpty(itemDto.MultiTextField3Value) && 
+                itemDto.MultiTextField3Value.Length > MaxLongTextLength)
+            {
+                modelState.AddModelError("MultiTextField3Value", 
+                    $"{inventory.MultiTextField3.Name} must be at most {MaxLongTextLength} characters.");
+            }
+        }
+        
+        private async Task PrepareCustomFieldsForView(int inventoryId, dynamic viewBag)
+        {
+            var inventory = await _inventoryService.GetInventoryByIdAsync(inventoryId);
+            if (inventory == null)
+            {
+                return;
+            }
+            
+            // Get the custom field configurations for this inventory
+            var customFields = new List<object>();
+            
+            // Add text fields
+            if (!string.IsNullOrEmpty(inventory.TextField1.Name)) 
+                customFields.Add(new { 
+                    type = "text", 
+                    id = "TextField1Value", 
+                    name = inventory.TextField1.Name, 
+                    description = inventory.TextField1.Description,
+                    maxLength = 255, // Max length for short text fields
+                    required = true  // Make the first field required as it's used for the name
+                });
+            
+            if (!string.IsNullOrEmpty(inventory.TextField2.Name)) 
+                customFields.Add(new { 
+                    type = "text", 
+                    id = "TextField2Value", 
+                    name = inventory.TextField2.Name, 
+                    description = inventory.TextField2.Description,
+                    maxLength = 255,
+                    required = inventory.TextField2.Required
+                });
+            
+            if (!string.IsNullOrEmpty(inventory.TextField3.Name)) 
+                customFields.Add(new { 
+                    type = "text", 
+                    id = "TextField3Value", 
+                    name = inventory.TextField3.Name, 
+                    description = inventory.TextField3.Description,
+                    maxLength = 255,
+                    required = inventory.TextField3.Required
+                });
+            
+            // Add multitext fields
+            if (!string.IsNullOrEmpty(inventory.MultiTextField1.Name)) 
+                customFields.Add(new { 
+                    type = "multitext", 
+                    id = "MultiTextField1Value", 
+                    name = inventory.MultiTextField1.Name, 
+                    description = inventory.MultiTextField1.Description,
+                    maxLength = 2000,
+                    required = inventory.MultiTextField1.Required
+                });
+            
+            if (!string.IsNullOrEmpty(inventory.MultiTextField2.Name)) 
+                customFields.Add(new { 
+                    type = "multitext", 
+                    id = "MultiTextField2Value", 
+                    name = inventory.MultiTextField2.Name, 
+                    description = inventory.MultiTextField2.Description,
+                    maxLength = 2000,
+                    required = inventory.MultiTextField2.Required
+                });
+            
+            if (!string.IsNullOrEmpty(inventory.MultiTextField3.Name)) 
+                customFields.Add(new { 
+                    type = "multitext", 
+                    id = "MultiTextField3Value", 
+                    name = inventory.MultiTextField3.Name, 
+                    description = inventory.MultiTextField3.Description,
+                    maxLength = 2000,
+                    required = inventory.MultiTextField3.Required
+                });
+            
+            // Add numeric fields
+            if (!string.IsNullOrEmpty(inventory.NumericField1.Name)) 
+                customFields.Add(new { 
+                    type = "numeric", 
+                    id = "NumericField1Value", 
+                    name = inventory.NumericField1.Name, 
+                    description = inventory.NumericField1.Description,
+                    isInteger = inventory.NumericField1.NumericConfig?.IsInteger,
+                    minValue = inventory.NumericField1.NumericConfig?.MinValue,
+                    maxValue = inventory.NumericField1.NumericConfig?.MaxValue,
+                    required = inventory.NumericField1.Required
+                });
+            
+            if (!string.IsNullOrEmpty(inventory.NumericField2.Name)) 
+                customFields.Add(new { 
+                    type = "numeric", 
+                    id = "NumericField2Value", 
+                    name = inventory.NumericField2.Name, 
+                    description = inventory.NumericField2.Description,
+                    isInteger = inventory.NumericField2.NumericConfig?.IsInteger,
+                    minValue = inventory.NumericField2.NumericConfig?.MinValue,
+                    maxValue = inventory.NumericField2.NumericConfig?.MaxValue,
+                    required = inventory.NumericField2.Required
+                });
+            
+            if (!string.IsNullOrEmpty(inventory.NumericField3.Name)) 
+                customFields.Add(new { 
+                    type = "numeric", 
+                    id = "NumericField3Value", 
+                    name = inventory.NumericField3.Name, 
+                    description = inventory.NumericField3.Description,
+                    isInteger = inventory.NumericField3.NumericConfig?.IsInteger,
+                    minValue = inventory.NumericField3.NumericConfig?.MinValue,
+                    maxValue = inventory.NumericField3.NumericConfig?.MaxValue,
+                    required = inventory.NumericField3.Required
+                });
+            
+            // Add boolean fields
+            if (!string.IsNullOrEmpty(inventory.BooleanField1.Name)) 
+                customFields.Add(new { 
+                    type = "boolean", 
+                    id = "BooleanField1Value", 
+                    name = inventory.BooleanField1.Name, 
+                    description = inventory.BooleanField1.Description,
+                    required = inventory.BooleanField1.Required
+                });
+            
+            if (!string.IsNullOrEmpty(inventory.BooleanField2.Name)) 
+                customFields.Add(new { 
+                    type = "boolean", 
+                    id = "BooleanField2Value", 
+                    name = inventory.BooleanField2.Name, 
+                    description = inventory.BooleanField2.Description,
+                    required = inventory.BooleanField2.Required
+                });
+            
+            if (!string.IsNullOrEmpty(inventory.BooleanField3.Name)) 
+                customFields.Add(new { 
+                    type = "boolean", 
+                    id = "BooleanField3Value", 
+                    name = inventory.BooleanField3.Name, 
+                    description = inventory.BooleanField3.Description,
+                    required = inventory.BooleanField3.Required
+                });
+            
+            // Add document fields
+            if (!string.IsNullOrEmpty(inventory.DocumentField1.Name)) 
+                customFields.Add(new { 
+                    type = "document", 
+                    id = "DocumentField1Value", 
+                    name = inventory.DocumentField1.Name, 
+                    description = inventory.DocumentField1.Description,
+                    required = inventory.DocumentField1.Required
+                });
+            
+            if (!string.IsNullOrEmpty(inventory.DocumentField2.Name)) 
+                customFields.Add(new { 
+                    type = "document", 
+                    id = "DocumentField2Value", 
+                    name = inventory.DocumentField2.Name, 
+                    description = inventory.DocumentField2.Description,
+                    required = inventory.DocumentField2.Required
+                });
+            
+            if (!string.IsNullOrEmpty(inventory.DocumentField3.Name)) 
+                customFields.Add(new { 
+                    type = "document", 
+                    id = "DocumentField3Value", 
+                    name = inventory.DocumentField3.Name, 
+                    description = inventory.DocumentField3.Description,
+                    required = inventory.DocumentField3.Required
+                });
+
+            // Set up the ViewBag for the view
+            viewBag.CustomFieldsJson = System.Text.Json.JsonSerializer.Serialize(customFields);
+            viewBag.CustomFields = customFields;
+            viewBag.Inventory = inventory;
+        }
+        
+        #endregion
     }
 }

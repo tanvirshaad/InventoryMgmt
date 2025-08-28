@@ -1,0 +1,209 @@
+@model InventoryMgmt.BLL.DTOs.ItemDto
+
+@using InventoryMgmt.BLL.DTOs
+
+@{
+    var customFields = ViewBag.CustomFields as List<object> ?? new List<object>();
+    var hasCustomFields = customFields.Any();
+}
+
+<div class="form-group mb-4 item-name-field">
+    <label for="Name" class="form-label">Item Name</label>
+    <input type="text" id="Name" name="Name" value="@Model.Name" class="form-control form-control-lg" placeholder="Enter item name" required />
+    <span class="text-danger" id="NameValidation"></span>
+    <small class="field-description">This name will be used to identify the item in lists and search results</small>
+</div>
+
+<div class="form-group mb-4 custom-id-field">
+    <label for="CustomId" class="form-label">Custom ID</label>
+    <div class="input-group">
+        <input type="text" id="CustomId" name="CustomId" value="@Model.CustomId" class="form-control" placeholder="Leave empty for auto-generated ID" />
+        <button type="button" class="btn btn-outline-secondary" id="autoGenerateIdBtn">
+            <i class="bi bi-magic"></i> Auto-generate ID
+        </button>
+    </div>
+    <span class="text-danger" id="CustomIdValidation"></span>
+    <small class="field-description">Optional: Provide a unique identifier for this item or click the button to generate one</small>
+</div>
+
+@if (!hasCustomFields)
+{
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>
+        No custom fields have been configured for this inventory yet.
+    </div>
+}
+else
+{
+    <div class="field-group">
+        <h5 class="field-group-title">
+            <i class="bi bi-list-check me-2"></i>Custom Fields
+        </h5>
+        
+        <div id="custom-fields-container">
+            @foreach (dynamic field in customFields)
+            {
+                string fieldId = field.id;
+                string fieldName = field.name;
+                string fieldDescription = field.description;
+                // Safely check for required property, default to false if not present
+                bool fieldRequired = false;
+                try { fieldRequired = field.required == true; } catch { /* Ignore if property doesn't exist */ }
+                string cssClasses = fieldRequired ? "custom-field required-field" : "custom-field";
+                
+                <div class="form-group mb-3 @cssClasses" 
+                     data-field-id="@fieldId" 
+                     data-field-type="@field.type">
+                    
+                    <label for="@fieldId" class="form-label">@fieldName</label>
+                    
+                    @switch (field.type)
+                    {
+                        case "text":
+                            {
+                                string maxLength = field.maxLength != null ? field.maxLength.ToString() : "";
+                                string value = GetPropertyValue(Model, fieldId) ?? "";
+                                
+                                <div class="text-field" data-max-length="@maxLength">
+                                    <input type="text" id="@fieldId" name="@fieldId" value="@value" 
+                                           class="form-control" placeholder="Enter @fieldName" 
+                                           @(fieldRequired ? "required" : "") 
+                                           @(!string.IsNullOrEmpty(maxLength) ? $"maxlength=\"{maxLength}\"" : "") />
+                                    <span class="text-danger" id="@(fieldId + "Validation")"></span>
+                                    @if (!string.IsNullOrEmpty(fieldDescription))
+                                    {
+                                        <small class="field-description">@fieldDescription</small>
+                                    }
+                                </div>
+                            }
+                            break;
+                            
+                        case "multitext":
+                            {
+                                string maxLength = field.maxLength != null ? field.maxLength.ToString() : "";
+                                string value = GetPropertyValue(Model, fieldId) ?? "";
+                                
+                                <div class="text-field" data-max-length="@maxLength">
+                                    <textarea id="@fieldId" name="@fieldId" class="form-control" rows="3" 
+                                              placeholder="Enter @fieldName" 
+                                              @(fieldRequired ? "required" : "") 
+                                              @(!string.IsNullOrEmpty(maxLength) ? $"maxlength=\"{maxLength}\"" : "")>@value</textarea>
+                                    <span class="text-danger" id="@(fieldId + "Validation")"></span>
+                                    @if (!string.IsNullOrEmpty(fieldDescription))
+                                    {
+                                        <small class="field-description">@fieldDescription</small>
+                                    }
+                                </div>
+                            }
+                            break;
+                            
+                        case "numeric":
+                            {
+                                string value = GetPropertyValue(Model, fieldId) ?? "";
+                                bool isInteger = field.isInteger == true;
+                                string minValue = field.minValue != null ? field.minValue.ToString() : "";
+                                string maxValue = field.maxValue != null ? field.maxValue.ToString() : "";
+                                string step = isInteger ? "1" : "0.01";
+                                
+                                <div class="numeric-field" 
+                                     data-field-id="@fieldId" 
+                                     data-is-integer="@isInteger" 
+                                     data-min-value="@minValue" 
+                                     data-max-value="@maxValue">
+                                    
+                                    <input type="number" id="@fieldId" name="@fieldId" value="@value" 
+                                           class="form-control" placeholder="Enter @fieldName"
+                                           @(fieldRequired ? "required" : "")
+                                           @(!string.IsNullOrEmpty(minValue) ? $"min=\"{minValue}\"" : "") 
+                                           @(!string.IsNullOrEmpty(maxValue) ? $"max=\"{maxValue}\"" : "")
+                                           step="@step" />
+                                    
+                                    <span class="text-danger" id="@(fieldId + "Validation")"></span>
+                                    
+                                    @{
+                                        string constraints = "";
+                                        if (!string.IsNullOrEmpty(minValue))
+                                            constraints += $"Min: {minValue} ";
+                                        if (!string.IsNullOrEmpty(maxValue))
+                                            constraints += $"Max: {maxValue} ";
+                                        if (!string.IsNullOrEmpty(constraints))
+                                            constraints = "(" + constraints.Trim() + ")";
+                                    }
+                                    
+                                    <small class="field-description">
+                                        @(!string.IsNullOrEmpty(fieldDescription) ? fieldDescription + " " : "")
+                                        @constraints
+                                    </small>
+                                </div>
+                            }
+                            break;
+                            
+                        case "boolean":
+                            {
+                                bool isChecked = GetPropertyValueAsBool(Model, fieldId);
+                                
+                                <div class="form-check">
+                                    <input type="checkbox" id="@fieldId" name="@fieldId" value="true" 
+                                           @(isChecked ? "checked" : "")
+                                           class="form-check-input" />
+                                    <input type="hidden" name="@fieldId" value="false" />
+                                    @if (!string.IsNullOrEmpty(fieldDescription))
+                                    {
+                                        <small class="field-description d-block mt-1">@fieldDescription</small>
+                                    }
+                                </div>
+                            }
+                            break;
+                            
+                        case "document":
+                            {
+                                string value = GetPropertyValue(Model, fieldId) ?? "";
+                                
+                                <div class="input-group">
+                                    <input type="text" id="@fieldId" name="@fieldId" value="@value" 
+                                           class="form-control" readonly placeholder="No file selected" />
+                                    <button type="button" class="btn btn-outline-secondary document-upload-btn" data-field-id="@fieldId">
+                                        <i class="bi bi-upload"></i>
+                                    </button>
+                                </div>
+                                <span class="text-danger" id="@(fieldId + "Validation")"></span>
+                                @if (!string.IsNullOrEmpty(fieldDescription))
+                                {
+                                    <small class="field-description d-block">@fieldDescription</small>
+                                }
+                                <small class="field-description">Document upload will be implemented in a future update</small>
+                            }
+                            break;
+                    }
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@functions {
+    public string GetPropertyValue(InventoryMgmt.BLL.DTOs.ItemDto item, string propertyName)
+    {
+        var property = item.GetType().GetProperty(propertyName);
+        if (property != null)
+        {
+            var value = property.GetValue(item);
+            return value?.ToString() ?? "";
+        }
+        return "";
+    }
+    
+    public bool GetPropertyValueAsBool(InventoryMgmt.BLL.DTOs.ItemDto item, string propertyName)
+    {
+        var property = item.GetType().GetProperty(propertyName);
+        if (property != null)
+        {
+            var value = property.GetValue(item);
+            if (value is bool boolValue)
+            {
+                return boolValue;
+            }
+        }
+        return false;
+    }
+}

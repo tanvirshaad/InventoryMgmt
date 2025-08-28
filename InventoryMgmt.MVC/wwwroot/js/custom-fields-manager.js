@@ -450,6 +450,9 @@ function deleteField(fieldId) {
         
         // Update the debug panel
         updateDebugPanel();
+        
+        // Save changes to server immediately to persist the deletion
+        saveCustomFields();
     }
 }
 

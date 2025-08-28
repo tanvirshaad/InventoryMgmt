@@ -1,43 +1,45 @@
 @model InventoryMgmt.BLL.DTOs.ItemDto
 
 @{
-    ViewData["Title"] = "Add New Item";
+    ViewData["Title"] = "Edit Item";
     var customFields = ViewBag.CustomFields as List<object> ?? new List<object>();
     var hasCustomFields = customFields.Any();
+    var inventory = ViewBag.Inventory;
 }
 
 <div class="row justify-content-center">
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">
-                <h2 class="text-center">Add New Item</h2>
-                @if (ViewBag.Inventory != null)
+                <h2 class="text-center">Edit Item</h2>
+                @if (inventory != null)
                 {
                     <p class="text-center text-muted mb-0">
-                        Adding to: <strong>@ViewBag.Inventory.Title</strong>
+                        Inventory: <strong>@inventory.Title</strong>
                     </p>
                 }
             </div>
             <div class="card-body">
-                <form asp-action="Create" method="post">
+                <form asp-action="Edit" method="post">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="Id" />
                     <input type="hidden" asp-for="InventoryId" />
                     
                     <div class="form-group mb-3">
                         <label asp-for="CustomId" class="form-label">Custom ID</label>
-                        <input asp-for="CustomId" class="form-control" placeholder="Leave empty for auto-generation" />
-                        <small class="form-text text-muted">Optional: Custom identifier for this item</small>
+                        <input asp-for="CustomId" class="form-control" placeholder="Custom identifier" />
+                        <small class="form-text text-muted">Unique identifier for this item</small>
                         <span asp-validation-for="CustomId" class="text-danger"></span>
                     </div>
                     
                     <partial name="_CustomFieldsForm" model="Model" />
                     
                     <div class="form-group mb-3">
-                        <button type="submit" class="btn btn-primary w-100">Add Item</button>
+                        <button type="submit" class="btn btn-primary w-100">Save Changes</button>
                     </div>
                 </form>
                 
-                <div class="text-center">
+                <div class="text-center mt-3">
                     <a asp-action="Details" asp-controller="Inventory" asp-route-id="@Model.InventoryId" class="btn btn-secondary">
                         <i class="bi bi-arrow-left me-2"></i>Back to Inventory
                     </a>
