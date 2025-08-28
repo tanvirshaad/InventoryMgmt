@@ -13,10 +13,28 @@ function initializeInventoryPage(inventoryId) {
         if (tabId === 'fields-tab') {
             // The custom fields manager will handle this
         }
+        
+        // Load custom ID elements when switching to custom ID tab
+        if (tabId === 'customid-tab') {
+            console.log("Loading custom ID elements from tab event");
+            loadCustomIdElements(inventoryId);
+        }
+        
+        // Load comments when switching to chat tab
+        if (tabId === 'chat-tab') {
+            loadComments(inventoryId);
+        }
     });
     
-    // Load custom ID elements if that tab is active
+    // Load custom ID elements if that tab is active initially
     if ($('#customid-tab').hasClass('active')) {
+        console.log("Custom ID tab is active on page load, loading elements");
+        loadCustomIdElements(inventoryId);
+    }
+    
+    // Also check if the custom ID content panel is active
+    if ($('#customid').hasClass('show active')) {
+        console.log("Custom ID content panel is active on page load, loading elements");
         loadCustomIdElements(inventoryId);
     }
     
@@ -28,30 +46,184 @@ function initializeInventoryPage(inventoryId) {
 
 // Load custom ID elements
 function loadCustomIdElements(inventoryId) {
+    console.log("Loading custom ID elements for inventory ID:", inventoryId);
+    
+    if (!inventoryId) {
+        console.error("Cannot load custom ID elements: No inventory ID provided");
+        return;
+    }
+    
+    // Clear any existing content first to avoid stale data
+    const container = document.getElementById('custom-id-elements');
+    if (container) {
+        container.innerHTML = '<div class="alert alert-info">Loading custom ID elements...</div>';
+    }
+    
     $.ajax({
         url: `/Inventory/GetCustomIdElements?id=${inventoryId}`,
         type: 'GET',
+        dataType: 'json',
+        cache: false, // Prevent caching of this request
         success: function(response) {
-            console.log("Loaded custom ID elements:", response);
-            renderCustomIdElements(response.elements || []);
+            console.log("Custom ID elements loaded successfully:", response);
+            
+            if (!response) {
+                console.error("Empty response received");
+                alert("Error: Empty response received from server");
+                return;
+            }
+            
+            if (!response.elements) {
+                console.warn("No elements property in response");
+                return;
+            }
+            
+            console.log(`Loaded ${response.elements.length} custom ID elements`);
+            
+            // Check if elements are valid
+            if (Array.isArray(response.elements)) {
+                console.log("Elements data:", JSON.stringify(response.elements));
+                
+                // Process each element to ensure it's valid
+                const validElements = response.elements.map(el => {
+                    return {
+                        id: el.id || `element-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                        type: el.type || 'fixed',
+                        value: el.value || '',
+                        order: el.order || 0
+                    };
+                });
+                
+                renderCustomIdElements(validElements);
+            } else {
+                console.error("Elements is not an array:", response.elements);
+                alert("Error: Invalid elements data received from server");
+            }
         },
         error: function(xhr, status, error) {
             console.error("Error loading custom ID elements:", error);
+            console.error("Status:", status);
+            console.error("Response:", xhr.responseText);
+            alert("Error loading custom ID elements. Check console for details.");
+            
+            // Display error message in the container
+            if (container) {
+                container.innerHTML = '<div class="alert alert-danger">Failed to load custom ID elements. Please try refreshing the page.</div>';
+            }
         }
     });
 }
 
 // Render custom ID elements
 function renderCustomIdElements(elements) {
-    // Implementation would go here
-    console.log("Custom ID elements:", elements);
+    console.log("Rendering custom ID elements:", elements);
+    
+    // Clear existing elements
+    const container = document.getElementById('custom-id-elements');
+    if (!container) {
+        console.error("Could not find custom-id-elements container");
+        alert("Error: Could not find custom-id-elements container");
+        return;
+    }
+    
+    console.log("Container found, clearing it");
+    container.innerHTML = '';
+    
+    // If no elements, show a message
+    if (!elements || elements.length === 0) {
+        console.log("No custom ID elements to render");
+        // Optionally show a "no elements" message
+        container.innerHTML = '<div class="alert alert-info">No custom ID elements configured. Click "Add element" to create one.</div>';
+        return;
+    }
+    
+    console.log(`Found ${elements.length} elements to render`);
+    
+    // Sort elements by order if available
+    const sortedElements = [...elements].sort((a, b) => (a.order || 0) - (b.order || 0));
+    console.log("Rendering sorted elements:", sortedElements);
+    
+    // Add each element to the container
+    sortedElements.forEach((element) => {
+        // Ensure we have a valid element ID
+        const elementId = element.id || 'element-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+        
+        console.log(`Rendering element ${elementId}: type=${element.type}, value=${element.value}`);
+        
+        // Fix for case-sensitivity in type comparison
+        const typeValue = (element.type || '').toLowerCase();
+        
+        const elementHtml = `
+            <div class="custom-id-element field-item" draggable="true" data-element-id="${elementId}">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="drag-handle">
+                            <i class="bi bi-grip-vertical"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select element-type" data-element-id="${elementId}">
+                            <option value="fixed" ${typeValue === 'fixed' ? 'selected' : ''}>Fixed</option>
+                            <option value="20-bit random" ${typeValue === '20-bit random' ? 'selected' : ''}>20-bit random</option>
+                            <option value="32-bit random" ${typeValue === '32-bit random' ? 'selected' : ''}>32-bit random</option>
+                            <option value="6-digit random" ${typeValue === '6-digit random' ? 'selected' : ''}>6-digit random</option>
+                            <option value="9-digit random" ${typeValue === '9-digit random' ? 'selected' : ''}>9-digit random</option>
+                            <option value="guid" ${typeValue === 'guid' ? 'selected' : ''}>GUID</option>
+                            <option value="date/time" ${typeValue === 'date/time' ? 'selected' : ''}>Date/time</option>
+                            <option value="sequence" ${typeValue === 'sequence' ? 'selected' : ''}>Sequence</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" class="form-control element-value" placeholder="Format or text" value="${element.value || ''}" data-element-id="${elementId}">
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-sm btn-outline-info help-btn" data-bs-toggle="tooltip" title="Help">
+                                <i class="bi bi-question-circle"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger remove-element" data-element-id="${elementId}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="element-description mt-2 text-muted small"></div>
+            </div>
+        `;
+        
+        container.insertAdjacentHTML('beforeend', elementHtml);
+        initializeElementEventListeners(elementId);
+    });
+    
+    // Add drag-and-drop reordering capabilities
+    initializeElementDragDrop();
+    
+    // Update the preview after rendering
+    updateCustomIdPreview();
 }
 
 // Get custom ID elements for saving
 function getCustomIdElements() {
-    // This would collect the custom ID elements from the UI
-    // For now, just return a placeholder
-    return [];
+    const elements = [];
+    const elementDivs = document.querySelectorAll('.custom-id-element');
+    
+    elementDivs.forEach((div, index) => {
+        const elementId = div.getAttribute('data-element-id');
+        const typeSelect = div.querySelector('.element-type');
+        const valueInput = div.querySelector('.element-value');
+        
+        if (typeSelect && valueInput) {
+            elements.push({
+                id: elementId,
+                type: typeSelect.value,
+                value: valueInput.value,
+                order: index
+            });
+        }
+    });
+    
+    console.log("Collected custom ID elements:", elements);
+    return elements;
 }
 
 // Load comments for the chat tab
@@ -69,10 +241,211 @@ function loadComments(inventoryId) {
     });
 }
 
+// Function to update custom ID preview
+function updateCustomIdPreview() {
+    console.log("Updating custom ID preview");
+    const elements = getCustomIdElements();
+    const previewElement = document.getElementById('custom-id-preview');
+    
+    if (!previewElement) {
+        console.error("Could not find custom-id-preview element");
+        return;
+    }
+    
+    // If no elements, show placeholder
+    if (elements.length === 0) {
+        previewElement.textContent = '(Preview will appear here)';
+        return;
+    }
+    
+    // Show loading indicator
+    previewElement.textContent = 'Generating preview...';
+    
+    // Generate preview using the current elements
+    fetch('/Inventory/GenerateAdvancedCustomIdPreview', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ elements: elements })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Preview generated:", data);
+        previewElement.textContent = data.preview || 'Invalid format';
+    })
+    .catch(err => {
+        console.error('Error generating preview:', err);
+        previewElement.textContent = 'Error generating preview';
+    });
+}
+
 // Render comments
 function renderComments(comments) {
     // Implementation would go here
     console.log("Comments:", comments);
+}
+
+// Initialize element event listeners
+function initializeElementEventListeners(elementId) {
+    console.log("Initializing event listeners for element:", elementId);
+    
+    const typeSelect = document.querySelector(`[data-element-id="${elementId}"].element-type`);
+    const valueInput = document.querySelector(`[data-element-id="${elementId}"].element-value`);
+    const removeBtn = document.querySelector(`[data-element-id="${elementId}"].remove-element`);
+    const helpBtn = document.querySelector(`[data-element-id="${elementId}"].help-btn`);
+    
+    if (typeSelect) {
+        typeSelect.addEventListener('change', function() {
+            updateElementDescription(elementId);
+            updateCustomIdPreview();
+        });
+        
+        // Initialize description
+        updateElementDescription(elementId);
+    }
+    
+    if (valueInput) {
+        valueInput.addEventListener('input', function() {
+            updateCustomIdPreview();
+        });
+    }
+    
+    if (removeBtn) {
+        removeBtn.addEventListener('click', function() {
+            removeCustomIdElement(elementId);
+        });
+    }
+    
+    if (helpBtn) {
+        // Initialize tooltip
+        new bootstrap.Tooltip(helpBtn);
+    }
+}
+
+// Update element description based on type
+function updateElementDescription(elementId) {
+    console.log("Updating description for element:", elementId);
+    
+    const typeSelect = document.querySelector(`[data-element-id="${elementId}"].element-type`);
+    const descriptionDiv = document.querySelector(`[data-element-id="${elementId}"] .element-description`);
+    
+    if (!typeSelect || !descriptionDiv) {
+        console.error("Could not find type select or description div for element:", elementId);
+        return;
+    }
+    
+    const descriptions = {
+        'fixed': 'A piece of unchanging text. You can use Unicode emoji.',
+        '20-bit random': 'A random value. Format it as a decimal (D6) or hex (X5).',
+        '32-bit random': 'A random value. Format it as a decimal (D10) or hex (X8).',
+        '6-digit random': 'A random 6-digit number.',
+        '9-digit random': 'A random 9-digit number.',
+        'guid': 'A globally unique identifier. Format: N (no dashes), D (dashes), B (braces), P (parentheses).',
+        'date/time': 'Item creation date/time. Format like: yyyy (year), MM (month), dd (day), HH (hour), mm (minute).',
+        'sequence': 'A sequential index. Format with leading zeros (D4) or without (D).'
+    };
+    
+    const selectedType = typeSelect.value;
+    descriptionDiv.textContent = descriptions[selectedType] || '';
+    
+    // Update value placeholder based on type
+    const valueInput = document.querySelector(`[data-element-id="${elementId}"].element-value`);
+    if (valueInput) {
+        switch (selectedType) {
+            case 'fixed':
+                valueInput.placeholder = 'Text (e.g., ABC-, 📦, etc.)';
+                break;
+            case '20-bit random':
+            case '32-bit random':
+            case '6-digit random':
+            case '9-digit random':
+                valueInput.placeholder = 'Format (e.g., X5, D6)';
+                break;
+            case 'guid':
+                valueInput.placeholder = 'Format (N, D, B, P)';
+                break;
+            case 'date/time':
+                valueInput.placeholder = 'Format (e.g., yyyyMMdd)';
+                break;
+            case 'sequence':
+                valueInput.placeholder = 'Format (e.g., D3)';
+                break;
+            default:
+                valueInput.placeholder = 'Format or text';
+        }
+    }
+}
+
+// Function to remove a custom ID element
+function removeCustomIdElement(elementId) {
+    console.log("Removing element:", elementId);
+    const element = document.querySelector(`.custom-id-element[data-element-id="${elementId}"]`);
+    if (element) {
+        element.remove();
+        updateCustomIdPreview();
+    }
+}
+
+// Initialize drag-and-drop functionality for custom ID elements
+function initializeElementDragDrop() {
+    console.log("Initializing drag-and-drop functionality");
+    
+    const container = document.getElementById('custom-id-elements');
+    if (!container) {
+        console.error("Cannot initialize drag-and-drop: container not found");
+        return;
+    }
+    
+    const elements = container.querySelectorAll('.custom-id-element');
+    console.log(`Found ${elements.length} elements for drag-drop initialization`);
+    
+    if (elements.length === 0) {
+        console.warn("No elements found to initialize drag-and-drop");
+        return;
+    }
+    
+    let draggedElement = null;
+    
+    elements.forEach((element, index) => {
+        console.log(`Setting up drag events for element ${index + 1}:`, element.getAttribute('data-element-id'));
+        
+        element.addEventListener('dragstart', function(e) {
+            draggedElement = this;
+            setTimeout(() => {
+                this.classList.add('dragging');
+            }, 0);
+            
+            // Set data for drag operation
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+            console.log("Element drag started");
+        });
+        
+        element.addEventListener('dragend', function() {
+            this.classList.remove('dragging');
+            draggedElement = null;
+            
+            // Update the preview and element order values
+            updateCustomIdPreview();
+            console.log("Element drag ended, updating preview");
+        });
+        
+        element.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            
+            if (draggedElement === this) return;
+            
+            const boundingRect = this.getBoundingClientRect();
+            const offset = boundingRect.y + (boundingRect.height / 2);
+            
+            if (e.clientY - offset > 0) {
+                this.parentNode.insertBefore(draggedElement, this.nextElementSibling);
+            } else {
+                this.parentNode.insertBefore(draggedElement, this);
+            }
+        });
+    });
 }
 
 $(document).ready(function () {

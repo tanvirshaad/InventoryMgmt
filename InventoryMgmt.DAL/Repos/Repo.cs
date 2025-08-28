@@ -165,5 +165,29 @@ namespace InventoryMgmt.DAL.Repos
         {
             return await _context.SaveChangesAsync();
         }
+
+        public virtual void DetachEntity(T entity)
+        {
+            _context.Entry(entity).State = EntityState.Detached;
+        }
+
+        public virtual void UpdateProperties(T entity, params string[] propertyNames)
+        {
+            var entry = _context.Entry(entity);
+            entry.State = EntityState.Modified;
+
+            // If specific properties are provided, only mark those as modified
+            if (propertyNames != null && propertyNames.Length > 0)
+            {
+                // First reset all properties to unchanged
+                entry.State = EntityState.Unchanged;
+                
+                // Then mark only the specified properties as modified
+                foreach (var propertyName in propertyNames)
+                {
+                    entry.Property(propertyName).IsModified = true;
+                }
+            }
+        }
     }
 }

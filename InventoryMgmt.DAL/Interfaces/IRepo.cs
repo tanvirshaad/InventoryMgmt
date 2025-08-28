@@ -27,5 +27,7 @@ namespace InventoryMgmt.DAL.Interfaces
         void Remove(T entity);
         void RemoveRange(IEnumerable<T> entities);
         Task<int> SaveChangesAsync();
+        void DetachEntity(T entity);
+        void UpdateProperties(T entity, params string[] propertyNames);
     }
 }

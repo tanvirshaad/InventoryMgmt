@@ -210,21 +210,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 10,
+          "SelectedChildIndex": 5,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "_CustomFieldsForm.cshtml",
-              "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Views\\Shared\\_CustomFieldsForm.cshtml",
-              "RelativeDocumentMoniker": "InventoryMgmt.MVC\\Views\\Shared\\_CustomFieldsForm.cshtml",
-              "ToolTip": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Views\\Shared\\_CustomFieldsForm.cshtml",
-              "RelativeToolTip": "InventoryMgmt.MVC\\Views\\Shared\\_CustomFieldsForm.cshtml",
-              "ViewState": "AgIAADcAAAAAAAAAAAAlwEcAAABNAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-08-27T17:19:54.256Z",
-              "EditorCaption": ""
-            },
             {
               "$type": "Document",
               "DocumentIndex": 20,
@@ -287,6 +274,31 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "InventoryService.cs",
+              "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\Services\\InventoryService.cs",
+              "RelativeDocumentMoniker": "InventoryMgmt.BLL\\Services\\InventoryService.cs",
+              "ToolTip": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\Services\\InventoryService.cs",
+              "RelativeToolTip": "InventoryMgmt.BLL\\Services\\InventoryService.cs",
+              "ViewState": "AgIAAO8EAAAAAAAAAAAEwPcEAAA4AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-24T13:46:50.239Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "_CustomFieldsForm.cshtml",
+              "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Views\\Shared\\_CustomFieldsForm.cshtml",
+              "RelativeDocumentMoniker": "InventoryMgmt.MVC\\Views\\Shared\\_CustomFieldsForm.cshtml",
+              "ToolTip": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Views\\Shared\\_CustomFieldsForm.cshtml",
+              "RelativeToolTip": "InventoryMgmt.MVC\\Views\\Shared\\_CustomFieldsForm.cshtml",
+              "ViewState": "AgIAADcAAAAAAAAAAAAlwEcAAABNAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-08-27T17:19:54.256Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 10,
               "Title": "ItemDto.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\DTOs\\ItemDto.cs",
@@ -332,19 +344,6 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAABVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2025-08-24T16:18:02.952Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "InventoryService.cs",
-              "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\Services\\InventoryService.cs",
-              "RelativeDocumentMoniker": "InventoryMgmt.BLL\\Services\\InventoryService.cs",
-              "ToolTip": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\Services\\InventoryService.cs",
-              "RelativeToolTip": "InventoryMgmt.BLL\\Services\\InventoryService.cs",
-              "ViewState": "AgIAANcEAAAAAAAAAAAEwOYEAAAwAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-24T13:46:50.239Z",
-              "EditorCaption": ""
             },
             {
               "$type": "Document",

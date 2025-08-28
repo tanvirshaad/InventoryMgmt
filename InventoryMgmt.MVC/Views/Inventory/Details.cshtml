@@ -588,6 +588,14 @@
             // Initialize custom fields manager with the inventory ID
             initCustomFieldsManager(window.currentInventoryId);
             
+            // Direct handler for add element button in custom ID tab
+            $(document).on('click', '#add-custom-id-element', function(e) {
+                console.log("Add custom ID element button clicked directly");
+                e.preventDefault();
+                addCustomIdElement();
+                return false;
+            });
+            
             // Direct handler for save custom ID button
             $(document).on('click', '#save-custom-id-button', function(e) {
                 console.log("Save custom ID button clicked directly");
@@ -596,9 +604,186 @@
                 return false;
             });
             
+            // Load custom ID elements if on that tab
+            if ($("#customid").hasClass("active")) {
+                console.log("Custom ID tab is active on initial page load");
+                setTimeout(() => loadCustomIdElements(window.currentInventoryId), 300);
+            }
+            
+            // Handle tab changes for custom ID (using Bootstrap's tab show event)
+            $('button[data-bs-toggle="tab"][data-bs-target="#customid"]').on('shown.bs.tab', function (e) {
+                console.log("Custom ID tab shown via Bootstrap tab event");
+                loadCustomIdElements(window.currentInventoryId);
+            });
+            
+            // Handle tab changes for custom ID (direct click as fallback)
+            $('#customid-tab').on('click', function() {
+                console.log("Custom ID tab clicked directly");
+                setTimeout(() => loadCustomIdElements(window.currentInventoryId), 300);
+            });
+            
             // Initialize the page
             initializeInventoryPage(window.currentInventoryId);
+            
+            // Force reload of custom ID elements if we're on that tab
+            if (@(ViewBag.CurrentTab == "customid" ? "true" : "false")) {
+                console.log("Custom ID tab is the current tab from ViewBag");
+                setTimeout(() => loadCustomIdElements(window.currentInventoryId), 500);
+            }
         });
+        
+        // Function to add a custom ID element
+        function addCustomIdElement() {
+            console.log("addCustomIdElement function called");
+            const container = document.getElementById('custom-id-elements');
+            const elementId = 'element-' + Date.now();
+            
+            const elementHtml = `
+                <div class="custom-id-element field-item" draggable="true" data-element-id="${elementId}">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div class="drag-handle">
+                                <i class="bi bi-grip-vertical"></i>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select element-type" data-element-id="${elementId}">
+                                <option value="fixed">Fixed</option>
+                                <option value="20-bit random">20-bit random</option>
+                                <option value="32-bit random">32-bit random</option>
+                                <option value="6-digit random">6-digit random</option>
+                                <option value="9-digit random">9-digit random</option>
+                                <option value="guid">GUID</option>
+                                <option value="date/time">Date/time</option>
+                                <option value="sequence">Sequence</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" class="form-control element-value" placeholder="Format or text" data-element-id="${elementId}">
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex gap-1">
+                                <button class="btn btn-sm btn-outline-info help-btn" data-bs-toggle="tooltip" title="Help">
+                                    <i class="bi bi-question-circle"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger remove-element" data-element-id="${elementId}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="element-description mt-2 text-muted small"></div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', elementHtml);
+            updateCustomIdPreview();
+            initializeElementEventListeners(elementId);
+        }
+        
+        // Function to initialize event listeners for a custom ID element
+        function initializeElementEventListeners(elementId) {
+            const typeSelect = document.querySelector(`[data-element-id="${elementId}"].element-type`);
+            const valueInput = document.querySelector(`[data-element-id="${elementId}"].element-value`);
+            const removeBtn = document.querySelector(`[data-element-id="${elementId}"].remove-element`);
+            
+            if (typeSelect) {
+                typeSelect.addEventListener('change', function() {
+                    updateElementDescription(elementId);
+                    updateCustomIdPreview();
+                });
+            }
+            
+            if (valueInput) {
+                valueInput.addEventListener('input', updateCustomIdPreview);
+            }
+            
+            if (removeBtn) {
+                removeBtn.addEventListener('click', function() {
+                    removeCustomIdElement(elementId);
+                });
+            }
+            
+            updateElementDescription(elementId);
+        }
+        
+        // Function to update element description based on type
+        function updateElementDescription(elementId) {
+            const typeSelect = document.querySelector(`[data-element-id="${elementId}"].element-type`);
+            const descriptionDiv = document.querySelector(`[data-element-id="${elementId}"] .element-description`);
+            
+            if (!typeSelect || !descriptionDiv) return;
+            
+            const descriptions = {
+                'fixed': 'A piece of unchanging text. E.g., you can use Unicode emoji.',
+                '20-bit random': 'A random value. E.g., you can format it as a six-digit decimal (D6) or 5-digit hex (X5).',
+                '32-bit random': 'A random value. E.g., you can format it as a six-digit decimal (D6) or 5-digit hex (X5).',
+                '6-digit random': 'A random value. E.g., you can format it as a six-digit decimal (D6) or 5-digit hex (X5).',
+                '9-digit random': 'A random value. E.g., you can format it as a six-digit decimal (D6) or 5-digit hex (X5).',
+                'guid': 'A globally unique identifier.',
+                'date/time': 'An item creation date and time. E.g., you can use an abbreviated day of the week (ddd).',
+                'sequence': 'A sequential index. E.g., you can format it with leading zeros (D4) or without them (D).'
+            };
+            
+            descriptionDiv.textContent = descriptions[typeSelect.value] || '';
+        }
+        
+        // Function to remove a custom ID element
+        function removeCustomIdElement(elementId) {
+            const element = document.querySelector(`.custom-id-element[data-element-id="${elementId}"]`);
+            if (element) {
+                element.remove();
+                updateCustomIdPreview();
+            }
+        }
+        
+        // Function to get custom ID elements for saving
+        function getCustomIdElements() {
+            const elements = [];
+            const elementDivs = document.querySelectorAll('.custom-id-element');
+            
+            elementDivs.forEach((div, index) => {
+                const elementId = div.getAttribute('data-element-id');
+                const typeSelect = div.querySelector('.element-type');
+                const valueInput = div.querySelector('.element-value');
+                
+                if (typeSelect && valueInput) {
+                    elements.push({
+                        id: elementId,
+                        type: typeSelect.value,
+                        value: valueInput.value,
+                        order: index
+                    });
+                }
+            });
+            
+            return elements;
+        }
+        
+        // Function to update custom ID preview
+        function updateCustomIdPreview() {
+            const elements = getCustomIdElements();
+            const previewElement = document.getElementById('custom-id-preview');
+            
+            if (!previewElement) return;
+            
+            // Generate preview using the current elements
+            fetch('/Inventory/GenerateAdvancedCustomIdPreview', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ elements: elements })
+            })
+            .then(response => response.json())
+            .then(data => {
+                previewElement.textContent = data.preview || 'Invalid format';
+            })
+            .catch(err => {
+                console.error('Error generating preview:', err);
+                previewElement.textContent = 'Error generating preview';
+            });
+        }
         
         // Direct save function for custom ID
         function saveCustomIdDirectly() {

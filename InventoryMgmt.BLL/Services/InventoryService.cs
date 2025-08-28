@@ -274,17 +274,41 @@ namespace InventoryMgmt.BLL.Services
 
         public async Task<bool> UpdateCustomIdConfigurationAsync(int inventoryId, List<CustomIdElement> elements)
         {
-            var inventory = await _inventoryRepository.GetByIdAsync(inventoryId);
-            if (inventory == null) return false;
+            try
+            {
+                // Get a fresh instance of the inventory from the database
+                var inventory = await _inventoryRepository.GetByIdAsync(inventoryId);
+                if (inventory == null) return false;
 
-            // Serialize elements to JSON
-            var elementsJson = JsonSerializer.Serialize(elements);
-            inventory.CustomIdElements = elementsJson;
-            inventory.UpdatedAt = DateTime.UtcNow;
-
-            _inventoryRepository.Update(inventory);
-            await _inventoryRepository.SaveChangesAsync();
-            return true;
+                // Serialize elements to JSON
+                var elementsJson = JsonSerializer.Serialize(elements);
+                
+                // Debug log
+                System.Diagnostics.Debug.WriteLine($"Updating custom ID elements for inventory {inventoryId}");
+                System.Diagnostics.Debug.WriteLine($"Elements count: {elements.Count}");
+                System.Diagnostics.Debug.WriteLine($"JSON to save: {elementsJson}");
+                
+                // Update the inventory
+                inventory.CustomIdElements = elementsJson;
+                inventory.UpdatedAt = DateTime.UtcNow;
+                
+                // Use a fresh database context for this operation to avoid concurrency conflicts
+                _inventoryRepository.DetachEntity(inventory);
+                
+                // Explicitly mark only the necessary properties as modified
+                _inventoryRepository.UpdateProperties(inventory, nameof(inventory.CustomIdElements), nameof(inventory.UpdatedAt));
+                
+                await _inventoryRepository.SaveChangesAsync();
+                
+                System.Diagnostics.Debug.WriteLine("Custom ID elements updated successfully");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error updating custom ID elements: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine(ex.StackTrace);
+                throw; // Re-throw so controller can handle it
+            }
         }
 
         public async Task<bool> UpdateCustomFieldsAsync(int inventoryId, List<CustomFieldData> fields)

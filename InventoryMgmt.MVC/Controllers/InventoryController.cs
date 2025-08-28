@@ -322,13 +322,38 @@ namespace InventoryMgmt.MVC.Controllers
         [HttpGet]
         public async Task<IActionResult> GetCustomIdElements(int id)
         {
+            System.Diagnostics.Debug.WriteLine($"GetCustomIdElements called for inventory ID: {id}");
+            
             var inventory = await _inventoryService.GetInventoryByIdAsync(id);
             if (inventory == null)
             {
+                System.Diagnostics.Debug.WriteLine($"ERROR: Inventory with ID {id} not found");
                 return NotFound();
             }
 
-            return Json(new { elements = inventory.CustomIdElementList });
+            System.Diagnostics.Debug.WriteLine($"Found inventory: {inventory.Title} (ID: {inventory.Id})");
+            System.Diagnostics.Debug.WriteLine($"Raw CustomIdElements JSON: {inventory.CustomIdElements}");
+            System.Diagnostics.Debug.WriteLine($"Deserialized elements count: {inventory.CustomIdElementList?.Count ?? 0}");
+            
+            // Ensure we return a valid list even if CustomIdElementList is null
+            var elements = inventory.CustomIdElementList ?? new List<CustomIdElement>();
+            
+            System.Diagnostics.Debug.WriteLine($"Returning {elements.Count} elements");
+            
+            if (elements.Any())
+            {
+                foreach (var element in elements)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Element: Id={element.Id}, Type={element.Type}, Value={element.Value}, Order={element.Order}");
+                }
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("No elements to return");
+            }
+
+            // Return a clean JSON result with the elements
+            return Json(new { elements = elements });
         }
 
         [HttpPost]

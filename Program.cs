@@ -35,7 +35,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddAuthorization();
 
 // Register AutoMapper
-builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
+builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
 // Register repositories
 builder.Services.AddScoped(typeof(IRepo<>), typeof(Repo<>));

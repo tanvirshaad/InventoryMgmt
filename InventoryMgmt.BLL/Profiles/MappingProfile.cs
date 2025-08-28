@@ -20,7 +20,7 @@ namespace InventoryMgmt.BLL.Profiles
             CreateMap<Comment, CommentDto>().ReverseMap();
 
             CreateMap<Inventory, InventoryDto>()
-                .ForMember(dest => dest.CustomIdElementList, opt => opt.Ignore())
+                .ForMember(dest => dest.CustomIdElementList, opt => opt.ConvertUsing(new CustomIdElementsResolver(), src => src.CustomIdElements))
                 .ForMember(dest => dest.TextField1, opt => opt.MapFrom(src => new CustomFieldConfig
                 {
                     Name = src.TextField1Name,
