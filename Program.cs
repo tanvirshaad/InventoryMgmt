@@ -39,7 +39,17 @@ builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
 // Register repositories
 builder.Services.AddScoped(typeof(IRepo<>), typeof(Repo<>));
+
+// Register specific repositories
 builder.Services.AddScoped<IInventoryRepo, InventoryRepo>();
+builder.Services.AddScoped<ICategoryRepo, CategoryRepo>();
+builder.Services.AddScoped<IUserRepo, UserRepo>();
+builder.Services.AddScoped<ITagRepo, TagRepo>();
+builder.Services.AddScoped<IItemRepo, ItemRepo>();
+builder.Services.AddScoped<ICommentRepo, CommentRepo>();
+builder.Services.AddScoped<IInventoryAccessRepo, InventoryAccessRepo>();
+builder.Services.AddScoped<IInventoryTagRepo, InventoryTagRepo>();
+builder.Services.AddScoped<IItemLikeRepo, ItemLikeRepo>();
 
 // Register services
 builder.Services.AddScoped<InventoryService>();

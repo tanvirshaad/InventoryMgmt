@@ -9,55 +9,49 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Text.Json;
+using InventoryMgmt.DAL;
 
 namespace InventoryMgmt.BLL.Services
 {
     public class InventoryService
     {
-        private readonly IInventoryRepo _inventoryRepository;
-        private readonly IRepo<Tag> _tagRepository;
-        private readonly IRepo<InventoryTag> _inventoryTagRepository;
-        private readonly IRepo<InventoryAccess> _inventoryUserAccessRepository;
-        private readonly IRepo<User> _userRepository; // Added for GetInventoryAccessUsersAsync
+        private readonly DataAccess _dataAccess;
+        //private readonly IInventoryRepo _dataAccess.InventoryData;
+        //private readonly IRepo<Tag> _tagRepository;
+        //private readonly IRepo<InventoryTag> _inventoryTagRepository;
+        //private readonly IRepo<InventoryAccess> _inventoryUserAccessRepository;
+        //private readonly IRepo<User> _userRepository; // Added for GetInventoryAccessUsersAsync
         private readonly IMapper _mapper;
 
         public InventoryService(
-            IInventoryRepo inventoryRepository,
-            IRepo<Tag> tagRepository,
-            IRepo<InventoryTag> inventoryTagRepository,
-            IRepo<InventoryAccess> inventoryUserAccessRepository,
-            IRepo<User> userRepository, // Added for GetInventoryAccessUsersAsync
+            DataAccess _da, // Added for GetInventoryAccessUsersAsync
             IMapper mapper)
         {
-            _inventoryRepository = inventoryRepository;
-            _tagRepository = tagRepository;
-            _inventoryTagRepository = inventoryTagRepository;
-            _inventoryUserAccessRepository = inventoryUserAccessRepository;
-            _userRepository = userRepository; // Added for GetInventoryAccessUsersAsync
+            _dataAccess = _da;
             _mapper = mapper;
         }
 
         public async Task<IEnumerable<InventoryDto>> GetLatestInventoriesAsync(int count)
         {
-            var inventories = await _inventoryRepository.GetLatestInventoriesAsync(count);
+            var inventories = await _dataAccess.InventoryData.GetLatestInventoriesAsync(count);
             return _mapper.Map<IEnumerable<InventoryDto>>(inventories);
         }
 
         public async Task<IEnumerable<InventoryDto>> GetMostPopularInventoriesAsync(int count)
         {
-            var inventories = await _inventoryRepository.GetMostPopularInventoriesAsync(count);
+            var inventories = await _dataAccess.InventoryData.GetMostPopularInventoriesAsync(count);
             return _mapper.Map<IEnumerable<InventoryDto>>(inventories);
         }
 
         public async Task<IEnumerable<InventoryDto>> SearchInventoriesAsync(string searchTerm)
         {
-            var inventories = await _inventoryRepository.SearchInventoriesAsync(searchTerm);
+            var inventories = await _dataAccess.InventoryData.SearchInventoriesAsync(searchTerm);
             return _mapper.Map<IEnumerable<InventoryDto>>(inventories);
         }
 
         public async Task<InventoryDto?> GetInventoryByIdAsync(int id)
         {
-            var inventory = await _inventoryRepository.GetByIdAsync(id,
+            var inventory = await _dataAccess.InventoryData.GetByIdAsync(id,
                 i => i.Owner,
                 i => i.Category,
                 i => i.InventoryTags,
@@ -73,8 +67,8 @@ namespace InventoryMgmt.BLL.Services
                 inventory.CreatedAt = DateTime.UtcNow;
                 inventory.UpdatedAt = DateTime.UtcNow;
 
-                await _inventoryRepository.AddAsync(inventory);
-                await _inventoryRepository.SaveChangesAsync();
+                await _dataAccess.InventoryData.AddAsync(inventory);
+                await _dataAccess.InventoryData.SaveChangesAsync();
 
                 return _mapper.Map<InventoryDto>(inventory);
             }
@@ -89,7 +83,7 @@ namespace InventoryMgmt.BLL.Services
 
         public async Task<InventoryDto?> UpdateInventoryAsync(InventoryDto inventoryDto)
         {
-            var existingInventory = await _inventoryRepository.GetByIdAsync(inventoryDto.Id);
+            var existingInventory = await _dataAccess.InventoryData.GetByIdAsync(inventoryDto.Id);
             if (existingInventory == null) return null;
 
             // Check optimistic concurrency
@@ -101,37 +95,37 @@ namespace InventoryMgmt.BLL.Services
             _mapper.Map(inventoryDto, existingInventory);
             existingInventory.UpdatedAt = DateTime.UtcNow;
 
-            _inventoryRepository.Update(existingInventory);
-            await _inventoryRepository.SaveChangesAsync();
+            _dataAccess.InventoryData.Update(existingInventory);
+            await _dataAccess.InventoryData.SaveChangesAsync();
 
             return _mapper.Map<InventoryDto>(existingInventory);
         }
 
         public async Task<bool> DeleteInventoryAsync(int id)
         {
-            var inventory = await _inventoryRepository.GetByIdAsync(id);
+            var inventory = await _dataAccess.InventoryData.GetByIdAsync(id);
             if (inventory == null) return false;
 
-            _inventoryRepository.Remove(inventory);
-            await _inventoryRepository.SaveChangesAsync();
+            _dataAccess.InventoryData.Remove(inventory);
+            await _dataAccess.InventoryData.SaveChangesAsync();
             return true;
         }
 
         public async Task<IEnumerable<InventoryDto>> GetUserOwnedInventoriesAsync(int userId)
         {
-            var inventories = await _inventoryRepository.GetUserOwnedInventoriesAsync(userId);
+            var inventories = await _dataAccess.InventoryData.GetUserOwnedInventoriesAsync(userId);
             return _mapper.Map<IEnumerable<InventoryDto>>(inventories);
         }
 
         public async Task<IEnumerable<InventoryDto>> GetUserAccessibleInventoriesAsync(int userId)
         {
-            var inventories = await _inventoryRepository.GetUserAccessibleInventoriesAsync(userId);
+            var inventories = await _dataAccess.InventoryData.GetUserAccessibleInventoriesAsync(userId);
             return _mapper.Map<IEnumerable<InventoryDto>>(inventories);
         }
 
         public async Task<bool> CanUserEditInventoryAsync(int inventoryId, string userId, bool isAdmin = false)
         {
-            var inventory = await _inventoryRepository.GetByIdAsync(inventoryId);
+            var inventory = await _dataAccess.InventoryData.GetByIdAsync(inventoryId);
             if (inventory == null) return false;
 
             int.TryParse(userId, out int userIdInt);
@@ -139,7 +133,7 @@ namespace InventoryMgmt.BLL.Services
 
             if (inventory.IsPublic) return true;
 
-            var hasAccess = await _inventoryUserAccessRepository.ExistsAsync(ua =>
+            var hasAccess = await _dataAccess.InventoryAccessData.ExistsAsync(ua =>
                 ua.InventoryId == inventoryId && ua.UserId == userIdInt);
             return hasAccess;
         }
@@ -277,7 +271,7 @@ namespace InventoryMgmt.BLL.Services
             try
             {
                 // Get a fresh instance of the inventory from the database
-                var inventory = await _inventoryRepository.GetByIdAsync(inventoryId);
+                var inventory = await _dataAccess.InventoryData.GetByIdAsync(inventoryId);
                 if (inventory == null) return false;
 
                 // Serialize elements to JSON
@@ -293,12 +287,12 @@ namespace InventoryMgmt.BLL.Services
                 inventory.UpdatedAt = DateTime.UtcNow;
                 
                 // Use a fresh database context for this operation to avoid concurrency conflicts
-                _inventoryRepository.DetachEntity(inventory);
+                _dataAccess.InventoryData.DetachEntity(inventory);
                 
                 // Explicitly mark only the necessary properties as modified
-                _inventoryRepository.UpdateProperties(inventory, nameof(inventory.CustomIdElements), nameof(inventory.UpdatedAt));
+                _dataAccess.InventoryData.UpdateProperties(inventory, nameof(inventory.CustomIdElements), nameof(inventory.UpdatedAt));
                 
-                await _inventoryRepository.SaveChangesAsync();
+                await _dataAccess.InventoryData.SaveChangesAsync();
                 
                 System.Diagnostics.Debug.WriteLine("Custom ID elements updated successfully");
                 return true;
@@ -331,7 +325,7 @@ namespace InventoryMgmt.BLL.Services
                 }
 
                 // Get the inventory record
-                var inventory = await _inventoryRepository.GetByIdAsync(inventoryId);
+                var inventory = await _dataAccess.InventoryData.GetByIdAsync(inventoryId);
                 if (inventory == null)
                 {
                     System.Diagnostics.Debug.WriteLine($"ERROR: Inventory with ID {inventoryId} not found");
@@ -414,14 +408,14 @@ namespace InventoryMgmt.BLL.Services
                 LogCurrentFieldState(inventory);
 
                 inventory.UpdatedAt = DateTime.UtcNow;
-                _inventoryRepository.Update(inventory);
+                _dataAccess.InventoryData.Update(inventory);
 
                 System.Diagnostics.Debug.WriteLine("Saving changes to database");
-                await _inventoryRepository.SaveChangesAsync();
+                await _dataAccess.InventoryData.SaveChangesAsync();
                 System.Diagnostics.Debug.WriteLine("Changes saved successfully");
 
                 // Verify the changes were saved by re-fetching the inventory
-                var savedInventory = await _inventoryRepository.GetByIdAsync(inventoryId);
+                var savedInventory = await _dataAccess.InventoryData.GetByIdAsync(inventoryId);
                 if (savedInventory != null)
                 {
                     System.Diagnostics.Debug.WriteLine("Verification: Re-fetched inventory after save");
@@ -747,21 +741,21 @@ namespace InventoryMgmt.BLL.Services
 
         public async Task<IEnumerable<UserDto>> GetInventoryAccessUsersAsync(int inventoryId)
         {
-            var inventory = await _inventoryRepository.GetByIdAsync(inventoryId);
+            var inventory = await _dataAccess.InventoryData.GetByIdAsync(inventoryId);
             if (inventory == null) return Enumerable.Empty<UserDto>();
 
             if (inventory.IsPublic)
             {
                 // Return all users for public inventories
-                var allUsers = await _userRepository.GetAllAsync();
+                var allUsers = await _dataAccess.UserData.GetAllAsync();
                 return _mapper.Map<IEnumerable<UserDto>>(allUsers);
             }
             else
             {
                 // Return only users with explicit access
-                var accessUsers = await _inventoryUserAccessRepository.FindAsync(ua => ua.InventoryId == inventoryId);
+                var accessUsers = await _dataAccess.InventoryAccessData.FindAsync(ua => ua.InventoryId == inventoryId);
                 var userIds = accessUsers.Select(ua => ua.UserId);
-                var users = await _userRepository.FindAsync(u => userIds.Contains(u.Id));
+                var users = await _dataAccess.UserData.FindAsync(u => userIds.Contains(u.Id));
                 return _mapper.Map<IEnumerable<UserDto>>(users);
             }
         }
@@ -792,7 +786,7 @@ namespace InventoryMgmt.BLL.Services
                 }
 
                 // Get the inventory record
-                var inventory = await _inventoryRepository.GetByIdAsync(inventoryId);
+                var inventory = await _dataAccess.InventoryData.GetByIdAsync(inventoryId);
                 if (inventory == null)
                 {
                     System.Diagnostics.Debug.WriteLine($"ERROR: Inventory with ID {inventoryId} not found");
@@ -806,10 +800,10 @@ namespace InventoryMgmt.BLL.Services
 
                 // Save changes
                 inventory.UpdatedAt = DateTime.UtcNow;
-                _inventoryRepository.Update(inventory);
+                _dataAccess.InventoryData.Update(inventory);
 
                 System.Diagnostics.Debug.WriteLine("Saving changes to database after clearing all fields");
-                await _inventoryRepository.SaveChangesAsync();
+                await _dataAccess.InventoryData.SaveChangesAsync();
                 System.Diagnostics.Debug.WriteLine("Changes saved successfully");
 
                 return true;
@@ -1124,7 +1118,7 @@ namespace InventoryMgmt.BLL.Services
                 System.Diagnostics.Debug.WriteLine($"Fetching raw inventory data for ID: {id}");
 
                 // Get the inventory entity directly from the database
-                var inventory = await _inventoryRepository.GetByIdAsync(id);
+                var inventory = await _dataAccess.InventoryData.GetByIdAsync(id);
 
                 if (inventory == null)
                 {

@@ -9,34 +9,29 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using InventoryMgmt.DAL;
 
 namespace InventoryMgmt.BLL.Services
 {
     public class ItemService
     {
-        private readonly IRepo<Item> _itemRepository;
-        private readonly IRepo<ItemLike> _itemLikeRepository;
-        private readonly IInventoryRepo _inventoryRepository;
+        private readonly DataAccess _dataAccess;
         private readonly InventoryService _inventoryService;
         private readonly IMapper _mapper;
 
         public ItemService(
-            IRepo<Item> itemRepository,
-            IRepo<ItemLike> itemLikeRepository,
-            IInventoryRepo inventoryRepository,
+            DataAccess _da,
             InventoryService inventoryService,
             IMapper mapper)
         {
-            _itemRepository = itemRepository;
-            _itemLikeRepository = itemLikeRepository;
-            _inventoryRepository = inventoryRepository;
+            _dataAccess = _da;
             _inventoryService = inventoryService;
             _mapper = mapper;
         }
 
         public async Task<IEnumerable<ItemDto>> GetInventoryItemsAsync(int inventoryId, string? currentUserId = null)
         {
-            var items = await _itemRepository.FindAsync(
+            var items = await _dataAccess.ItemData.FindAsync(
                 i => i.InventoryId == inventoryId,
                 i => i.CreatedBy,
                 i => i.Likes);
@@ -51,7 +46,7 @@ namespace InventoryMgmt.BLL.Services
                 var itemIds = items.Select(i => i.Id).ToList();
                 
                 // Get likes for these specific items by the current user
-                var likedItemIds = await _itemLikeRepository.FindAsync(
+                var likedItemIds = await _dataAccess.ItemLikeData.FindAsync(
                     il => il.UserId == userIdInt && itemIds.Contains(il.ItemId));
 
                 var likedIds = likedItemIds.Select(il => il.ItemId).ToHashSet();
@@ -67,7 +62,7 @@ namespace InventoryMgmt.BLL.Services
 
         public async Task<ItemDto?> GetItemByIdAsync(int id, string? currentUserId = null)
         {
-            var item = await _itemRepository.GetByIdAsync(id, i => i.CreatedBy, i => i.Inventory, i => i.Likes);
+            var item = await _dataAccess.ItemData.GetByIdAsync(id, i => i.CreatedBy, i => i.Inventory, i => i.Likes);
             if (item == null) return null;
 
             var itemDto = _mapper.Map<ItemDto>(item);
@@ -75,7 +70,7 @@ namespace InventoryMgmt.BLL.Services
             if (!string.IsNullOrEmpty(currentUserId))
             {
                 int.TryParse(currentUserId, out int userIdInt);
-                var isLiked = await _itemLikeRepository.ExistsAsync(il =>
+                var isLiked = await _dataAccess.ItemLikeData.ExistsAsync(il =>
                     il.ItemId == id && il.UserId == userIdInt);
                 itemDto.IsLikedByCurrentUser = isLiked;
             }
@@ -85,12 +80,12 @@ namespace InventoryMgmt.BLL.Services
 
         public async Task<ItemDto> CreateItemAsync(ItemDto itemDto)
         {
-            var inventory = await _inventoryRepository.GetByIdAsync(itemDto.InventoryId);
+            var inventory = await _dataAccess.InventoryData.GetByIdAsync(itemDto.InventoryId);
             if (inventory == null)
                 throw new ArgumentException("Inventory not found");
 
             // Find the highest ID number used for this inventory to use as the next sequence
-            var items = await _itemRepository.FindAsync(
+            var items = await _dataAccess.ItemData.FindAsync(
                 i => i.InventoryId == itemDto.InventoryId);
             
             // Get the next available sequence number for the custom ID
@@ -116,7 +111,7 @@ namespace InventoryMgmt.BLL.Services
                         nextSequence + attempts);
                 
                 // Check if this custom ID is already in use in this inventory
-                var exists = await _itemRepository.ExistsAsync(i => 
+                var exists = await _dataAccess.ItemData.ExistsAsync(i => 
                     i.InventoryId == itemDto.InventoryId && i.CustomId == customId);
                 
                 isUnique = !exists;
@@ -136,15 +131,15 @@ namespace InventoryMgmt.BLL.Services
             item.UpdatedAt = DateTime.UtcNow;
             item.LikesCount = 0;
 
-            await _itemRepository.AddAsync(item);
-            await _itemRepository.SaveChangesAsync();
+            await _dataAccess.ItemData.AddAsync(item);
+            await _dataAccess.ItemData.SaveChangesAsync();
 
             return _mapper.Map<ItemDto>(item);
         }
 
         public async Task<ItemDto?> UpdateItemAsync(ItemDto itemDto)
         {
-            var existingItem = await _itemRepository.GetByIdAsync(itemDto.Id);
+            var existingItem = await _dataAccess.ItemData.GetByIdAsync(itemDto.Id);
             if (existingItem == null) return null;
 
             // Check optimistic concurrency
@@ -156,37 +151,37 @@ namespace InventoryMgmt.BLL.Services
             _mapper.Map(itemDto, existingItem);
             existingItem.UpdatedAt = DateTime.UtcNow;
 
-            _itemRepository.Update(existingItem);
-            await _itemRepository.SaveChangesAsync();
+            _dataAccess.ItemData.Update(existingItem);
+            await _dataAccess.ItemData.SaveChangesAsync();
 
             return _mapper.Map<ItemDto>(existingItem);
         }
 
         public async Task<bool> DeleteItemAsync(int id)
         {
-            var item = await _itemRepository.GetByIdAsync(id);
+            var item = await _dataAccess.ItemData.GetByIdAsync(id);
             if (item == null) return false;
 
-            _itemRepository.Remove(item);
-            await _itemRepository.SaveChangesAsync();
+            _dataAccess.ItemData.Remove(item);
+            await _dataAccess.ItemData.SaveChangesAsync();
             return true;
         }
 
         public async Task<bool> ToggleLikeAsync(int itemId, string userId)
         {
             int.TryParse(userId, out int userIdInt);
-            var existingLike = await _itemLikeRepository.FindFirstAsync(il =>
+            var existingLike = await _dataAccess.ItemLikeData.FindFirstAsync(il =>
                 il.ItemId == itemId && il.UserId == userIdInt);
 
             if (existingLike != null)
             {
-                _itemLikeRepository.Remove(existingLike);
+                _dataAccess.ItemLikeData.Remove(existingLike);
 
-                var item = await _itemRepository.GetByIdAsync(itemId);
+                var item = await _dataAccess.ItemData.GetByIdAsync(itemId);
                 if (item != null)
                 {
                     item.LikesCount = Math.Max(0, item.LikesCount - 1);
-                    _itemRepository.Update(item);
+                    _dataAccess.ItemData.Update(item);
                 }
             }
             else
@@ -198,17 +193,17 @@ namespace InventoryMgmt.BLL.Services
                     CreatedAt = DateTime.UtcNow
                 };
 
-                await _itemLikeRepository.AddAsync(newLike);
+                await _dataAccess.ItemLikeData.AddAsync(newLike);
 
-                var item = await _itemRepository.GetByIdAsync(itemId);
+                var item = await _dataAccess.ItemData.GetByIdAsync(itemId);
                 if (item != null)
                 {
                     item.LikesCount++;
-                    _itemRepository.Update(item);
+                    _dataAccess.ItemData.Update(item);
                 }
             }
 
-            await _itemRepository.SaveChangesAsync();
+            await _dataAccess.ItemData.SaveChangesAsync();
             return existingLike == null; // Return true if like was added, false if removed
         }
     }

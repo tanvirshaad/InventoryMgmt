@@ -7,23 +7,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using InventoryMgmt.DAL;
 
 namespace InventoryMgmt.BLL.Services
 {
     public class CommentService
     {
-        private readonly IRepo<Comment> _commentRepository;
+        private readonly DataAccess _dataAccess;
         private readonly IMapper _mapper;
 
-        public CommentService(IRepo<Comment> commentRepository, IMapper mapper)
+        public CommentService(DataAccess _da, IMapper mapper)
         {
-            _commentRepository = commentRepository;
+            _dataAccess = _da;
             _mapper = mapper;
         }
 
         public async Task<IEnumerable<CommentDto>> GetCommentsByInventoryIdAsync(int inventoryId)
         {
-            var comments = await _commentRepository.GetAllAsync();
+            var comments = await _dataAccess.CommentData.GetAllAsync();
             var filteredComments = comments.Where(c => c.InventoryId == inventoryId)
                                          .OrderBy(c => c.CreatedAt);
             return _mapper.Map<IEnumerable<CommentDto>>(filteredComments);
@@ -35,14 +36,14 @@ namespace InventoryMgmt.BLL.Services
             comment.CreatedAt = DateTime.UtcNow;
             comment.UpdatedAt = DateTime.UtcNow;
 
-            await _commentRepository.AddAsync(comment);
-            await _commentRepository.SaveChangesAsync();
+            await _dataAccess.CommentData.AddAsync(comment);
+            await _dataAccess.CommentData.SaveChangesAsync();
             return true;
         }
 
         public async Task<bool> DeleteCommentAsync(int commentId, string userId)
         {
-            var comment = await _commentRepository.GetByIdAsync(commentId);
+            var comment = await _dataAccess.CommentData.GetByIdAsync(commentId);
             if (comment == null) return false;
 
             // Only allow the comment author or admin to delete
@@ -51,8 +52,8 @@ namespace InventoryMgmt.BLL.Services
                 return false;
             }
 
-            _commentRepository.Remove(comment);
-            await _commentRepository.SaveChangesAsync();
+            _dataAccess.CommentData.Remove(comment);
+            await _dataAccess.CommentData.SaveChangesAsync();
             return true;
         }
     }

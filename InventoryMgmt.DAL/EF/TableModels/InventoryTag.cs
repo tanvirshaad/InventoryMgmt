@@ -1,5 +1,4 @@
-﻿using Azure;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,7 +12,7 @@ namespace InventoryMgmt.DAL.EF.TableModels
         public int TagId { get; set; }
 
         // Navigation properties
-        public virtual Inventory Inventory { get; set; } = null;
-        public virtual Tag Tag { get; set; } 
+        public virtual Inventory Inventory { get; set; } = null!;
+        public virtual Tag Tag { get; set; } = null!;
     }
 }
