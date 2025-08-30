@@ -13,6 +13,7 @@ namespace InventoryMgmt.DAL.Interfaces
         Task<IEnumerable<InventoryAccess>> GetAccessesByUserIdAsync(int userId);
         Task<InventoryAccess?> GetAccessAsync(int inventoryId, int userId);
         Task<bool> HasUserAccessAsync(int inventoryId, int userId);
+        Task<bool> HasWriteAccessAsync(int userId, int inventoryId);
         Task GrantAccessAsync(int inventoryId, int userId);
         Task RevokeAccessAsync(int inventoryId, int userId);
     }

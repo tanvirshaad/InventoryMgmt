@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using InventoryMgmt.BLL.DTOs;
+using InventoryMgmt.BLL.Interfaces;
 using InventoryMgmt.DAL.EF.TableModels;
 using InventoryMgmt.DAL.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +14,7 @@ using InventoryMgmt.DAL;
 
 namespace InventoryMgmt.BLL.Services
 {
-    public class InventoryService
+    public class InventoryService : IInventoryService
     {
         private readonly DataAccess _dataAccess;
         //private readonly IInventoryRepo _dataAccess.InventoryData;
@@ -86,19 +87,123 @@ namespace InventoryMgmt.BLL.Services
             var existingInventory = await _dataAccess.InventoryData.GetByIdAsync(inventoryDto.Id);
             if (existingInventory == null) return null;
 
-            // Check optimistic concurrency
-            if (!existingInventory.Version.SequenceEqual(inventoryDto.Version))
+            try
             {
-                throw new DbUpdateConcurrencyException("The inventory has been modified by another user.");
+                // Update only the properties we want to change, not the navigation properties
+                existingInventory.Title = inventoryDto.Title;
+                existingInventory.Description = inventoryDto.Description;
+                existingInventory.CategoryId = inventoryDto.CategoryId;
+                existingInventory.ImageUrl = inventoryDto.ImageUrl;
+                existingInventory.IsPublic = inventoryDto.IsPublic;
+                existingInventory.CustomIdFormat = inventoryDto.CustomIdFormat;
+                existingInventory.CustomIdElements = inventoryDto.CustomIdElements;
+                existingInventory.UpdatedAt = DateTime.UtcNow;
+
+                // Update custom field configurations
+                UpdateCustomFieldsFromDto(existingInventory, inventoryDto);
+
+                _dataAccess.InventoryData.Update(existingInventory);
+                await _dataAccess.InventoryData.SaveChangesAsync();
+
+                return _mapper.Map<InventoryDto>(existingInventory);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                // Handle concurrency exception gracefully
+                throw new InvalidOperationException("The inventory has been modified by another user. Please refresh the page and try again.");
+            }
+        }
+
+        private void UpdateCustomFieldsFromDto(Inventory inventory, InventoryDto dto)
+        {
+            // Text fields
+            inventory.TextField1Name = dto.TextField1.Name;
+            inventory.TextField1Description = dto.TextField1.Description;
+            inventory.TextField1ShowInTable = dto.TextField1.ShowInTable;
+            
+            inventory.TextField2Name = dto.TextField2.Name;
+            inventory.TextField2Description = dto.TextField2.Description;
+            inventory.TextField2ShowInTable = dto.TextField2.ShowInTable;
+            
+            inventory.TextField3Name = dto.TextField3.Name;
+            inventory.TextField3Description = dto.TextField3.Description;
+            inventory.TextField3ShowInTable = dto.TextField3.ShowInTable;
+
+            // Multi-text fields
+            inventory.MultiTextField1Name = dto.MultiTextField1.Name;
+            inventory.MultiTextField1Description = dto.MultiTextField1.Description;
+            inventory.MultiTextField1ShowInTable = dto.MultiTextField1.ShowInTable;
+            
+            inventory.MultiTextField2Name = dto.MultiTextField2.Name;
+            inventory.MultiTextField2Description = dto.MultiTextField2.Description;
+            inventory.MultiTextField2ShowInTable = dto.MultiTextField2.ShowInTable;
+            
+            inventory.MultiTextField3Name = dto.MultiTextField3.Name;
+            inventory.MultiTextField3Description = dto.MultiTextField3.Description;
+            inventory.MultiTextField3ShowInTable = dto.MultiTextField3.ShowInTable;
+
+            // Numeric fields
+            inventory.NumericField1Name = dto.NumericField1.Name;
+            inventory.NumericField1Description = dto.NumericField1.Description;
+            inventory.NumericField1ShowInTable = dto.NumericField1.ShowInTable;
+            if (dto.NumericField1.NumericConfig != null)
+            {
+                inventory.NumericField1IsInteger = dto.NumericField1.NumericConfig.IsInteger;
+                inventory.NumericField1MinValue = dto.NumericField1.NumericConfig.MinValue;
+                inventory.NumericField1MaxValue = dto.NumericField1.NumericConfig.MaxValue;
+                inventory.NumericField1StepValue = dto.NumericField1.NumericConfig.StepValue;
+                inventory.NumericField1DisplayFormat = dto.NumericField1.NumericConfig.DisplayFormat;
+            }
+            
+            inventory.NumericField2Name = dto.NumericField2.Name;
+            inventory.NumericField2Description = dto.NumericField2.Description;
+            inventory.NumericField2ShowInTable = dto.NumericField2.ShowInTable;
+            if (dto.NumericField2.NumericConfig != null)
+            {
+                inventory.NumericField2IsInteger = dto.NumericField2.NumericConfig.IsInteger;
+                inventory.NumericField2MinValue = dto.NumericField2.NumericConfig.MinValue;
+                inventory.NumericField2MaxValue = dto.NumericField2.NumericConfig.MaxValue;
+                inventory.NumericField2StepValue = dto.NumericField2.NumericConfig.StepValue;
+                inventory.NumericField2DisplayFormat = dto.NumericField2.NumericConfig.DisplayFormat;
+            }
+            
+            inventory.NumericField3Name = dto.NumericField3.Name;
+            inventory.NumericField3Description = dto.NumericField3.Description;
+            inventory.NumericField3ShowInTable = dto.NumericField3.ShowInTable;
+            if (dto.NumericField3.NumericConfig != null)
+            {
+                inventory.NumericField3IsInteger = dto.NumericField3.NumericConfig.IsInteger;
+                inventory.NumericField3MinValue = dto.NumericField3.NumericConfig.MinValue;
+                inventory.NumericField3MaxValue = dto.NumericField3.NumericConfig.MaxValue;
+                inventory.NumericField3StepValue = dto.NumericField3.NumericConfig.StepValue;
+                inventory.NumericField3DisplayFormat = dto.NumericField3.NumericConfig.DisplayFormat;
             }
 
-            _mapper.Map(inventoryDto, existingInventory);
-            existingInventory.UpdatedAt = DateTime.UtcNow;
+            // Document fields
+            inventory.DocumentField1Name = dto.DocumentField1.Name;
+            inventory.DocumentField1Description = dto.DocumentField1.Description;
+            inventory.DocumentField1ShowInTable = dto.DocumentField1.ShowInTable;
+            
+            inventory.DocumentField2Name = dto.DocumentField2.Name;
+            inventory.DocumentField2Description = dto.DocumentField2.Description;
+            inventory.DocumentField2ShowInTable = dto.DocumentField2.ShowInTable;
+            
+            inventory.DocumentField3Name = dto.DocumentField3.Name;
+            inventory.DocumentField3Description = dto.DocumentField3.Description;
+            inventory.DocumentField3ShowInTable = dto.DocumentField3.ShowInTable;
 
-            _dataAccess.InventoryData.Update(existingInventory);
-            await _dataAccess.InventoryData.SaveChangesAsync();
-
-            return _mapper.Map<InventoryDto>(existingInventory);
+            // Boolean fields
+            inventory.BooleanField1Name = dto.BooleanField1.Name;
+            inventory.BooleanField1Description = dto.BooleanField1.Description;
+            inventory.BooleanField1ShowInTable = dto.BooleanField1.ShowInTable;
+            
+            inventory.BooleanField2Name = dto.BooleanField2.Name;
+            inventory.BooleanField2Description = dto.BooleanField2.Description;
+            inventory.BooleanField2ShowInTable = dto.BooleanField2.ShowInTable;
+            
+            inventory.BooleanField3Name = dto.BooleanField3.Name;
+            inventory.BooleanField3Description = dto.BooleanField3.Description;
+            inventory.BooleanField3ShowInTable = dto.BooleanField3.ShowInTable;
         }
 
         public async Task<bool> DeleteInventoryAsync(int id)
@@ -1289,6 +1394,16 @@ namespace InventoryMgmt.BLL.Services
             inventory.DocumentField3Name = null;
             inventory.DocumentField3Description = null;
             inventory.DocumentField3ShowInTable = false;
+        }
+
+        public async Task GrantUserAccessAsync(int inventoryId, int userId)
+        {
+            await _dataAccess.InventoryAccessData.GrantAccessAsync(inventoryId, userId);
+        }
+
+        public async Task RevokeUserAccessAsync(int inventoryId, int userId)
+        {
+            await _dataAccess.InventoryAccessData.RevokeAccessAsync(inventoryId, userId);
         }
     }
 }

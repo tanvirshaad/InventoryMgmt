@@ -204,7 +204,11 @@ namespace InventoryMgmt.BLL.Profiles
                 .ForMember(dest => dest.BooleanField3ShowInTable, opt => opt.MapFrom(src => src.BooleanField3.ShowInTable))
                 .ForMember(dest => dest.InventoryTags, opt => opt.Ignore())
                 .ForMember(dest => dest.UserAccesses, opt => opt.Ignore())
-                .ForMember(dest => dest.Items, opt => opt.Ignore());
+                .ForMember(dest => dest.Items, opt => opt.Ignore())
+                .ForMember(dest => dest.Version, opt => opt.Ignore())
+                .ForMember(dest => dest.Owner, opt => opt.Ignore())
+                .ForMember(dest => dest.Category, opt => opt.Ignore())
+                .ForMember(dest => dest.Comments, opt => opt.Ignore());
 
             CreateMap<Item, ItemDto>()
                 .ForMember(dest => dest.LikesCount, opt => opt.MapFrom(src => src.Likes.Count))
@@ -217,7 +221,10 @@ namespace InventoryMgmt.BLL.Profiles
             CreateMap<ItemDto, Item>()
                 .ForMember(dest => dest.Likes, opt => opt.Ignore())
                 .ForMember(dest => dest.TextField1Value, opt => opt.MapFrom(src => src.Name))
-                .ForMember(dest => dest.MultiTextField1Value, opt => opt.MapFrom(src => src.Description));
+                .ForMember(dest => dest.MultiTextField1Value, opt => opt.MapFrom(src => src.Description))
+                .ForMember(dest => dest.Version, opt => opt.Ignore())
+                .ForMember(dest => dest.Inventory, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedBy, opt => opt.Ignore());
         }
     }
 }

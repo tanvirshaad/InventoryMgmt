@@ -1,6 +1,8 @@
 ﻿using InventoryMgmt.BLL.DTOs;
 using InventoryMgmt.BLL.Services;
+using InventoryMgmt.BLL.Interfaces;
 using InventoryMgmt.DAL.EF.TableModels;
+using InventoryMgmt.MVC.Attributes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -10,16 +12,17 @@ using System.Text.Json;
 
 namespace InventoryMgmt.MVC.Controllers
 {
-    public class ItemController : Controller
+    public class ItemController : BaseController
     {
         private readonly ItemService _itemService;
-        private readonly InventoryService _inventoryService;
+        private readonly IInventoryService _inventoryService;
         private readonly IAuthService _authService;
 
         public ItemController(
             ItemService itemService,
-            InventoryService inventoryService,
-            IAuthService authService)
+            IInventoryService inventoryService,
+            IAuthService authService,
+            InventoryMgmt.BLL.Interfaces.IAuthorizationService authorizationService) : base(authorizationService)
         {
             _itemService = itemService;
             _inventoryService = inventoryService;
@@ -28,33 +31,39 @@ namespace InventoryMgmt.MVC.Controllers
 
         public async Task<IActionResult> Details(int id)
         {
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var item = await _itemService.GetItemByIdAsync(id, currentUserId);
+            var currentUserId = GetCurrentUserId();
+            var item = await _itemService.GetItemByIdAsync(id, currentUserId?.ToString());
 
             if (item == null)
             {
                 return NotFound();
             }
 
-            var isAdmin = User.IsInRole("Admin");
-            var canEdit = await _inventoryService.CanUserEditInventoryAsync(item.InventoryId, currentUserId, isAdmin);
+            // Check if user can view the inventory this item belongs to
+            if (!await CanCurrentUserViewInventoryAsync(item.InventoryId))
+            {
+                return NotFoundOrForbiddenResult();
+            }
 
-            ViewBag.CanEdit = canEdit;
+            var canEditItem = await CanCurrentUserEditItemAsync(id);
+            var canDeleteItem = await CanCurrentUserDeleteItemAsync(id);
+            var canLikeItem = await CanCurrentUserLikeItemAsync(id);
+
+            ViewBag.CanEditItem = canEditItem;
+            ViewBag.CanDeleteItem = canDeleteItem;
+            ViewBag.CanLikeItem = canLikeItem;
             ViewBag.CurrentUserId = currentUserId;
 
             return View(item);
         }
 
-        [Authorize]
+        [RequireAuthenticated]
         public async Task<IActionResult> Create(int inventoryId)
         {
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var isAdmin = User.IsInRole("Admin");
-
-            var canEdit = await _inventoryService.CanUserEditInventoryAsync(inventoryId, currentUserId, isAdmin);
-            if (!canEdit)
+            // Check if user can create items in this inventory
+            if (!await CanCurrentUserCreateItemAsync(inventoryId))
             {
-                return Forbid();
+                return ForbiddenResult();
             }
 
             var inventory = await _inventoryService.GetInventoryByIdAsync(inventoryId);
@@ -69,24 +78,22 @@ namespace InventoryMgmt.MVC.Controllers
             return View(new ItemDto { InventoryId = inventoryId });
         }
 
-        [Authorize]
+        [RequireAuthenticated]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ItemDto itemDto)
         {
             if (ModelState.IsValid)
             {
-                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                var isAdmin = User.IsInRole("Admin");
-
-                var canEdit = await _inventoryService.CanUserEditInventoryAsync(itemDto.InventoryId, currentUserId, isAdmin);
-                if (!canEdit)
+                // Check if user can create items in this inventory
+                if (!await CanCurrentUserCreateItemAsync(itemDto.InventoryId))
                 {
-                    return Forbid();
+                    return ForbiddenResult();
                 }
 
+                var currentUserId = GetCurrentUserId();
                 // Fix: Initialize CreatedById with a valid value to prevent validation errors
-                itemDto.CreatedById = currentUserId ?? "1"; // Use a default ID if no user ID is found
+                itemDto.CreatedById = currentUserId?.ToString() ?? "1"; // Use a default ID if no user ID is found
                 
                 // Make sure we have a name value
                 if (string.IsNullOrWhiteSpace(itemDto.Name))
@@ -227,14 +234,37 @@ namespace InventoryMgmt.MVC.Controllers
                 var result = await _itemService.UpdateItemAsync(itemDto);
                 if (result != null)
                 {
+                    // Check if it's a new version due to concurrency
+                    if (!result.Version.SequenceEqual(itemDto.Version))
+                    {
+                        // This is a concurrency resolution - update the form with latest data
+                        ModelState.Clear(); // Clear validation errors
+                        ModelState.AddModelError("", "The item has been updated with the latest version from the database. Please review and save your changes again.");
+                        
+                        // Reload the inventory and custom fields to ensure they're available
+                        await PrepareCustomFieldsForView(result.InventoryId, ViewBag);
+                        ViewBag.Inventory = await _inventoryService.GetInventoryByIdAsync(result.InventoryId);
+                        
+                        // Return the refreshed item
+                        return View(result);
+                    }
+                    
+                    // Regular successful update
                     return RedirectToAction("Details", "Inventory", new { id = itemDto.InventoryId });
                 }
                 else
                 {
-                    ModelState.AddModelError("", "Failed to update item");
+                    ModelState.AddModelError("", "Failed to update item. Please try again.");
+                    
+                    // Reload the inventory and custom fields to ensure they're available
+                    await PrepareCustomFieldsForView(itemDto.InventoryId, ViewBag);
+                    ViewBag.Inventory = await _inventoryService.GetInventoryByIdAsync(itemDto.InventoryId);
                 }
             }
 
+            // Make sure custom fields are loaded when returning the view
+            await PrepareCustomFieldsForView(itemDto.InventoryId, ViewBag);
+            ViewBag.Inventory = await _inventoryService.GetInventoryByIdAsync(itemDto.InventoryId);
             return View(itemDto);
         }
 

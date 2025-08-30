@@ -7,6 +7,14 @@
       "RelativeMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|solutionrelative:inventorymgmt.mvc\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|d:\\itransition\\inventorymgmt.mvc\\inventorymgmt.mvc\\controllers\\inventorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|solutionrelative:inventorymgmt.mvc\\controllers\\inventorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|d:\\itransition\\inventorymgmt.mvc\\inventorymgmt.mvc\\controllers\\itemcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|solutionrelative:inventorymgmt.mvc\\controllers\\itemcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{1C51A8D4-E1A6-48DE-8E50-15EF8D1CFCE6}|InventoryMgmt.DAL\\InventoryMgmt.DAL.csproj|d:\\itransition\\inventorymgmt.mvc\\inventorymgmt.dal\\dataaccess.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{1C51A8D4-E1A6-48DE-8E50-15EF8D1CFCE6}|InventoryMgmt.DAL\\InventoryMgmt.DAL.csproj|solutionrelative:inventorymgmt.dal\\dataaccess.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -41,14 +49,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|d:\\itransition\\inventorymgmt.mvc\\inventorymgmt.mvc\\views\\shared\\_customfieldsform.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|solutionrelative:inventorymgmt.mvc\\views\\shared\\_customfieldsform.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|d:\\itransition\\inventorymgmt.mvc\\inventorymgmt.mvc\\controllers\\itemcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|solutionrelative:inventorymgmt.mvc\\controllers\\itemcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|d:\\itransition\\inventorymgmt.mvc\\inventorymgmt.mvc\\controllers\\inventorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|solutionrelative:inventorymgmt.mvc\\controllers\\inventorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|d:\\itransition\\inventorymgmt.mvc\\inventorymgmt.mvc\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
@@ -230,34 +230,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 7,
+          "SelectedChildIndex": 5,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "AuthService.cs",
-              "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\Services\\AuthService.cs",
-              "RelativeDocumentMoniker": "InventoryMgmt.BLL\\Services\\AuthService.cs",
-              "ToolTip": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\Services\\AuthService.cs",
-              "RelativeToolTip": "InventoryMgmt.BLL\\Services\\AuthService.cs",
-              "ViewState": "AgIAAFAAAAAAAAAAAAAkwAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-29T17:22:33.24Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "20250829063539_user table altered.cs",
-              "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\Migrations\\20250829063539_user table altered.cs",
-              "RelativeDocumentMoniker": "InventoryMgmt.DAL\\Migrations\\20250829063539_user table altered.cs",
-              "ToolTip": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\Migrations\\20250829063539_user table altered.cs",
-              "RelativeToolTip": "InventoryMgmt.DAL\\Migrations\\20250829063539_user table altered.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-29T06:35:40.204Z",
-              "EditorCaption": ""
-            },
             {
               "$type": "Document",
               "DocumentIndex": 19,
@@ -272,19 +246,19 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 2,
               "Title": "ItemController.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Controllers\\ItemController.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.MVC\\Controllers\\ItemController.cs",
               "ToolTip": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Controllers\\ItemController.cs",
               "RelativeToolTip": "InventoryMgmt.MVC\\Controllers\\ItemController.cs",
-              "ViewState": "AgIAAAgDAAAAAAAAAADwvxYDAABAAAAAAAAAAA==",
+              "ViewState": "AgIAAAoAAAAAAAAAAAAlwBgAAAA+AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-24T14:24:40.947Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 7,
               "Title": "InventoryService.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\Services\\InventoryService.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.BLL\\Services\\InventoryService.cs",
@@ -292,12 +266,11 @@
               "RelativeToolTip": "InventoryMgmt.BLL\\Services\\InventoryService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-24T13:46:50.239Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-24T13:46:50.239Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 11,
               "Title": "_CustomFieldsForm.cshtml",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Views\\Shared\\_CustomFieldsForm.cshtml",
               "RelativeDocumentMoniker": "InventoryMgmt.MVC\\Views\\Shared\\_CustomFieldsForm.cshtml",
@@ -327,14 +300,14 @@
               "RelativeDocumentMoniker": "InventoryMgmt.MVC\\Program.cs",
               "ToolTip": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Program.cs",
               "RelativeToolTip": "InventoryMgmt.MVC\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACcAAAA8AAAAAAAAAA==",
+              "ViewState": "AgIAABsAAAAAAAAAAAAAADIAAABCAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-24T16:40:06.596Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "DataAccess.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\DataAccess.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.DAL\\DataAccess.cs",
@@ -342,12 +315,11 @@
               "RelativeToolTip": "InventoryMgmt.DAL\\DataAccess.cs",
               "ViewState": "AgIAABQAAAAAAAAAAAASwAsAAAAbAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-20T12:30:22.871Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-20T12:30:22.871Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 9,
               "Title": "CategoryService.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\Services\\CategoryService.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.BLL\\Services\\CategoryService.cs",
@@ -355,12 +327,47 @@
               "RelativeToolTip": "InventoryMgmt.BLL\\Services\\CategoryService.cs",
               "ViewState": "AgIAAAMAAAAAAAAAAAAAABIAAAA+AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-29T12:16:26.993Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-29T12:16:26.993Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 1,
+              "Title": "InventoryController.cs",
+              "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Controllers\\InventoryController.cs",
+              "RelativeDocumentMoniker": "InventoryMgmt.MVC\\Controllers\\InventoryController.cs",
+              "ToolTip": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Controllers\\InventoryController.cs",
+              "RelativeToolTip": "InventoryMgmt.MVC\\Controllers\\InventoryController.cs",
+              "ViewState": "AgIAABUAAAAAAAAAAAAMwCIAAAA+AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-26T14:19:35.357Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "20250829063539_user table altered.cs",
+              "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\Migrations\\20250829063539_user table altered.cs",
+              "RelativeDocumentMoniker": "InventoryMgmt.DAL\\Migrations\\20250829063539_user table altered.cs",
+              "ToolTip": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\Migrations\\20250829063539_user table altered.cs",
+              "RelativeToolTip": "InventoryMgmt.DAL\\Migrations\\20250829063539_user table altered.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-29T06:35:40.204Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "AuthService.cs",
+              "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\Services\\AuthService.cs",
+              "RelativeDocumentMoniker": "InventoryMgmt.BLL\\Services\\AuthService.cs",
+              "ToolTip": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\Services\\AuthService.cs",
+              "RelativeToolTip": "InventoryMgmt.BLL\\Services\\AuthService.cs",
+              "ViewState": "AgIAAFAAAAAAAAAAAAAkwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-29T17:22:33.24Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
               "Title": "CommentService.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\Services\\CommentService.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.BLL\\Services\\CommentService.cs",
@@ -368,12 +375,11 @@
               "RelativeToolTip": "InventoryMgmt.BLL\\Services\\CommentService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAACcAAAA9AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-29T12:20:17.26Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-29T12:20:17.26Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 6,
               "Title": "ItemService.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\Services\\ItemService.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.BLL\\Services\\ItemService.cs",
@@ -381,8 +387,7 @@
               "RelativeToolTip": "InventoryMgmt.BLL\\Services\\ItemService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAwAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-24T13:51:09.767Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-24T13:51:09.767Z"
             },
             {
               "$type": "Document",
@@ -398,7 +403,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 5,
               "Title": "JwtService.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\Services\\JwtService.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.BLL\\Services\\JwtService.cs",
@@ -406,8 +411,7 @@
               "RelativeToolTip": "InventoryMgmt.BLL\\Services\\JwtService.cs",
               "ViewState": "AgIAAAwAAAAAAAAAAAAIwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-29T17:22:24.949Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-29T17:22:24.949Z"
             },
             {
               "$type": "Document",
@@ -444,18 +448,6 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAABVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2025-08-24T16:18:02.952Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "InventoryController.cs",
-              "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Controllers\\InventoryController.cs",
-              "RelativeDocumentMoniker": "InventoryMgmt.MVC\\Controllers\\InventoryController.cs",
-              "ToolTip": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Controllers\\InventoryController.cs",
-              "RelativeToolTip": "InventoryMgmt.MVC\\Controllers\\InventoryController.cs",
-              "ViewState": "AgIAAHgCAAAAAAAAAAAMwLECAAAQAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-26T14:19:35.357Z"
             },
             {
               "$type": "Document",

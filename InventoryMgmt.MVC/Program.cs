@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using InventoryMgmt.DAL.Repos;
 using InventoryMgmt.DAL.Interfaces;
 using InventoryMgmt.BLL.Services;
+using InventoryMgmt.BLL.Interfaces;
 using InventoryMgmt.DAL.EF.TableModels;
 using InventoryMgmt.BLL.Profiles;
 using AutoMapper;
@@ -51,12 +52,15 @@ builder.Services.AddScoped<IInventoryTagRepo, InventoryTagRepo>();
 builder.Services.AddScoped<IItemLikeRepo, ItemLikeRepo>();
 
 // Register services
+builder.Services.AddScoped<IInventoryService, InventoryService>();
 builder.Services.AddScoped<InventoryService>();
 builder.Services.AddScoped<ItemService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<CommentService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<InventoryMgmt.BLL.Interfaces.IAuthorizationService, AuthorizationService>();
 builder.Services.AddScoped<DataAccess>();
 
 // Add SignalR

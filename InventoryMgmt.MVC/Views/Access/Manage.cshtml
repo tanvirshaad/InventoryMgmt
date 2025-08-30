@@ -1,0 +1,131 @@
+@{
+    ViewData["Title"] = "Manage Access";
+    var inventory = ViewBag.Inventory as InventoryMgmt.BLL.DTOs.InventoryDto;
+    var accessUsers = ViewBag.AccessUsers as IEnumerable<InventoryMgmt.BLL.DTOs.UserDto> ?? new List<InventoryMgmt.BLL.DTOs.UserDto>();
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+                    <li class="breadcrumb-item"><a asp-controller="Inventory" asp-action="Details" asp-route-id="@inventory.Id">@inventory.Title</a></li>
+                    <li class="breadcrumb-item active">Manage Access</li>
+                </ol>
+            </nav>
+
+            <h2>Manage Access - @inventory.Title</h2>
+            
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Grant Access to User</h4>
+                        </div>
+                        <div class="card-body">
+                            <form asp-action="GrantAccess" method="post">
+                                <input type="hidden" name="inventoryId" value="@inventory.Id" />
+                                <div class="mb-3">
+                                    <label for="userEmail" class="form-label">User Email</label>
+                                    <input type="email" class="form-control" id="userEmail" name="userEmail" 
+                                           placeholder="Enter user's email address" required>
+                                    <div class="form-text">Enter the email address of the user you want to grant access to.</div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> Grant Access
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Current Access List</h4>
+                        </div>
+                        <div class="card-body">
+                            @if (accessUsers.Any())
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Email</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var user in accessUsers)
+                                            {
+                                                <tr>
+                                                    <td>@user.FirstName @user.LastName</td>
+                                                    <td>@user.Email</td>
+                                                    <td>
+                                                        <form asp-action="RevokeAccess" method="post" style="display: inline;">
+                                                            <input type="hidden" name="inventoryId" value="@inventory.Id" />
+                                                            <input type="hidden" name="userId" value="@user.Id" />
+                                                            <button type="submit" class="btn btn-sm btn-danger" 
+                                                                    onclick="return confirm('Are you sure you want to revoke access for @user.FirstName @user.LastName?')">
+                                                                <i class="fas fa-times"></i> Revoke
+                                                            </button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted">No users have been granted access to this inventory.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <a asp-controller="Inventory" asp-action="Details" asp-route-id="@inventory.Id" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Inventory
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+    
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    }
+    
+    .table-responsive {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+</style>

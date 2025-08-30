@@ -1,5 +1,6 @@
 ﻿using InventoryMgmt.BLL.DTOs;
 using InventoryMgmt.BLL.Services;
+using InventoryMgmt.BLL.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,7 @@ using InventoryMgmt.DAL.EF.TableModels;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using InventoryMgmt.MVC.Models; // Added for CustomIdPreviewRequest, CustomIdConfigurationRequest, CustomFieldsRequest, AddCommentRequest
+using InventoryMgmt.MVC.Attributes;
 using System.Text; // Added for StringBuilder
 using System.Linq; // Added for Any()
 using Microsoft.AspNetCore.SignalR; // Added for HubContext
@@ -14,7 +16,7 @@ using InventoryMgmt.MVC.Hubs; // Added for CommentHub
 
 namespace InventoryMgmt.MVC.Controllers
 {
-    public class InventoryController : Controller
+    public class InventoryController : BaseController
     {
         private readonly InventoryService _inventoryService;
         private readonly ItemService _itemService;
@@ -29,7 +31,8 @@ namespace InventoryMgmt.MVC.Controllers
             CategoryService categoryService,
             IAuthService authService,
             IHubContext<CommentHub> hubContext, // Added for SignalR
-            CommentService commentService) // Added for comments
+            CommentService commentService, // Added for comments
+            InventoryMgmt.BLL.Interfaces.IAuthorizationService authorizationService) : base(authorizationService)
         {
             _inventoryService = inventoryService;
             _itemService = itemService;
@@ -41,30 +44,38 @@ namespace InventoryMgmt.MVC.Controllers
 
         public async Task<IActionResult> Details(int id, string tab = "items")
         {
+            // Check if user can view this inventory
+            if (!await CanCurrentUserViewInventoryAsync(id))
+            {
+                return NotFoundOrForbiddenResult();
+            }
+
             var inventory = await _inventoryService.GetInventoryByIdAsync(id);
             if (inventory == null)
             {
                 return NotFound();
             }
 
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var isAdmin = User.IsInRole("Admin");
-            var canEdit = await _inventoryService.CanUserEditInventoryAsync(id, currentUserId, isAdmin);
+            var permissions = await GetCurrentUserInventoryPermissionsAsync(id);
+            var currentUserId = GetCurrentUserId();
 
-            ViewBag.CanEdit = canEdit;
+            ViewBag.CanEdit = permissions.Permission >= InventoryPermission.FullControl;
+            ViewBag.CanAddItems = permissions.Permission >= InventoryPermission.Write;
+            ViewBag.CanComment = await CanCurrentUserCommentAsync(id);
             ViewBag.CurrentTab = tab;
             ViewBag.CurrentUserId = currentUserId;
+            ViewBag.UserPermissions = permissions;
 
             if (tab == "items")
             {
-                var items = await _itemService.GetInventoryItemsAsync(id, currentUserId);
+                var items = await _itemService.GetInventoryItemsAsync(id, currentUserId?.ToString());
                 ViewBag.Items = items;
             }
 
             return View(inventory);
         }
 
-        [Authorize]
+        [RequireAuthenticated]
         public async Task<IActionResult> Create()
         {
             await PopulateCategoriesAsync();
@@ -87,55 +98,29 @@ namespace InventoryMgmt.MVC.Controllers
             }
         }
 
-                [Authorize]
+        [RequireAuthenticated]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(InventoryDto inventoryDto)
         {
-            // Remove this debug model error as it interferes with form submission
-            // ModelState.AddModelError("", $"DEBUG: Form submitted successfully - Title: {inventoryDto.Title}, CategoryId: {inventoryDto.CategoryId}, IsPublic: {inventoryDto.IsPublic}");
-            
-            // Debug: Log the incoming data
-            System.Diagnostics.Debug.WriteLine($"Create action called with Title: {inventoryDto.Title}, CategoryId: {inventoryDto.CategoryId}");
-            
             if (ModelState.IsValid)
             {
-                System.Diagnostics.Debug.WriteLine("ModelState is valid");
-                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                System.Diagnostics.Debug.WriteLine($"CurrentUserId: {currentUserId}");
-                
-                // Find the first User in the database if we can't parse the current user ID
-                if (!int.TryParse(currentUserId, out int userId))
+                var currentUserId = GetCurrentUserId();
+                if (!currentUserId.HasValue)
                 {
-                    // Try to get the authenticated user from the database
-                    var userEmail = User.FindFirstValue(ClaimTypes.Email);
-                    var currentUser = await _authService.GetUserByEmailAsync(userEmail);
-                    
-                    if (currentUser != null)
-                    {
-                        userId = currentUser.Id;
-                        System.Diagnostics.Debug.WriteLine($"Retrieved user ID from email: {userId}");
-                    }
-                    else
-                    {
-                        ModelState.AddModelError("", "Could not determine current user. Please try logging out and back in.");
-                        await PopulateCategoriesAsync();
-                        return View(inventoryDto);
-                    }
+                    ModelState.AddModelError("", "Could not determine current user. Please try logging out and back in.");
+                    await PopulateCategoriesAsync();
+                    return View(inventoryDto);
                 }
                 
-                System.Diagnostics.Debug.WriteLine($"Using userId: {userId}");
-                inventoryDto.OwnerId = userId;
+                inventoryDto.OwnerId = currentUserId.Value;
 
                 try
                 {
-                    System.Diagnostics.Debug.WriteLine("Calling CreateInventoryAsync...");
                     var result = await _inventoryService.CreateInventoryAsync(inventoryDto);
-                    System.Diagnostics.Debug.WriteLine($"CreateInventoryAsync result: {(result != null ? $"Success with ID {result.Id}" : "null")}");
                     
                     if (result != null)
                     {
-                        System.Diagnostics.Debug.WriteLine($"Redirecting to Details with ID: {result.Id}");
                         return RedirectToAction(nameof(Details), new { id = result.Id });
                     }
                     else
@@ -146,17 +131,6 @@ namespace InventoryMgmt.MVC.Controllers
                 catch (Exception ex)
                 {
                     ModelState.AddModelError("", $"Error creating inventory: {ex.Message}");
-                    // Log the full exception for debugging
-                    System.Diagnostics.Debug.WriteLine($"Inventory creation error: {ex}");
-                }
-            }
-            else
-            {
-                System.Diagnostics.Debug.WriteLine("ModelState is invalid");
-                // Log validation errors
-                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    System.Diagnostics.Debug.WriteLine($"Validation error: {error.ErrorMessage}");
                 }
             }
 
@@ -164,29 +138,20 @@ namespace InventoryMgmt.MVC.Controllers
             return View(inventoryDto);
         }
 
-        [Authorize]
+        [RequireInventoryPermission(InventoryPermission.FullControl)]
         public async Task<IActionResult> Edit(int id)
         {
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var isAdmin = User.IsInRole("Admin");
-
             var inventory = await _inventoryService.GetInventoryByIdAsync(id);
             if (inventory == null)
             {
                 return NotFound();
             }
 
-            var canEdit = await _inventoryService.CanUserEditInventoryAsync(id, currentUserId, isAdmin);
-            if (!canEdit)
-            {
-                return Forbid();
-            }
-
             await PopulateCategoriesAsync();
             return View(inventory);
         }
 
-        [Authorize]
+        [RequireInventoryPermission(InventoryPermission.FullControl)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, InventoryDto inventoryDto)
@@ -198,23 +163,25 @@ namespace InventoryMgmt.MVC.Controllers
 
             if (ModelState.IsValid)
             {
-                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                var isAdmin = User.IsInRole("Admin");
-
-                var canEdit = await _inventoryService.CanUserEditInventoryAsync(id, currentUserId, isAdmin);
-                if (!canEdit)
+                try
                 {
-                    return Forbid();
+                    var result = await _inventoryService.UpdateInventoryAsync(inventoryDto);
+                    if (result != null)
+                    {
+                        return RedirectToAction(nameof(Details), new { id = result.Id });
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "Failed to update inventory");
+                    }
                 }
-
-                var result = await _inventoryService.UpdateInventoryAsync(inventoryDto);
-                if (result != null)
+                catch (InvalidOperationException ex)
                 {
-                    return RedirectToAction(nameof(Details), new { id = result.Id });
+                    ModelState.AddModelError("", ex.Message);
                 }
-                else
+                catch (Exception)
                 {
-                    ModelState.AddModelError("", "Failed to update inventory");
+                    ModelState.AddModelError("", "An unexpected error occurred while updating the inventory.");
                 }
             }
 
@@ -222,47 +189,23 @@ namespace InventoryMgmt.MVC.Controllers
             return View(inventoryDto);
         }
 
-        [Authorize]
+        [RequireInventoryPermission(InventoryPermission.FullControl)]
         public async Task<IActionResult> Delete(int id)
         {
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var isAdmin = User.IsInRole("Admin");
-
             var inventory = await _inventoryService.GetInventoryByIdAsync(id);
             if (inventory == null)
             {
                 return NotFound();
-            }
-
-            var canEdit = await _inventoryService.CanUserEditInventoryAsync(id, currentUserId, isAdmin);
-            if (!canEdit)
-            {
-                return Forbid();
             }
 
             return View(inventory);
         }
 
-        [Authorize]
+        [RequireInventoryPermission(InventoryPermission.FullControl)]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var isAdmin = User.IsInRole("Admin");
-
-            var inventory = await _inventoryService.GetInventoryByIdAsync(id);
-            if (inventory == null)
-            {
-                return NotFound();
-            }
-
-            var canEdit = await _inventoryService.CanUserEditInventoryAsync(id, currentUserId, isAdmin);
-            if (!canEdit)
-            {
-                return Forbid();
-            }
-
             var result = await _inventoryService.DeleteInventoryAsync(id);
             if (result)
             {
@@ -270,33 +213,32 @@ namespace InventoryMgmt.MVC.Controllers
             }
             else
             {
+                var inventory = await _inventoryService.GetInventoryByIdAsync(id);
                 ModelState.AddModelError("", "Failed to delete inventory");
                 return View(inventory);
             }
         }
 
-        [Authorize]
+        [RequireAuthenticated]
         public async Task<IActionResult> MyInventories()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (int.TryParse(userId, out int userIdInt))
-            {
-                var ownedInventories = await _inventoryService.GetUserOwnedInventoriesAsync(userIdInt);
-                var accessibleInventories = await _inventoryService.GetUserAccessibleInventoriesAsync(userIdInt);
-
-                            ViewBag.OwnedInventories = ownedInventories;
-                ViewBag.AccessibleInventories = accessibleInventories;
-
-                return View();
-            }
-            else
+            var userId = GetCurrentUserId();
+            if (!userId.HasValue)
             {
                 return RedirectToAction("Login", "Auth");
             }
+
+            var ownedInventories = await _inventoryService.GetUserOwnedInventoriesAsync(userId.Value);
+            var accessibleInventories = await _inventoryService.GetUserAccessibleInventoriesAsync(userId.Value);
+
+            ViewBag.OwnedInventories = ownedInventories;
+            ViewBag.AccessibleInventories = accessibleInventories;
+
+            return View();
         }
 
         [HttpGet]
-        public async Task<IActionResult> GenerateCustomIdPreview(string format)
+        public IActionResult GenerateCustomIdPreview(string format)
         {
             if (string.IsNullOrWhiteSpace(format))
             {
@@ -308,7 +250,7 @@ namespace InventoryMgmt.MVC.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> GenerateAdvancedCustomIdPreview([FromBody] CustomIdPreviewRequest request)
+        public IActionResult GenerateAdvancedCustomIdPreview([FromBody] CustomIdPreviewRequest request)
         {
             if (request?.Elements == null || !request.Elements.Any())
             {
@@ -361,68 +303,27 @@ namespace InventoryMgmt.MVC.Controllers
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine($"SaveCustomIdConfiguration called with request: {request}");
-                
-                // Check for null request (might indicate JSON parsing failure)
-                if (request == null)
+                if (request == null || request.InventoryId <= 0)
                 {
-                    System.Diagnostics.Debug.WriteLine("ERROR: Request is null");
-                    var rawRequest = await new StreamReader(Request.Body).ReadToEndAsync();
-                    System.Diagnostics.Debug.WriteLine($"Raw request data: {rawRequest}");
-                    return Json(new { success = false, error = "Invalid request format" });
+                    return Json(new { success = false, error = "Invalid request" });
                 }
-                
-                System.Diagnostics.Debug.WriteLine($"SaveCustomIdConfiguration called with InventoryId: {request.InventoryId}, Elements count: {request.Elements?.Count ?? 0}");
-                
-                if (request.InventoryId <= 0)
+
+                // Check permissions
+                if (!await CanCurrentUserManageInventoryAsync(request.InventoryId))
                 {
-                    System.Diagnostics.Debug.WriteLine("ERROR: Invalid inventory ID");
-                    return Json(new { success = false, error = "Invalid inventory ID" });
+                    return Json(new { success = false, error = "Access denied" });
                 }
-                
+
                 if (request.Elements == null)
                 {
                     request.Elements = new List<CustomIdElement>();
-                    System.Diagnostics.Debug.WriteLine("WARNING: Elements was null, created empty list");
                 }
-                
-                if (request.Elements.Count == 0)
-                {
-                    System.Diagnostics.Debug.WriteLine("WARNING: No elements provided");
-                    // Continue processing - this might be intentional to clear all elements
-                }
-
-                // Log each element for debugging
-                foreach (var element in request.Elements)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Element: Id={element.Id}, Type={element.Type}, Value={element.Value}, Order={element.Order}");
-                }
-
-                // Skip authentication check for debugging if needed
-                /*var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                var isAdmin = User.IsInRole("Admin");
-                System.Diagnostics.Debug.WriteLine($"Current user ID: {currentUserId}, Is admin: {isAdmin}");
-
-                var canEdit = await _inventoryService.CanUserEditInventoryAsync(request.InventoryId, currentUserId, isAdmin);
-                System.Diagnostics.Debug.WriteLine($"Can edit: {canEdit}");
-                
-                if (!canEdit)
-                {
-                    System.Diagnostics.Debug.WriteLine("ERROR: User cannot edit inventory");
-                    return Forbid();
-                }*/
-
-                // Always allow edits for debugging
-                System.Diagnostics.Debug.WriteLine("WARNING: Authentication check bypassed for debugging");
 
                 var result = await _inventoryService.UpdateCustomIdConfigurationAsync(request.InventoryId, request.Elements);
-                System.Diagnostics.Debug.WriteLine($"Update result: {result}");
                 return Json(new { success = result });
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"ERROR updating custom ID configuration: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine(ex.StackTrace);
                 return Json(new { success = false, error = ex.Message });
             }
         }
@@ -688,78 +589,34 @@ namespace InventoryMgmt.MVC.Controllers
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine($"SaveCustomFields called with request: {request}");
-                
-                // Check for null request (might indicate JSON parsing failure)
-                if (request == null)
+                if (request == null || request.InventoryId <= 0)
                 {
-                    System.Diagnostics.Debug.WriteLine("ERROR: Request is null");
-                    var rawRequest = await new StreamReader(Request.Body).ReadToEndAsync();
-                    System.Diagnostics.Debug.WriteLine($"Raw request data: {rawRequest}");
-                    return Json(new { success = false, error = "Invalid request format" });
+                    return Json(new { success = false, error = "Invalid request" });
                 }
-                
-                System.Diagnostics.Debug.WriteLine($"SaveCustomFields called with InventoryId: {request.InventoryId}, Fields count: {request.Fields?.Count ?? 0}");
-                
-                if (request.InventoryId <= 0)
+
+                // Check permissions
+                if (!await CanCurrentUserManageInventoryAsync(request.InventoryId))
                 {
-                    System.Diagnostics.Debug.WriteLine("ERROR: Invalid inventory ID");
-                    return Json(new { success = false, error = "Invalid inventory ID" });
+                    return Json(new { success = false, error = "Access denied" });
                 }
-                
+
                 if (request.Fields == null)
                 {
                     request.Fields = new List<CustomFieldData>();
-                    System.Diagnostics.Debug.WriteLine("WARNING: Fields was null, created empty list");
                 }
-                
+
                 if (request.Fields.Count == 0)
                 {
-                    System.Diagnostics.Debug.WriteLine("WARNING: No fields provided - this will clear all field configurations");
-                    
-                    // When fields is empty, assume the user wants to clear all fields
-                    var inventory = await _inventoryService.GetInventoryByIdAsync(request.InventoryId);
-                    if (inventory == null)
-                    {
-                        return Json(new { success = false, error = "Inventory not found" });
-                    }
-                    
-                    // Use the ClearAllCustomFieldsAsync method to clear all fields
+                    // Clear all fields
                     bool clearResult = await _inventoryService.ClearAllCustomFieldsAsync(request.InventoryId);
                     return Json(new { success = clearResult });
                 }
 
-                // Log each field for debugging
-                foreach (var field in request.Fields)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Field: Id={field.Id}, Type={field.Type}, Name={field.Name}, Order={field.Order}");
-                }
-
-                // Skip authentication check for debugging if needed
-                /*var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                var isAdmin = User.IsInRole("Admin");
-                System.Diagnostics.Debug.WriteLine($"Current user ID: {currentUserId}, Is admin: {isAdmin}");
-
-                var canEdit = await _inventoryService.CanUserEditInventoryAsync(request.InventoryId, currentUserId, isAdmin);
-                System.Diagnostics.Debug.WriteLine($"Can edit: {canEdit}");
-                
-                if (!canEdit)
-                {
-                    System.Diagnostics.Debug.WriteLine("ERROR: User cannot edit inventory");
-                    return Forbid();
-                }*/
-
-                // Always allow edits for debugging
-                System.Diagnostics.Debug.WriteLine("WARNING: Authentication check bypassed for debugging");
-
                 var result = await _inventoryService.UpdateCustomFieldsAsync(request.InventoryId, request.Fields);
-                System.Diagnostics.Debug.WriteLine($"Update result: {result}");
                 return Json(new { success = result });
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"ERROR updating custom fields: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine(ex.StackTrace);
                 return Json(new { success = false, error = ex.Message });
             }
         }
@@ -870,17 +727,22 @@ namespace InventoryMgmt.MVC.Controllers
         [HttpPost]
         public async Task<IActionResult> AddComment([FromBody] AddCommentRequest request)
         {
-            if (!User.Identity?.IsAuthenticated == true)
+            var currentUserId = GetCurrentUserId();
+            if (!currentUserId.HasValue)
             {
                 return Json(new { success = false, message = "User not authenticated" });
             }
 
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!await CanCurrentUserCommentAsync(request.InventoryId))
+            {
+                return Json(new { success = false, message = "Access denied" });
+            }
+
             var commentDto = new CommentDto
             {
                 InventoryId = request.InventoryId,
                 Content = request.Content,
-                UserId = currentUserId
+                UserId = currentUserId.Value.ToString()
             };
 
             var result = await _commentService.AddCommentAsync(commentDto);

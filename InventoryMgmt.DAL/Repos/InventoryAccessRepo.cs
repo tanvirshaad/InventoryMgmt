@@ -51,6 +51,12 @@ namespace InventoryMgmt.DAL.Repos
                 .AnyAsync(ia => ia.InventoryId == inventoryId && ia.UserId == userId);
         }
 
+        public async Task<bool> HasWriteAccessAsync(int userId, int inventoryId)
+        {
+            return await _dbSet
+                .AnyAsync(ia => ia.UserId == userId && ia.InventoryId == inventoryId);
+        }
+
         public async Task GrantAccessAsync(int inventoryId, int userId)
         {
             var existingAccess = await GetAccessAsync(inventoryId, userId);

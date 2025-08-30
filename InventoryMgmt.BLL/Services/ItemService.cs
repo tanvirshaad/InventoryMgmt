@@ -139,22 +139,50 @@ namespace InventoryMgmt.BLL.Services
 
         public async Task<ItemDto?> UpdateItemAsync(ItemDto itemDto)
         {
-            var existingItem = await _dataAccess.ItemData.GetByIdAsync(itemDto.Id);
-            if (existingItem == null) return null;
-
-            // Check optimistic concurrency
-            if (!existingItem.Version.SequenceEqual(itemDto.Version))
+            try
             {
-                throw new DbUpdateConcurrencyException("The item has been modified by another user.");
+                var existingItem = await _dataAccess.ItemData.GetByIdAsync(itemDto.Id);
+                if (existingItem == null) return null;
+
+                // Check optimistic concurrency
+                if (!existingItem.Version.SequenceEqual(itemDto.Version))
+                {
+                    // Instead of returning null, return the current version of the item
+                    // This way, the controller can use this data to refresh the form
+                    var freshItem = await _dataAccess.ItemData.GetByIdAsync(itemDto.Id);
+                    return freshItem != null ? _mapper.Map<ItemDto>(freshItem) : null;
+                }
+
+                // Manual property updates to avoid navigation property conflicts
+                existingItem.CustomId = itemDto.CustomId;
+                existingItem.TextField1Value = itemDto.Name;
+                existingItem.TextField2Value = itemDto.TextField2Value;
+                existingItem.TextField3Value = itemDto.TextField3Value;
+                existingItem.MultiTextField1Value = itemDto.Description;
+                existingItem.MultiTextField2Value = itemDto.MultiTextField2Value;
+                existingItem.MultiTextField3Value = itemDto.MultiTextField3Value;
+                existingItem.NumericField1Value = itemDto.NumericField1Value;
+                existingItem.NumericField2Value = itemDto.NumericField2Value;
+                existingItem.NumericField3Value = itemDto.NumericField3Value;
+                existingItem.DocumentField1Value = itemDto.DocumentField1Value;
+                existingItem.DocumentField2Value = itemDto.DocumentField2Value;
+                existingItem.DocumentField3Value = itemDto.DocumentField3Value;
+                existingItem.BooleanField1Value = itemDto.BooleanField1Value;
+                existingItem.BooleanField2Value = itemDto.BooleanField2Value;
+                existingItem.BooleanField3Value = itemDto.BooleanField3Value;
+                existingItem.UpdatedAt = DateTime.UtcNow;
+
+                _dataAccess.ItemData.Update(existingItem);
+                await _dataAccess.ItemData.SaveChangesAsync();
+
+                return _mapper.Map<ItemDto>(existingItem);
             }
-
-            _mapper.Map(itemDto, existingItem);
-            existingItem.UpdatedAt = DateTime.UtcNow;
-
-            _dataAccess.ItemData.Update(existingItem);
-            await _dataAccess.ItemData.SaveChangesAsync();
-
-            return _mapper.Map<ItemDto>(existingItem);
+            catch (DbUpdateConcurrencyException)
+            {
+                // Handle concurrency conflicts gracefully by getting the latest version
+                var freshItem = await _dataAccess.ItemData.GetByIdAsync(itemDto.Id);
+                return freshItem != null ? _mapper.Map<ItemDto>(freshItem) : null;
+            }
         }
 
         public async Task<bool> DeleteItemAsync(int id)
