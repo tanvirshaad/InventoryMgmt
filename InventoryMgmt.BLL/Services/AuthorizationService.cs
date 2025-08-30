@@ -68,6 +68,11 @@ namespace InventoryMgmt.BLL.Services
             {
                 permission = InventoryPermission.Write;
             }
+            else if (inventory.IsPublic && userRole != UserRole.Anonymous)
+            {
+                // Give authenticated users Write permission on public inventories
+                permission = InventoryPermission.Write;
+            }
             else if (inventory.IsPublic || userRole != UserRole.Anonymous)
             {
                 permission = InventoryPermission.Read;
