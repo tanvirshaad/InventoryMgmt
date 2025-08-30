@@ -26,5 +26,13 @@ namespace InventoryMgmt.BLL.Interfaces
         Task RevokeUserAccessAsync(int inventoryId, int userId);
         string GenerateCustomId(string format, int itemNumber);
         string GenerateAdvancedCustomId(List<CustomIdElement> elements, int itemNumber);
+
+        // Tag related methods
+        Task<IEnumerable<TagDto>> GetInventoryTagsAsync(int inventoryId);
+        Task<IEnumerable<TagDto>> SearchTagsAsync(string searchTerm);
+        Task<bool> AddTagToInventoryAsync(int inventoryId, string tagName);
+        Task<bool> AddTagsToInventoryAsync(int inventoryId, List<string> tagNames);
+        Task<bool> RemoveTagFromInventoryAsync(int inventoryId, int tagId);
+        Task<IEnumerable<TagDto>> GetPopularTagsAsync(int count = 10);
     }
 }

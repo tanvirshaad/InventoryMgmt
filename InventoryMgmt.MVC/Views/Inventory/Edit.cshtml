@@ -42,6 +42,18 @@
                         <span asp-validation-for="Description" class="text-danger"></span>
                     </div>
                     
+                    <div class="form-group mb-3">
+                        <label class="form-label">Tags</label>
+                        <div class="tag-input-group">
+                            <input type="text" id="tagInput" class="form-control" placeholder="Enter tag name" />
+                            <button type="button" id="addTagButton" class="btn btn-outline-primary">Add</button>
+                        </div>
+                        <div id="tagsContainer" class="tags-container">
+                            <!-- Tags will be populated by JavaScript -->
+                        </div>
+                        <small class="form-text text-muted">Enter tags to help categorize and find your inventory items.</small>
+                    </div>
+                    
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group mb-3">
@@ -79,4 +91,183 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="~/css/tags.css" />
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Setup autocomplete for tag input
+            $(document).ready(function() {
+                const inventoryId = @Model.Id;
+                let tags = [];
+                
+                // Load existing tags
+                $.ajax({
+                    url: '/Inventory/GetInventoryTags',
+                    data: { id: inventoryId },
+                    dataType: 'json',
+                    success: function(data) {
+                        if (data.tags && data.tags.length > 0) {
+                            data.tags.forEach(function(tag) {
+                                // Add to our tags array if valid
+                                if (tag && tag.name) {
+                                    tags.push({
+                                        id: tag.id,
+                                        name: tag.name
+                                    });
+                                    renderTag(tag.name, tag.id);
+                                }
+                            });
+                        }
+                    }
+                });
+                
+                // Setup autocomplete
+                $("#tagInput").autocomplete({
+                    source: function(request, response) {
+                        $.ajax({
+                            url: '/Inventory/SearchTags',
+                            dataType: 'json',
+                            data: { term: request.term },
+                            success: function(data) {
+                                response($.map(data, function(item) {
+                                    return {
+                                        label: item.name,
+                                        value: item.name,
+                                        id: item.id
+                                    };
+                                }));
+                            }
+                        });
+                    },
+                    minLength: 1,
+                    select: function(event, ui) {
+                        event.preventDefault();
+                        $("#tagInput").val(ui.item.value);
+                        addTag(ui.item.value, ui.item.id);
+                    }
+                });
+                
+                // Add tag when button is clicked
+                $("#addTagButton").click(function() {
+                    addTag($("#tagInput").val().trim());
+                });
+                
+                // Add tag when Enter key is pressed
+                $("#tagInput").keypress(function(e) {
+                    if (e.which === 13) {
+                        e.preventDefault();
+                        addTag($("#tagInput").val().trim());
+                    }
+                });
+                
+                function addTag(tagName, tagId) {
+                    if (!tagName) return;
+                    
+                    // Check if the tag already exists in our array
+                    if (!tags.some(t => t.name.toLowerCase() === tagName.toLowerCase())) {
+                        // Make AJAX call to add the tag to the inventory
+                        $.ajax({
+                            url: '/Inventory/AddTag',
+                            type: 'POST',
+                            data: { 
+                                inventoryId: inventoryId, 
+                                tagName: tagName 
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    // Refresh the tags to get the new tag ID
+                                    $.ajax({
+                                        url: '/Inventory/GetInventoryTags',
+                                        data: { id: inventoryId },
+                                        dataType: 'json',
+                                        success: function(data) {
+                                            // Clear existing tags
+                                            $("#tagsContainer").empty();
+                                            tags = [];
+                                            
+                                            // Add all tags from response
+                                            if (data.tags && data.tags.length > 0) {
+                                                data.tags.forEach(function(tag) {
+                                                    if (tag && tag.name) {
+                                                        tags.push({
+                                                            id: tag.id,
+                                                            name: tag.name
+                                                        });
+                                                        renderTag(tag.name, tag.id);
+                                                    }
+                                                });
+                                            }
+                                            
+                                            // Clear input
+                                            $("#tagInput").val('');
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
+                }
+                
+                function renderTag(tagName, tagId) {
+                    const tagElement = $('<div class="tag-item"></div>');
+                    tagElement.append($('<span></span>').text(tagName));
+                    
+                    const removeButton = $('<button type="button" class="tag-remove">×</button>');
+                    removeButton.click(function() {
+                        // Make AJAX call to remove the tag
+                        if (tagId) {
+                            $.ajax({
+                                url: '/Inventory/RemoveTag',
+                                type: 'POST',
+                                data: { 
+                                    inventoryId: inventoryId, 
+                                    tagId: tagId 
+                                },
+                                success: function(response) {
+                                    if (response.success) {
+                                        // Remove from UI and array
+                                        tags = tags.filter(t => t.id !== tagId);
+                                        tagElement.remove();
+                                    }
+                                }
+                            });
+                        } else {
+                            // Just remove from UI for new tags that haven't been saved
+                            tags = tags.filter(t => t.name !== tagName);
+                            tagElement.remove();
+                        }
+                    });
+                    
+                    tagElement.append(removeButton);
+                    $("#tagsContainer").append(tagElement);
+                }
+                
+                // Add popular tags section
+                $.ajax({
+                    url: '/Inventory/GetPopularTags',
+                    dataType: 'json',
+                    success: function(data) {
+                        if (data.tags && data.tags.length > 0) {
+                            const popularTagsSection = $('<div class="popular-tags mt-2"><h6>Popular Tags:</h6><div class="d-flex flex-wrap gap-1"></div></div>');
+                            
+                            data.tags.forEach(function(tag) {
+                                // Don't add popular tags that are already assigned
+                                if (!tags.some(t => t.id === tag.id)) {
+                                    const tagBadge = $('<span class="badge bg-light text-dark border"></span>').text(tag.name);
+                                    tagBadge.css('cursor', 'pointer');
+                                    tagBadge.click(function() {
+                                        addTag(tag.name, tag.id);
+                                    });
+                                    popularTagsSection.find('div').append(tagBadge);
+                                }
+                            });
+                            
+                            $("#tagsContainer").after(popularTagsSection);
+                        }
+                    }
+                });
+            });
+        });
+    </script>
 }

@@ -18,6 +18,16 @@
                         <span class="mx-2">•</span>
                         <i class="bi bi-calendar me-2"></i>@Model.CreatedAt.ToString("MMM dd, yyyy")
                     </p>
+                    @if (Model.Tags != null && Model.Tags.Any(t => t != null && !string.IsNullOrEmpty(t.Name)))
+                    {
+                        <div class="d-flex flex-wrap gap-1 mb-2">
+                            <i class="bi bi-tags me-2 mt-1"></i>
+                            @foreach (var tag in Model.Tags.Where(t => t != null && !string.IsNullOrEmpty(t.Name)))
+                            {
+                                <span class="badge bg-light text-dark border">@tag.Name</span>
+                            }
+                        </div>
+                    }
                     @if (!string.IsNullOrEmpty(Model.Description))
                     {
                         <p class="lead">@Model.Description</p>
@@ -834,5 +844,6 @@
 @section Styles {
     <link rel="stylesheet" href="~/css/inventory-detail.css" />
     <link rel="stylesheet" href="~/css/custom-fields.css" />
+    <link rel="stylesheet" href="~/css/tags.css" />
 }
 

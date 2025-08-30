@@ -39,6 +39,19 @@
                         <span asp-validation-for="Description" class="text-danger"></span>
                     </div>
                     
+                    <div class="form-group mb-3">
+                        <label class="form-label">Tags</label>
+                        <div class="tag-input-group">
+                            <input type="text" id="tagInput" class="form-control" placeholder="Enter tag name" />
+                            <button type="button" id="addTagButton" class="btn btn-outline-primary">Add</button>
+                        </div>
+                        <div id="tagsContainer" class="tags-container">
+                            <!-- Tags will be populated by JavaScript -->
+                        </div>
+                        <small class="form-text text-muted">Enter tags to help categorize and find your inventory items.</small>
+                        <input type="hidden" id="inventoryId" value="0" />
+                    </div>
+                    
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group mb-3">
@@ -76,4 +89,111 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="~/css/tags.css" />
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Setup autocomplete for tag input
+            $(document).ready(function() {
+                // Store tags to be submitted with form
+                let tags = [];
+                
+                // Setup autocomplete
+                $("#tagInput").autocomplete({
+                    source: function(request, response) {
+                        $.ajax({
+                            url: '/Inventory/SearchTags',
+                            dataType: 'json',
+                            data: { term: request.term },
+                            success: function(data) {
+                                response($.map(data, function(item) {
+                                    return {
+                                        label: item.name,
+                                        value: item.name,
+                                        id: item.id
+                                    };
+                                }));
+                            }
+                        });
+                    },
+                    minLength: 1,
+                    select: function(event, ui) {
+                        event.preventDefault();
+                        $("#tagInput").val(ui.item.value);
+                        addTag(ui.item.value);
+                    }
+                });
+                
+                // Add tag when button is clicked
+                $("#addTagButton").click(function() {
+                    addTag($("#tagInput").val().trim());
+                });
+                
+                // Add tag when Enter key is pressed
+                $("#tagInput").keypress(function(e) {
+                    if (e.which === 13) {
+                        e.preventDefault();
+                        addTag($("#tagInput").val().trim());
+                    }
+                });
+                
+                function addTag(tagName) {
+                    if (!tagName) return;
+                    
+                    // Add to our tags array if it's not already there
+                    if (!tags.some(t => t.toLowerCase() === tagName.toLowerCase())) {
+                        tags.push(tagName);
+                        renderTag(tagName);
+                        $("#tagInput").val('');
+                    }
+                }
+                
+                function renderTag(tagName) {
+                    const tagElement = $('<div class="tag-item"></div>');
+                    tagElement.append($('<span></span>').text(tagName));
+                    
+                    const removeButton = $('<button type="button" class="tag-remove">×</button>');
+                    removeButton.click(function() {
+                        // Remove from tags array
+                        tags = tags.filter(t => t !== tagName);
+                        tagElement.remove();
+                    });
+                    
+                    tagElement.append(removeButton);
+                    $("#tagsContainer").append(tagElement);
+                }
+                
+                // Intercept form submit to add tags
+                $("form").submit(function(e) {
+                    if (tags.length > 0) {
+                        // Store the tags in a hidden input to be submitted with the form
+                        $(this).append($('<input type="hidden" name="tagNames">').val(JSON.stringify(tags)));
+                    }
+                });
+                
+                // Add popular tags section
+                $.ajax({
+                    url: '/Inventory/GetPopularTags',
+                    dataType: 'json',
+                    success: function(data) {
+                        if (data.tags && data.tags.length > 0) {
+                            const popularTagsSection = $('<div class="popular-tags mt-2"><h6>Popular Tags:</h6><div class="d-flex flex-wrap gap-1"></div></div>');
+                            
+                            data.tags.forEach(function(tag) {
+                                const tagBadge = $('<span class="badge bg-light text-dark border"></span>').text(tag.name);
+                                tagBadge.css('cursor', 'pointer');
+                                tagBadge.click(function() {
+                                    addTag(tag.name);
+                                });
+                                popularTagsSection.find('div').append(tagBadge);
+                            });
+                            
+                            $("#tagsContainer").after(popularTagsSection);
+                        }
+                    }
+                });
+            });
+        });
+    </script>
 }

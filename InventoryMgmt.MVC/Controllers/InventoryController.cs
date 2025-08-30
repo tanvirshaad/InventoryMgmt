@@ -101,7 +101,7 @@ namespace InventoryMgmt.MVC.Controllers
         [RequireAuthenticated]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(InventoryDto inventoryDto)
+        public async Task<IActionResult> Create(InventoryDto inventoryDto, string tagNames)
         {
             if (ModelState.IsValid)
             {
@@ -121,6 +121,24 @@ namespace InventoryMgmt.MVC.Controllers
                     
                     if (result != null)
                     {
+                        // Process tags if provided
+                        if (!string.IsNullOrEmpty(tagNames))
+                        {
+                            try
+                            {
+                                var tags = System.Text.Json.JsonSerializer.Deserialize<List<string>>(tagNames);
+                                if (tags != null && tags.Any())
+                                {
+                                    await _inventoryService.AddTagsToInventoryAsync(result.Id, tags);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                // Log the error but continue since the inventory was created successfully
+                                System.Diagnostics.Debug.WriteLine($"Error processing tags: {ex.Message}");
+                            }
+                        }
+                        
                         return RedirectToAction(nameof(Details), new { id = result.Id });
                     }
                     else
@@ -168,6 +186,7 @@ namespace InventoryMgmt.MVC.Controllers
                     var result = await _inventoryService.UpdateInventoryAsync(inventoryDto);
                     if (result != null)
                     {
+                        // Tags are managed via AJAX, so we don't need to process them here
                         return RedirectToAction(nameof(Details), new { id = result.Id });
                     }
                     else
@@ -815,6 +834,85 @@ namespace InventoryMgmt.MVC.Controllers
 
             return BadRequest("Unsupported format");
         }
+        
+        #region Tag Management
+        
+        /// <summary>
+        /// Gets all tags for an inventory
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> GetInventoryTags(int id)
+        {
+            var tags = await _inventoryService.GetInventoryTagsAsync(id);
+            return Json(new { tags = tags });
+        }
+        
+        /// <summary>
+        /// Searches for tags that match the provided search term (for autocomplete)
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> SearchTags(string term)
+        {
+            var tags = await _inventoryService.SearchTagsAsync(term);
+            return Json(tags);
+        }
+        
+        /// <summary>
+        /// Gets the most popular tags
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> GetPopularTags(int count = 10)
+        {
+            var tags = await _inventoryService.GetPopularTagsAsync(count);
+            return Json(new { tags = tags });
+        }
+        
+        /// <summary>
+        /// Adds a tag to an inventory
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> AddTag(int inventoryId, string tagName)
+        {
+            if (!await CanCurrentUserManageInventoryAsync(inventoryId))
+            {
+                return Json(new { success = false, message = "Access denied" });
+            }
+            
+            var result = await _inventoryService.AddTagToInventoryAsync(inventoryId, tagName);
+            return Json(new { success = result });
+        }
+        
+        /// <summary>
+        /// Adds multiple tags to an inventory
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> AddTags(int inventoryId, [FromBody] List<string> tagNames)
+        {
+            if (!await CanCurrentUserManageInventoryAsync(inventoryId))
+            {
+                return Json(new { success = false, message = "Access denied" });
+            }
+            
+            var result = await _inventoryService.AddTagsToInventoryAsync(inventoryId, tagNames);
+            return Json(new { success = result });
+        }
+        
+        /// <summary>
+        /// Removes a tag from an inventory
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> RemoveTag(int inventoryId, int tagId)
+        {
+            if (!await CanCurrentUserManageInventoryAsync(inventoryId))
+            {
+                return Json(new { success = false, message = "Access denied" });
+            }
+            
+            var result = await _inventoryService.RemoveTagFromInventoryAsync(inventoryId, tagId);
+            return Json(new { success = result });
+        }
+        
+        #endregion
 
         private string GenerateCsvExport(InventoryDto inventory, IEnumerable<ItemDto> items)
         {

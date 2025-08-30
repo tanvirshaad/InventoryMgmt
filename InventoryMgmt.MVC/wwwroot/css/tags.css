@@ -1,0 +1,64 @@
+.tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+    min-height: 34px;
+    padding: 5px;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+}
+
+.tag-input-group {
+    display: flex;
+    margin-bottom: 10px;
+}
+
+.tag-input-group input {
+    flex: 1;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.tag-input-group button {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.tag-item {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    background-color: #f0f0f0;
+    border: 1px solid #d0d0d0;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.tag-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    margin-left: 6px;
+    padding: 0;
+    background-color: transparent;
+    border: none;
+    border-radius: 50%;
+    color: #666;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.tag-remove:hover {
+    color: #dc3545;
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+.ui-autocomplete {
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1050;
+}
