@@ -21,6 +21,7 @@ namespace InventoryMgmt.DAL.Repos
             return await _dbSet
                 .Include(i => i.Owner)
                 .Include(i => i.Category)
+                .Include(i => i.Items)
                 .OrderByDescending(i => i.CreatedAt)
                 .Take(count)
                 .ToListAsync();
@@ -42,6 +43,7 @@ namespace InventoryMgmt.DAL.Repos
             return await _dbSet
                 .Include(i => i.Owner)
                 .Include(i => i.Category)
+                .Include(i => i.Items)
                 .Where(i => i.Title.Contains(searchTerm) ||
                            (i.Description != null && i.Description.Contains(searchTerm)) ||
                            i.Owner.FirstName!.Contains(searchTerm) ||
@@ -56,6 +58,7 @@ namespace InventoryMgmt.DAL.Repos
                 .Include(i => i.Owner)
                 .Include(i => i.Category)
                 .Include(i => i.InventoryTags)
+                .Include(i => i.Items)
                 .Where(i => i.InventoryTags.Any(it => it.TagId == tagId))
                 .ToListAsync();
         }
@@ -76,6 +79,7 @@ namespace InventoryMgmt.DAL.Repos
                 .Include(i => i.Owner)
                 .Include(i => i.Category)
                 .Include(i => i.UserAccesses)
+                .Include(i => i.Items)
                 .Where(i => i.UserAccesses.Any(ua => ua.UserId == userId))
                 .OrderByDescending(i => i.UpdatedAt)
                 .ToListAsync();

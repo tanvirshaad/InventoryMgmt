@@ -19,8 +19,21 @@ namespace InventoryMgmt.MVC.Controllers
             var model = new HomeIndexViewModel
             {
                 LatestInventories = await _inventoryService.GetLatestInventoriesAsync(10),
-                PopularInventories = await _inventoryService.GetMostPopularInventoriesAsync(5)
+                PopularInventories = await _inventoryService.GetMostPopularInventoriesAsync(5),
+                PopularTags = await _inventoryService.GetPopularTagsAsync(20)
             };
+
+            // Load user-specific inventories if the user is authenticated
+            if (User.Identity.IsAuthenticated)
+            {
+                var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");
+                
+                if (userId > 0)
+                {
+                    model.UserOwnedInventories = await _inventoryService.GetUserOwnedInventoriesAsync(userId);
+                    model.UserAccessibleInventories = await _inventoryService.GetUserAccessibleInventoriesAsync(userId);
+                }
+            }
 
             return View(model);
         }
