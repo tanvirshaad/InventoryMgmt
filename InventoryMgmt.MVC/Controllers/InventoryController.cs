@@ -777,6 +777,18 @@ namespace InventoryMgmt.MVC.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAccessUsers(int id)
         {
+            var inventory = await _inventoryService.GetInventoryByIdAsync(id);
+            if (inventory == null)
+            {
+                return NotFound();
+            }
+
+            // If inventory is public, we don't need to return access users
+            if (inventory.IsPublic)
+            {
+                return Json(new { isPublic = true, users = new object[0] });
+            }
+
             var users = await _inventoryService.GetInventoryAccessUsersAsync(id);
             var userDtos = users.Select(u => new
             {
@@ -786,7 +798,7 @@ namespace InventoryMgmt.MVC.Controllers
                 email = u.Email
             });
 
-            return Json(new { users = userDtos });
+            return Json(new { isPublic = false, users = userDtos });
         }
 
         [HttpGet]

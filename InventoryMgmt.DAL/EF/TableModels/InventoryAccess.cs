@@ -11,6 +11,7 @@ namespace InventoryMgmt.DAL.EF.TableModels
         public int InventoryId { get; set; }
         public int UserId { get; set; }
         public DateTime GrantedAt { get; set; } = DateTime.UtcNow;
+        public InventoryAccessPermission Permission { get; set; } = InventoryAccessPermission.Write;
 
         // Navigation properties
         public virtual Inventory Inventory { get; set; } = null!;

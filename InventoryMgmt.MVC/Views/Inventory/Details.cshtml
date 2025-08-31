@@ -95,7 +95,15 @@
             <button class="nav-link @(ViewBag.CurrentTab == "access" ? "active" : "")" 
                     id="access-tab" data-bs-toggle="tab" data-bs-target="#access" 
                     type="button" role="tab" aria-controls="access" aria-selected="false">
-                <i class="bi bi-people me-2"></i>Access
+                <i class="bi bi-people me-2"></i>Access 
+                @if (!Model.IsPublic)
+                {
+                    <span class='badge bg-primary ms-1'>Private</span>
+                }
+                else
+                {
+                    <span class='badge bg-success ms-1'>Public</span>
+                }
             </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -405,6 +413,8 @@
                     <h5>Access Control</h5>
                     <p class="text-muted">Manage who can access this inventory.</p>
                     
+                    @Html.AntiForgeryToken()
+                    
                     <div class="form-check mb-3">
                         <input class="form-check-input" type="checkbox" id="isPublic" 
                                @(Model.IsPublic ? "checked" : "") disabled>
@@ -413,20 +423,79 @@
                         </label>
                     </div>
                     
-                    <div class="mb-3">
-                        <label class="form-label">Users with Access</label>
-                        <div id="access-users-list">
-                            <!-- Access users will be loaded here -->
-                        </div>
-                    </div>
-                    
-                    @if (ViewBag.CanEdit == true)
+                    @if (Model.IsPublic)
                     {
-                        <div class="input-group mb-3">
-                            <input type="text" class="form-control" id="add-user-input" placeholder="Search users by name or email...">
-                            <button class="btn btn-outline-secondary" type="button" id="add-user-btn">
-                                <i class="bi bi-plus-circle me-2"></i>Add User
-                            </button>
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            This inventory is public, so anyone can access it. To manage specific user access, first make this inventory private in the Settings tab.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="mb-3">
+                            <label class="form-label">Users with Access</label>
+                            <div id="access-users-list" class="mt-2">
+                                <div class="text-center py-3">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="text-muted mt-2">Loading users...</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        @if (ViewBag.CanEdit == true)
+                        {
+                            <div id="add-user-form" class="mb-3">
+                                <label class="form-label">Add a User</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="add-user-input" 
+                                          placeholder="Enter user email...">
+                                    <button class="btn btn-primary" type="button" id="add-user-btn">
+                                        <i class="bi bi-plus-circle me-2"></i>Add User
+                                    </button>
+                                </div>
+                                <small class="form-text text-muted">Enter the complete email address of the user you want to add.</small>
+                                
+                                <!-- Hidden elements for TempData messages -->
+                                @if (TempData["Success"] != null)
+                                {
+                                    <div id="temp-success-message" class="d-none">@TempData["Success"]</div>
+                                }
+                                @if (TempData["Error"] != null)
+                                {
+                                    <div id="temp-error-message" class="d-none">@TempData["Error"]</div>
+                                }
+                                @if (TempData["Info"] != null)
+                                {
+                                    <div id="temp-info-message" class="d-none">@TempData["Info"]</div>
+                                }
+                                @if (TempData["Warning"] != null)
+                                {
+                                    <div id="temp-warning-message" class="d-none">@TempData["Warning"]</div>
+                                }
+                                
+                                <!-- Hidden form for direct submission -->
+                                <!-- Global anti-forgery token for JS -->
+                                <div id="antiforgery-container" class="d-none">
+                                    @Html.AntiForgeryToken()
+                                </div>
+                                
+                                <!-- Hidden form for direct submission -->
+                                <form id="direct-access-form" method="post" action="/Access/GrantAccess" style="display:none;">
+                                    <input type="hidden" name="__RequestVerificationToken" value="@Html.AntiForgeryToken().ToString()" />
+                                    <input type="hidden" name="inventoryId" value="@Model.Id">
+                                    <input type="hidden" name="userEmail" id="direct-email-input">
+                                    <input type="hidden" name="permission" value="1"> <!-- Write permission -->
+                                </form>
+                            </div>
+                        }
+                        
+                        <div id="access-status" class="alert @(TempData["Success"] != null ? "alert-success" : 
+                                        TempData["Error"] != null ? "alert-danger" : 
+                                        TempData["Info"] != null ? "alert-info" : 
+                                        TempData["Warning"] != null ? "alert-warning" : "d-none")">
+                            @(TempData["Success"] ?? TempData["Error"] ?? TempData["Info"] ?? TempData["Warning"] ?? "")
                         </div>
                     }
                 </div>
@@ -584,6 +653,9 @@
 @section Scripts {
     <script src="~/js/inventory-detail.js"></script>
     <script src="~/js/custom-fields-manager.js"></script>
+    <!-- Using only direct-access.js for simpler access control implementation -->
+    <script src="~/js/direct-access.js"></script>
+    <!-- jQuery UI is not available, using our own implementation -->
     <script>
         // Wait for jQuery to be fully loaded
         $(function() {
@@ -638,6 +710,12 @@
                 setTimeout(() => loadCustomIdElements(window.currentInventoryId), 300);
             });
             
+            // Handle tab changes for access tab
+            $('button[data-bs-toggle="tab"][data-bs-target="#access"]').on('shown.bs.tab', function (e) {
+                console.log("Access tab shown via Bootstrap tab event");
+                loadAccessUsers(window.currentInventoryId);
+            });
+            
             // Initialize the page
             initializeInventoryPage(window.currentInventoryId);
             
@@ -645,6 +723,12 @@
             if (@(ViewBag.CurrentTab == "customid" ? "true" : "false")) {
                 console.log("Custom ID tab is the current tab from ViewBag");
                 setTimeout(() => loadCustomIdElements(window.currentInventoryId), 500);
+            }
+            
+            // Force reload of access users if we're on that tab
+            if (@(ViewBag.CurrentTab == "access" ? "true" : "false")) {
+                console.log("Access tab is the current tab from ViewBag");
+                setTimeout(() => loadAccessUsers(window.currentInventoryId), 500);
             }
         });
         
@@ -845,5 +929,29 @@
     <link rel="stylesheet" href="~/css/inventory-detail.css" />
     <link rel="stylesheet" href="~/css/custom-fields.css" />
     <link rel="stylesheet" href="~/css/tags.css" />
+    <link rel="stylesheet" href="~/css/access-control.css" />
+    <!-- jQuery UI is not available, using Bootstrap styles -->
+    <style>
+        /* Simple dropdown styles for user search */
+        .user-search-dropdown {
+            position: absolute;
+            z-index: 1000;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .user-search-dropdown .user-item {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        
+        .user-search-dropdown .user-item:hover {
+            background-color: #f5f5f5;
+        }
+    </style>
 }
 

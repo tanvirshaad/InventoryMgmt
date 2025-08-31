@@ -1,0 +1,1 @@
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\wwwroot\js\inventory-access.js

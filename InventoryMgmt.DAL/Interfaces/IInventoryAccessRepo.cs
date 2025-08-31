@@ -14,7 +14,9 @@ namespace InventoryMgmt.DAL.Interfaces
         Task<InventoryAccess?> GetAccessAsync(int inventoryId, int userId);
         Task<bool> HasUserAccessAsync(int inventoryId, int userId);
         Task<bool> HasWriteAccessAsync(int userId, int inventoryId);
-        Task GrantAccessAsync(int inventoryId, int userId);
+        Task<InventoryAccessPermission> GetUserPermissionAsync(int inventoryId, int userId);
+        Task GrantAccessAsync(int inventoryId, int userId, InventoryAccessPermission permission = InventoryAccessPermission.Write);
+        Task UpdatePermissionAsync(int inventoryId, int userId, InventoryAccessPermission permission);
         Task RevokeAccessAsync(int inventoryId, int userId);
     }
 }

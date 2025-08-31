@@ -21,5 +21,8 @@ namespace InventoryMgmt.BLL.DTOs
         public DateTime LastLoginAt { get; set; }
         public string? Role { get; set; }
         public string FullName => $"{FirstName} {LastName}".Trim();
+        
+        // Used for displaying user's permission in inventory access lists
+        public InventoryPermission AccessPermission { get; set; } = InventoryPermission.None;
     }
 }

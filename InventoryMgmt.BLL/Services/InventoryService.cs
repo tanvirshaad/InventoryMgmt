@@ -853,15 +853,31 @@ namespace InventoryMgmt.BLL.Services
             {
                 // Return all users for public inventories
                 var allUsers = await _dataAccess.UserData.GetAllAsync();
-                return _mapper.Map<IEnumerable<UserDto>>(allUsers);
+                var userDtos = _mapper.Map<IEnumerable<UserDto>>(allUsers);
+                
+                // For public inventories, indicate that all users have Read access by default
+                foreach (var userDto in userDtos)
+                {
+                    userDto.AccessPermission = InventoryPermission.Read;
+                }
+                
+                return userDtos;
             }
             else
             {
                 // Return only users with explicit access
-                var accessUsers = await _dataAccess.InventoryAccessData.FindAsync(ua => ua.InventoryId == inventoryId);
-                var userIds = accessUsers.Select(ua => ua.UserId);
-                var users = await _dataAccess.UserData.FindAsync(u => userIds.Contains(u.Id));
-                return _mapper.Map<IEnumerable<UserDto>>(users);
+                var accessUsers = await _dataAccess.InventoryAccessData.GetAccessesByInventoryIdAsync(inventoryId);
+                
+                // Map users with their permissions
+                var userDtos = new List<UserDto>();
+                foreach (var access in accessUsers)
+                {
+                    var userDto = _mapper.Map<UserDto>(access.User);
+                    userDto.AccessPermission = MapToBllPermission(access.Permission);
+                    userDtos.Add(userDto);
+                }
+                
+                return userDtos;
             }
         }
         private void UpdateFieldIfProvided(Dictionary<string, CustomFieldData> fieldDictionary, string fieldId, Inventory inventory, Action<Inventory, CustomFieldData> applyFunc)
@@ -1396,9 +1412,51 @@ namespace InventoryMgmt.BLL.Services
             inventory.DocumentField3ShowInTable = false;
         }
 
-        public async Task GrantUserAccessAsync(int inventoryId, int userId)
+        public async Task GrantUserAccessAsync(int inventoryId, int userId, InventoryPermission permission = InventoryPermission.Write)
         {
-            await _dataAccess.InventoryAccessData.GrantAccessAsync(inventoryId, userId);
+            // Map BLL InventoryPermission to DAL InventoryAccessPermission
+            var dalPermission = MapToDalPermission(permission);
+            await _dataAccess.InventoryAccessData.GrantAccessAsync(inventoryId, userId, dalPermission);
+        }
+
+        public async Task UpdateUserAccessPermissionAsync(int inventoryId, int userId, InventoryPermission permission)
+        {
+            // Map BLL InventoryPermission to DAL InventoryAccessPermission
+            var dalPermission = MapToDalPermission(permission);
+            await _dataAccess.InventoryAccessData.UpdatePermissionAsync(inventoryId, userId, dalPermission);
+        }
+
+        public async Task<InventoryPermission> GetUserAccessPermissionAsync(int inventoryId, int userId)
+        {
+            var dalPermission = await _dataAccess.InventoryAccessData.GetUserPermissionAsync(inventoryId, userId);
+            // Map DAL InventoryAccessPermission to BLL InventoryPermission
+            return MapToBllPermission(dalPermission);
+        }
+        
+        private InventoryAccessPermission MapToDalPermission(InventoryPermission permission)
+        {
+            return permission switch
+            {
+                InventoryPermission.None => InventoryAccessPermission.None,
+                InventoryPermission.Read => InventoryAccessPermission.Read,
+                InventoryPermission.Write => InventoryAccessPermission.Write,
+                InventoryPermission.Manage => InventoryAccessPermission.Manage,
+                InventoryPermission.FullControl => InventoryAccessPermission.FullControl,
+                _ => InventoryAccessPermission.None
+            };
+        }
+        
+        private InventoryPermission MapToBllPermission(InventoryAccessPermission permission)
+        {
+            return permission switch
+            {
+                InventoryAccessPermission.None => InventoryPermission.None,
+                InventoryAccessPermission.Read => InventoryPermission.Read,
+                InventoryAccessPermission.Write => InventoryPermission.Write,
+                InventoryAccessPermission.Manage => InventoryPermission.Manage,
+                InventoryAccessPermission.FullControl => InventoryPermission.FullControl,
+                _ => InventoryPermission.None
+            };
         }
 
         public async Task RevokeUserAccessAsync(int inventoryId, int userId)

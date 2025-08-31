@@ -22,7 +22,9 @@ namespace InventoryMgmt.BLL.Interfaces
         Task<IEnumerable<UserDto>> GetInventoryAccessUsersAsync(int inventoryId);
         Task<bool> ClearAllCustomFieldsAsync(int inventoryId);
         Task<Inventory?> GetRawInventoryDataAsync(int id);
-        Task GrantUserAccessAsync(int inventoryId, int userId);
+        Task GrantUserAccessAsync(int inventoryId, int userId, InventoryPermission permission = InventoryPermission.Write);
+        Task UpdateUserAccessPermissionAsync(int inventoryId, int userId, InventoryPermission permission);
+        Task<InventoryPermission> GetUserAccessPermissionAsync(int inventoryId, int userId);
         Task RevokeUserAccessAsync(int inventoryId, int userId);
         string GenerateCustomId(string format, int itemNumber);
         string GenerateAdvancedCustomId(List<CustomIdElement> elements, int itemNumber);

@@ -54,10 +54,16 @@ namespace InventoryMgmt.DAL.Repos
         public async Task<bool> HasWriteAccessAsync(int userId, int inventoryId)
         {
             return await _dbSet
-                .AnyAsync(ia => ia.UserId == userId && ia.InventoryId == inventoryId);
+                .AnyAsync(ia => ia.UserId == userId && ia.InventoryId == inventoryId && ia.Permission >= InventoryAccessPermission.Write);
         }
 
-        public async Task GrantAccessAsync(int inventoryId, int userId)
+        public async Task<InventoryAccessPermission> GetUserPermissionAsync(int inventoryId, int userId)
+        {
+            var access = await GetAccessAsync(inventoryId, userId);
+            return access?.Permission ?? InventoryAccessPermission.None;
+        }
+
+        public async Task GrantAccessAsync(int inventoryId, int userId, InventoryAccessPermission permission = InventoryAccessPermission.Write)
         {
             var existingAccess = await GetAccessAsync(inventoryId, userId);
             if (existingAccess == null)
@@ -66,10 +72,27 @@ namespace InventoryMgmt.DAL.Repos
                 {
                     InventoryId = inventoryId,
                     UserId = userId,
-                    GrantedAt = DateTime.UtcNow
+                    GrantedAt = DateTime.UtcNow,
+                    Permission = permission
                 };
 
                 await AddAsync(access);
+                await SaveChangesAsync();
+            }
+            else if (existingAccess.Permission != permission)
+            {
+                // Update permission if it has changed
+                await UpdatePermissionAsync(inventoryId, userId, permission);
+            }
+        }
+
+        public async Task UpdatePermissionAsync(int inventoryId, int userId, InventoryAccessPermission permission)
+        {
+            var access = await GetAccessAsync(inventoryId, userId);
+            if (access != null)
+            {
+                access.Permission = permission;
+                Update(access);
                 await SaveChangesAsync();
             }
         }
