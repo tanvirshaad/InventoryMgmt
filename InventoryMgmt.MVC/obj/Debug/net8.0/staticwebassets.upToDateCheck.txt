@@ -1,10 +1,12 @@
 wwwroot\css\access-control.css
+wwwroot\css\chat.css
 wwwroot\css\custom-fields.css
 wwwroot\css\inventory-detail.css
 wwwroot\css\item-form.css
 wwwroot\css\site.css
 wwwroot\css\tags.css
 wwwroot\favicon.ico
+wwwroot\js\chat.js
 wwwroot\js\custom-fields-manager.js
 wwwroot\js\direct-access.js
 wwwroot\js\inventory-detail.js

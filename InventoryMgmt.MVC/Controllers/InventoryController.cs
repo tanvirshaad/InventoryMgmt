@@ -735,15 +735,17 @@ namespace InventoryMgmt.MVC.Controllers
             var commentDtos = comments.Select(c => new
             {
                 id = c.Id,
-                content = c.Content,
+                content = c.Content, // Keep raw markdown content
                 userName = $"{c.User?.FirstName} {c.User?.LastName}",
-                createdAt = c.CreatedAt
+                createdAt = c.CreatedAt,
+                userId = c.UserId
             });
 
             return Json(new { comments = commentDtos });
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddComment([FromBody] AddCommentRequest request)
         {
             var currentUserId = GetCurrentUserId();
@@ -756,7 +758,13 @@ namespace InventoryMgmt.MVC.Controllers
             {
                 return Json(new { success = false, message = "Access denied" });
             }
+            
+            if (string.IsNullOrWhiteSpace(request.Content))
+            {
+                return Json(new { success = false, message = "Comment content cannot be empty" });
+            }
 
+            // Keep original markdown content
             var commentDto = new CommentDto
             {
                 InventoryId = request.InventoryId,
@@ -768,7 +776,8 @@ namespace InventoryMgmt.MVC.Controllers
             if (result)
             {
                 // Notify other users via SignalR
-                await _hubContext.Clients.All.SendAsync("CommentAdded", request.InventoryId);
+                // Make sure we're using the same event name that the client is listening for
+                await _hubContext.Clients.Group($"inventory_{request.InventoryId}").SendAsync("CommentAdded", request.InventoryId);
             }
 
             return Json(new { success = result });

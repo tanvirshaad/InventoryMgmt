@@ -1,0 +1,164 @@
+/* Chat styles for inventory discussions */
+
+/* Comment container */
+#comments-container {
+    background-color: #f9f9f9;
+    border-radius: 6px;
+}
+
+/* Individual comment */
+.comment {
+    position: relative;
+    padding: 0.75rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.comment:last-child {
+    border-bottom: none;
+}
+
+/* Comment hover effect */
+.comment:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* User avatar */
+.comment .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #007bff;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+/* Comment content */
+.comment-content {
+    padding: 0.5rem 0;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+/* Markdown body styles */
+.markdown-body {
+    line-height: 1.6;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.markdown-body h1 {
+    font-size: 1.5rem;
+}
+
+.markdown-body h2 {
+    font-size: 1.3rem;
+}
+
+.markdown-body h3 {
+    font-size: 1.1rem;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+    padding-left: 1.5rem;
+}
+
+.markdown-body blockquote {
+    padding: 0.5rem 1rem;
+    color: #6c757d;
+    border-left: 4px solid #e9ecef;
+    margin-left: 0;
+}
+
+.markdown-body pre {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 0.75rem;
+    overflow: auto;
+}
+
+.markdown-body code {
+    padding: 0.2rem 0.4rem;
+    font-size: 90%;
+    color: #d63384;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.markdown-body pre code {
+    padding: 0;
+    color: inherit;
+    background-color: transparent;
+}
+
+.markdown-body img {
+    max-width: 100%;
+    height: auto;
+}
+
+.markdown-body a {
+    color: #0d6efd;
+    text-decoration: underline;
+}
+
+.markdown-body table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.markdown-body table th,
+.markdown-body table td {
+    padding: 0.5rem;
+    border: 1px solid #dee2e6;
+}
+
+.markdown-body table th {
+    background-color: #f8f9fa;
+}
+
+/* Comment textarea */
+#new-comment {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Markdown help toggle */
+#markdown-help-toggle {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+#markdown-help-toggle:hover {
+    color: #0d6efd;
+}
+
+/* Markdown help */
+#markdown-help {
+    background-color: #f8f9fa;
+}
+
+#markdown-help code {
+    background-color: #e9ecef;
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+}
+
+/* Timestamp */
+.comment .text-muted {
+    font-size: 0.8rem;
+}

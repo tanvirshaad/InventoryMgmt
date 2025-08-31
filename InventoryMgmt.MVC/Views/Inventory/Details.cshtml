@@ -204,17 +204,42 @@
              id="chat" role="tabpanel" aria-labelledby="chat-tab">
             <div class="card">
                 <div class="card-body">
-                    <h5>Discussion</h5>
-                    <div id="comments-container" class="mb-3" style="max-height: 400px; overflow-y: auto;">
+                    <h5>
+                        Discussion
+                        <a href="#" class="text-decoration-none ms-2 small" id="markdown-help-toggle">
+                            <i class="bi bi-markdown me-1"></i>Markdown supported
+                        </a>
+                    </h5>
+                    
+                    <div id="markdown-help" class="alert alert-light border small mb-3" style="display: none;">
+                        <h6>Markdown Formatting</h6>
+                        <ul class="mb-0">
+                            <li><code>**bold**</code> for <strong>bold text</strong></li>
+                            <li><code>*italic*</code> for <em>italic text</em></li>
+                            <li><code>[link](https://example.com)</code> for <a href="#">links</a></li>
+                            <li><code>![alt](image-url)</code> for images</li>
+                            <li><code>`code`</code> for <code>inline code</code></li>
+                            <li><code>```code block```</code> for code blocks</li>
+                            <li><code># Heading</code> for headings</li>
+                            <li><code>- list item</code> for lists</li>
+                            <li><code>> quote</code> for blockquotes</li>
+                        </ul>
+                    </div>
+                    
+                    <div id="comments-container" class="mb-3 p-2" style="max-height: 500px; overflow-y: auto; border: 1px solid #eee; border-radius: 4px;">
                         <!-- Comments will be loaded here -->
                     </div>
+                    
                     @if (User.Identity?.IsAuthenticated == true)
                     {
                         <div class="input-group">
-                            <textarea class="form-control" id="new-comment" placeholder="Add a comment..." rows="2"></textarea>
+                            <textarea class="form-control" id="new-comment" placeholder="Write a comment... (Markdown supported)" rows="3"></textarea>
                             <button class="btn btn-primary" type="button" id="send-comment">
                                 <i class="bi bi-send"></i>
                             </button>
+                        </div>
+                        <div class="text-end mt-1">
+                            <small class="text-muted">Press Shift+Enter for a new line</small>
                         </div>
                     }
                     else
@@ -224,6 +249,7 @@
                             Please <a href="/Auth/Login">login</a> to participate in the discussion.
                         </div>
                     }
+                    @Html.AntiForgeryToken()
                 </div>
             </div>
         </div>
@@ -655,6 +681,10 @@
     <script src="~/js/custom-fields-manager.js"></script>
     <!-- Using only direct-access.js for simpler access control implementation -->
     <script src="~/js/direct-access.js"></script>
+    <!-- Markdown parser for chat -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Chat functionality -->
+    <script src="~/js/chat.js"></script>
     <!-- jQuery UI is not available, using our own implementation -->
     <script>
         // Wait for jQuery to be fully loaded
@@ -718,6 +748,9 @@
             
             // Initialize the page
             initializeInventoryPage(window.currentInventoryId);
+            
+            // Initialize chat functionality
+            initializeChat(window.currentInventoryId);
             
             // Force reload of custom ID elements if we're on that tab
             if (@(ViewBag.CurrentTab == "customid" ? "true" : "false")) {
@@ -930,6 +963,7 @@
     <link rel="stylesheet" href="~/css/custom-fields.css" />
     <link rel="stylesheet" href="~/css/tags.css" />
     <link rel="stylesheet" href="~/css/access-control.css" />
+    <link rel="stylesheet" href="~/css/chat.css" asp-append-version="true" />
     <!-- jQuery UI is not available, using Bootstrap styles -->
     <style>
         /* Simple dropdown styles for user search */

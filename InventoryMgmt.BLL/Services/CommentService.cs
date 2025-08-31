@@ -24,10 +24,14 @@ namespace InventoryMgmt.BLL.Services
 
         public async Task<IEnumerable<CommentDto>> GetCommentsByInventoryIdAsync(int inventoryId)
         {
-            var comments = await _dataAccess.CommentData.GetAllAsync();
-            var filteredComments = comments.Where(c => c.InventoryId == inventoryId)
-                                         .OrderBy(c => c.CreatedAt);
-            return _mapper.Map<IEnumerable<CommentDto>>(filteredComments);
+            // Use the repository method instead of getting all comments and filtering in memory
+            var comments = await _dataAccess.CommentData.GetCommentsByInventoryIdAsync(inventoryId);
+            
+            // Sort comments by creation date (oldest first)
+            var sortedComments = comments.OrderBy(c => c.CreatedAt);
+            
+            // Map to DTOs
+            return _mapper.Map<IEnumerable<CommentDto>>(sortedComments);
         }
 
         public async Task<bool> AddCommentAsync(CommentDto commentDto)

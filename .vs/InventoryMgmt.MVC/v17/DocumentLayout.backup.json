@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "D:\\itransition\\InventoryMgmt.MVC\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|d:\\itransition\\inventorymgmt.mvc\\inventorymgmt.mvc\\hubs\\commenthub.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|solutionrelative:inventorymgmt.mvc\\hubs\\commenthub.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|d:\\itransition\\inventorymgmt.mvc\\inventorymgmt.mvc\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|solutionrelative:inventorymgmt.mvc\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
@@ -219,10 +223,6 @@
       "RelativeMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|solutionrelative:inventorymgmt.mvc\\views\\home\\searchresults.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|d:\\itransition\\inventorymgmt.mvc\\inventorymgmt.mvc\\hubs\\commenthub.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|solutionrelative:inventorymgmt.mvc\\hubs\\commenthub.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|d:\\itransition\\inventorymgmt.mvc\\inventorymgmt.mvc\\models\\homeindexviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|solutionrelative:inventorymgmt.mvc\\models\\homeindexviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -250,11 +250,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 8,
+          "SelectedChildIndex": 9,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "AccessController.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Controllers\\AccessController.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.MVC\\Controllers\\AccessController.cs",
@@ -262,12 +262,11 @@
               "RelativeToolTip": "InventoryMgmt.MVC\\Controllers\\AccessController.cs",
               "ViewState": "AgIAAAQBAAAAAAAAAAAlwCIBAABuAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-31T12:03:43.496Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-31T12:03:43.496Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "IInventoryAccessRepo.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\Interfaces\\IInventoryAccessRepo.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.DAL\\Interfaces\\IInventoryAccessRepo.cs",
@@ -279,7 +278,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "Users.cshtml",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Views\\Admin\\Users.cshtml",
               "RelativeDocumentMoniker": "InventoryMgmt.MVC\\Views\\Admin\\Users.cshtml",
@@ -291,7 +290,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 24,
+              "DocumentIndex": 25,
               "Title": "HomeController.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Controllers\\HomeController.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.MVC\\Controllers\\HomeController.cs",
@@ -303,7 +302,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "ItemController.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Controllers\\ItemController.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.MVC\\Controllers\\ItemController.cs",
@@ -315,7 +314,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 14,
               "Title": "InventoryService.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\Services\\InventoryService.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.BLL\\Services\\InventoryService.cs",
@@ -327,7 +326,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 18,
               "Title": "_CustomFieldsForm.cshtml",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Views\\Shared\\_CustomFieldsForm.cshtml",
               "RelativeDocumentMoniker": "InventoryMgmt.MVC\\Views\\Shared\\_CustomFieldsForm.cshtml",
@@ -339,7 +338,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 23,
               "Title": "ItemDto.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\DTOs\\ItemDto.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.BLL\\DTOs\\ItemDto.cs",
@@ -351,15 +350,28 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "Index.cshtml",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Views\\Home\\Index.cshtml",
               "RelativeDocumentMoniker": "InventoryMgmt.MVC\\Views\\Home\\Index.cshtml",
               "ToolTip": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Views\\Home\\Index.cshtml",
               "RelativeToolTip": "InventoryMgmt.MVC\\Views\\Home\\Index.cshtml",
-              "ViewState": "AgIAAJ0AAAAAAAAAAIAywKwAAABmAAAAAAAAAA==",
+              "ViewState": "AgIAAJ0AAAAAAAAAAIAywK0AAAAkAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2025-08-24T16:18:02.952Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "CommentHub.cs",
+              "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Hubs\\CommentHub.cs",
+              "RelativeDocumentMoniker": "InventoryMgmt.MVC\\Hubs\\CommentHub.cs",
+              "ToolTip": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Hubs\\CommentHub.cs",
+              "RelativeToolTip": "InventoryMgmt.MVC\\Hubs\\CommentHub.cs",
+              "ViewState": "AgIAABwAAAAAAAAAAAAlwCoAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-24T16:16:37.659Z",
               "EditorCaption": ""
             },
             {
@@ -376,7 +388,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "Program.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Program.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.MVC\\Program.cs",
@@ -388,7 +400,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "DataAccess.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\DataAccess.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.DAL\\DataAccess.cs",
@@ -400,7 +412,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 16,
               "Title": "CategoryService.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\Services\\CategoryService.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.BLL\\Services\\CategoryService.cs",
@@ -412,7 +424,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "InventoryAccess.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\EF\\TableModels\\InventoryAccess.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.DAL\\EF\\TableModels\\InventoryAccess.cs",
@@ -424,7 +436,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "AdminController.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Controllers\\AdminController.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.MVC\\Controllers\\AdminController.cs",
@@ -436,7 +448,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "InventoryController.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Controllers\\InventoryController.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.MVC\\Controllers\\InventoryController.cs",
@@ -448,7 +460,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 17,
               "Title": "20250829063539_user table altered.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\Migrations\\20250829063539_user table altered.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.DAL\\Migrations\\20250829063539_user table altered.cs",
@@ -460,7 +472,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 11,
               "Title": "AuthService.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\Services\\AuthService.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.BLL\\Services\\AuthService.cs",
@@ -472,7 +484,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 15,
               "Title": "CommentService.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\Services\\CommentService.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.BLL\\Services\\CommentService.cs",
@@ -484,7 +496,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 13,
               "Title": "ItemService.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\Services\\ItemService.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.BLL\\Services\\ItemService.cs",
@@ -496,7 +508,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 31,
+              "DocumentIndex": 32,
               "Title": "InventoryTag.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\EF\\TableModels\\InventoryTag.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.DAL\\EF\\TableModels\\InventoryTag.cs",
@@ -508,7 +520,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 12,
               "Title": "JwtService.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\Services\\JwtService.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.BLL\\Services\\JwtService.cs",
@@ -520,7 +532,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 30,
+              "DocumentIndex": 31,
               "Title": "appsettings.json",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\appsettings.json",
               "RelativeDocumentMoniker": "InventoryMgmt.MVC\\appsettings.json",
@@ -532,7 +544,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 23,
+              "DocumentIndex": 24,
               "Title": "Create.cshtml",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Views\\Inventory\\Create.cshtml",
               "RelativeDocumentMoniker": "InventoryMgmt.MVC\\Views\\Inventory\\Create.cshtml",
@@ -544,7 +556,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 19,
               "Title": "20250826090934_Numeric field config added.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\Migrations\\20250826090934_Numeric field config added.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.DAL\\Migrations\\20250826090934_Numeric field config added.cs",
@@ -556,7 +568,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 20,
               "Title": "20250826090808_Numeric field config added.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\Migrations\\20250826090808_Numeric field config added.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.DAL\\Migrations\\20250826090808_Numeric field config added.cs",
@@ -568,7 +580,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 22,
               "Title": "Item.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\EF\\TableModels\\Item.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.DAL\\EF\\TableModels\\Item.cs",
@@ -580,7 +592,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 21,
               "Title": "MappingProfile.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\Profiles\\MappingProfile.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.BLL\\Profiles\\MappingProfile.cs",
@@ -592,7 +604,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 36,
+              "DocumentIndex": 37,
               "Title": "TagDto.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\DTOs\\TagDto.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.BLL\\DTOs\\TagDto.cs",
@@ -604,7 +616,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 35,
+              "DocumentIndex": 36,
               "Title": "UserDto.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\DTOs\\UserDto.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.BLL\\DTOs\\UserDto.cs",
@@ -616,7 +628,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 37,
+              "DocumentIndex": 38,
               "Title": "CommentDto.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\DTOs\\CommentDto.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.BLL\\DTOs\\CommentDto.cs",
@@ -628,7 +640,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 26,
+              "DocumentIndex": 27,
               "Title": "Create.cshtml",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Views\\Item\\Create.cshtml",
               "RelativeDocumentMoniker": "InventoryMgmt.MVC\\Views\\Item\\Create.cshtml",
@@ -640,7 +652,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 25,
+              "DocumentIndex": 26,
               "Title": "AuthController.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Controllers\\AuthController.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.MVC\\Controllers\\AuthController.cs",
@@ -652,7 +664,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 28,
+              "DocumentIndex": 29,
               "Title": "20250825055542_column updated.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\Migrations\\20250825055542_column updated.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.DAL\\Migrations\\20250825055542_column updated.cs",
@@ -664,7 +676,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 27,
+              "DocumentIndex": 28,
               "Title": "20250825055652_column updated.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\Migrations\\20250825055652_column updated.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.DAL\\Migrations\\20250825055652_column updated.cs",
@@ -676,7 +688,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 40,
+              "DocumentIndex": 41,
               "Title": "InventoryRepo.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\Repos\\InventoryRepo.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.DAL\\Repos\\InventoryRepo.cs",
@@ -688,7 +700,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 39,
+              "DocumentIndex": 40,
               "Title": "Repo.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\Repos\\Repo.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.DAL\\Repos\\Repo.cs",
@@ -700,7 +712,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 29,
+              "DocumentIndex": 30,
               "Title": "User.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\EF\\TableModels\\User.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.DAL\\EF\\TableModels\\User.cs",
@@ -712,7 +724,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 32,
+              "DocumentIndex": 33,
               "Title": "Comment.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\EF\\TableModels\\Comment.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.DAL\\EF\\TableModels\\Comment.cs",
@@ -724,7 +736,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 33,
+              "DocumentIndex": 34,
               "Title": "Category.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\EF\\TableModels\\Category.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.DAL\\EF\\TableModels\\Category.cs",
@@ -736,7 +748,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 38,
+              "DocumentIndex": 39,
               "Title": "InventoryDto.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\DTOs\\InventoryDto.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.BLL\\DTOs\\InventoryDto.cs",
@@ -748,7 +760,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 34,
+              "DocumentIndex": 35,
               "Title": "CategoryDto.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\DTOs\\CategoryDto.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.BLL\\DTOs\\CategoryDto.cs",
@@ -760,7 +772,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 42,
+              "DocumentIndex": 43,
               "Title": "Inventory.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\EF\\TableModels\\Inventory.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.DAL\\EF\\TableModels\\Inventory.cs",
@@ -772,7 +784,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 43,
+              "DocumentIndex": 44,
               "Title": "ApplicationDbContext.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\Data\\ApplicationDbContext.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.DAL\\Data\\ApplicationDbContext.cs",
@@ -784,7 +796,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 41,
+              "DocumentIndex": 42,
               "Title": "IInventoryRepo.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\Interfaces\\IInventoryRepo.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.DAL\\Interfaces\\IInventoryRepo.cs",
@@ -796,7 +808,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 44,
+              "DocumentIndex": 45,
               "Title": "ItemLike.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\EF\\TableModels\\ItemLike.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.DAL\\EF\\TableModels\\ItemLike.cs",
@@ -808,7 +820,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 45,
+              "DocumentIndex": 46,
               "Title": "Tag.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\EF\\TableModels\\Tag.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.DAL\\EF\\TableModels\\Tag.cs",
@@ -820,7 +832,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 48,
+              "DocumentIndex": 49,
               "Title": "Program.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
@@ -832,7 +844,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 51,
+              "DocumentIndex": 52,
               "Title": "site.css",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\wwwroot\\css\\site.css",
               "RelativeDocumentMoniker": "InventoryMgmt.MVC\\wwwroot\\css\\site.css",
@@ -844,7 +856,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 47,
+              "DocumentIndex": 48,
               "Title": "InventoryMgmt.DAL.csproj",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\InventoryMgmt.DAL.csproj",
               "RelativeDocumentMoniker": "InventoryMgmt.DAL\\InventoryMgmt.DAL.csproj",
@@ -856,7 +868,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 46,
+              "DocumentIndex": 47,
               "Title": "InventoryMgmt.BLL.csproj",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\InventoryMgmt.BLL.csproj",
               "RelativeDocumentMoniker": "InventoryMgmt.BLL\\InventoryMgmt.BLL.csproj",
@@ -881,18 +893,6 @@
             {
               "$type": "Document",
               "DocumentIndex": 54,
-              "Title": "CommentHub.cs",
-              "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Hubs\\CommentHub.cs",
-              "RelativeDocumentMoniker": "InventoryMgmt.MVC\\Hubs\\CommentHub.cs",
-              "ToolTip": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Hubs\\CommentHub.cs",
-              "RelativeToolTip": "InventoryMgmt.MVC\\Hubs\\CommentHub.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-24T16:16:37.659Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 53,
               "Title": "SearchResults.cshtml",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Views\\Home\\SearchResults.cshtml",
               "RelativeDocumentMoniker": "InventoryMgmt.MVC\\Views\\Home\\SearchResults.cshtml",
@@ -904,7 +904,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 52,
+              "DocumentIndex": 53,
               "Title": "_Layout.cshtml",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Views\\Shared\\_Layout.cshtml",
               "RelativeDocumentMoniker": "InventoryMgmt.MVC\\Views\\Shared\\_Layout.cshtml",
@@ -916,7 +916,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 49,
+              "DocumentIndex": 50,
               "Title": "_LoginPartial.cshtml",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Views\\Shared\\_LoginPartial.cshtml",
               "RelativeDocumentMoniker": "InventoryMgmt.MVC\\Views\\Shared\\_LoginPartial.cshtml",
@@ -928,7 +928,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 50,
+              "DocumentIndex": 51,
               "Title": "site.js",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\wwwroot\\js\\site.js",
               "RelativeDocumentMoniker": "InventoryMgmt.MVC\\wwwroot\\js\\site.js",
