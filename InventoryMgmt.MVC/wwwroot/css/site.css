@@ -422,6 +422,11 @@ body {
 /* Like button animation */
 .like-btn {
     transition: all 0.2s ease;
+    cursor: pointer !important;
+    position: relative;
+    z-index: 1000 !important; /* Very high z-index to ensure it's above everything */
+    padding: 8px !important; /* Larger padding to increase clickable area */
+    display: inline-block !important;
 }
 
     .like-btn.liked {
@@ -431,6 +436,34 @@ body {
 
     .like-btn:hover {
         transform: scale(1.05);
+    }
+    
+    .like-btn .bi-heart-fill {
+        color: var(--bs-danger);
+    }
+    
+    .like-btn .bi-heart {
+        color: var(--bs-secondary);
+    }
+    
+    .heart-icon {
+        pointer-events: auto; /* Allow clicks on the heart icon */
+        font-size: 1.2em; /* Make the icon bigger */
+        cursor: pointer !important;
+        color: var(--bs-danger) !important; /* Make it red for better visibility */
+    }
+    
+    /* Like animation */
+    @keyframes heartbeat {
+        0% { transform: scale(1); }
+        25% { transform: scale(1.2); }
+        50% { transform: scale(1); }
+        75% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+    
+    .like-btn.liked i {
+        animation: heartbeat 0.5s ease;
     }
 
 /* Comment section */

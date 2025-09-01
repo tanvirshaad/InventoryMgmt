@@ -12,6 +12,7 @@ wwwroot\js\direct-access.js
 wwwroot\js\inventory-detail.js
 wwwroot\js\item-detail.js
 wwwroot\js\item-form.js
+wwwroot\js\like-handler.js
 wwwroot\js\numeric-field-config.js
 wwwroot\js\site.js
 wwwroot\js\tag-manager.js

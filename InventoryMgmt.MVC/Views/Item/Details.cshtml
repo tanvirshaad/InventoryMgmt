@@ -4,6 +4,7 @@
     ViewData["Title"] = "Item Details";
 }
 
+@Html.AntiForgeryToken()
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col">
@@ -37,7 +38,11 @@
                             <i class="bi bi-pencil me-2"></i>Edit
                         </a>
                     }
-                    <button class="btn btn-outline-primary like-btn" data-item-id="@Model.Id">
+                    <button class="btn btn-outline-primary like-btn" 
+                            data-item-id="@Model.Id"
+                            data-authenticated="@(User.Identity?.IsAuthenticated == true ? "true" : "false")"
+                            data-bs-toggle="tooltip" 
+                            title="@(User.Identity?.IsAuthenticated == true ? (Model.IsLikedByCurrentUser ? "Unlike" : "Like") : "Login to like this item")">
                         <i class="bi bi-heart@(Model.IsLikedByCurrentUser ? "-fill" : "")"></i>
                         <span class="likes-count">@Model.LikesCount</span>
                     </button>

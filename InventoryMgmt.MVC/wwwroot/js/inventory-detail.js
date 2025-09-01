@@ -1,5 +1,13 @@
 // inventory-detail.js - Handles selection and actions for inventory items
 
+// Debug event handler to log all clicks on the page
+$(document).on('click', function(e) {
+    console.log('Document click event target:', e.target);
+    console.log('Target classList:', e.target.classList);
+    console.log('Target is like button:', $(e.target).is('.like-btn') || $(e.target).closest('.like-btn').length > 0);
+    console.log('------');
+});
+
 // Initialize the inventory page
 function initializeInventoryPage(inventoryId) {
     console.log("Initializing inventory page with ID:", inventoryId);
@@ -449,6 +457,9 @@ function initializeElementDragDrop() {
 }
 
 $(document).ready(function () {
+    // Initialize tooltips
+    $('[data-bs-toggle="tooltip"]').tooltip();
+    
     // Selection management
     const selectionToolbar = $('#selectionToolbar');
     const selectedCountBadge = $('#selectedCount');
@@ -511,10 +522,19 @@ $(document).ready(function () {
     
     // Row click handler (excluding checkbox and action buttons)
     $('.item-row').on('click', function(e) {
+        console.log('Row clicked, target:', e.target);
+        
         // Only toggle if the click wasn't on a checkbox, button, or link
-        if (!$(e.target).is('input, button, a, .btn, i.fas, i.far, i.fab')) {
+        // Exclude specific elements to ensure they can handle their own clicks
+        if (!$(e.target).is('input, button, a, .btn, i.bi, .heart-icon, .like-btn') && 
+            !$(e.target).closest('.like-btn').length && 
+            !$(e.target).closest('button').length) {
+            
+            console.log('Row click handler: toggling checkbox');
             const checkbox = $(this).find('.item-checkbox');
             checkbox.prop('checked', !checkbox.prop('checked')).trigger('change');
+        } else {
+            console.log('Row click handler: click on excluded element, not toggling checkbox');
         }
     });
     
@@ -695,4 +715,109 @@ $(document).ready(function () {
     
     // Initialize tooltips
     $('[data-bs-toggle="tooltip"]').tooltip();
+    
+    // Handle clicks on the heart icons inside like buttons
+    $(document).on('click', '.like-btn i.heart-icon, .like-btn i.bi', function(e) {
+        console.log('Heart icon clicked directly');
+        
+        // Check if the dedicated like handler is active
+        if (window.likeHandlerActive) {
+            console.log('Skipping handler - dedicated like-handler.js is active');
+            return;
+        }
+        
+        e.stopPropagation();
+        e.preventDefault();
+        
+        // Don't trigger parent click, handle the click here directly
+        const $likeBtn = $(this).parent();
+        handleLikeButtonClick($likeBtn, e);
+    });
+    
+    // Like button functionality
+    $(document).on('click', '.like-btn', function(e) {
+        console.log('Like button clicked');
+        
+        // Check if the dedicated like handler is active
+        if (window.likeHandlerActive) {
+            console.log('Skipping handler - dedicated like-handler.js is active');
+            return;
+        }
+        
+        // Stop event propagation to prevent the row click handler from firing
+        e.stopPropagation();
+        e.preventDefault();
+        
+        handleLikeButtonClick($(this), e);
+    });
+    
+    // Add a hidden form to the page for submitting the like action
+    if ($('#like-form').length === 0) {
+        $('body').append(`
+            <form id="like-form" method="post" style="display: none;">
+                <input type="hidden" name="__RequestVerificationToken" value="${$('input[name="__RequestVerificationToken"]').val() || ''}" />
+            </form>
+        `);
+    }
+    
+    function handleLikeButtonClick($likeBtn, e) {
+        console.log('Handling like button click');
+        
+        // Debug authentication data
+        console.log('Auth state from data():', $likeBtn.data('authenticated'));
+        console.log('Auth state from attr():', $likeBtn.attr('data-authenticated'));
+        
+        // Don't check authentication here - we're handling it in like-handler.js
+        // to avoid duplicate alerts
+        
+        const itemId = $likeBtn.data('item-id');
+        const $icon = $likeBtn.find('i');
+        // Find the likes count element - might be nested or a sibling
+        const $likesCount = $('span.likes-count[data-item-id="' + itemId + '"]');
+        
+        // Log for debugging
+        console.log('Processing like for item:', itemId);
+        
+        // Create a simple form submission
+        const form = $('#like-form');
+        form.attr('action', `/Item/ToggleLike/${itemId}`);
+        
+        // Submit the form using fetch API to get JSON response
+        fetch(form.attr('action'), {
+            method: 'POST',
+            body: new FormData(form[0]),
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(result => {
+            console.log('Like toggle success:', result);
+            if (result.success) {
+                if (result.isLiked) {
+                    $icon.removeClass('bi-heart').addClass('bi-heart-fill');
+                    $likeBtn.attr('data-bs-original-title', 'Unlike');
+                } else {
+                    $icon.removeClass('bi-heart-fill').addClass('bi-heart');
+                    $likeBtn.attr('data-bs-original-title', 'Like');
+                }
+                
+                // Update tooltip
+                var tooltip = bootstrap.Tooltip.getInstance($likeBtn[0]);
+                if (tooltip) {
+                    tooltip.dispose();
+                }
+                new bootstrap.Tooltip($likeBtn[0]);
+                
+                // Update like count if it's returned in the response
+                if (result.likesCount !== undefined) {
+                    $likesCount.text(result.likesCount);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error toggling like:', error);
+            alert('Failed to toggle like. Please try again.');
+        });
+    }
 });

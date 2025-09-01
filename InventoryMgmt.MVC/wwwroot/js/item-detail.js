@@ -1,8 +1,30 @@
 // item-detail.js - Handles item detail functionality
 
 $(document).ready(function() {
+    // Initialize tooltips
+    $('[data-bs-toggle="tooltip"]').tooltip();
+    
+    // Handle clicks on the heart icons inside like buttons
+    $(document).on('click', '.like-btn i.bi', function(e) {
+        e.stopPropagation();
+        // Trigger click on parent button
+        $(this).parent().trigger('click');
+    });
+    
     // Like button functionality
-    $('.like-btn').on('click', function() {
+    $('.like-btn').on('click', function(e) {
+        // Stop event propagation
+        e.stopPropagation();
+        e.preventDefault();
+        
+        console.log('Like button clicked in item detail view');
+        
+        // Check if user is authenticated
+        if ($(this).data('authenticated') !== 'true') {
+            alert('You must be logged in to like items.');
+            return;
+        }
+        
         const itemId = $(this).data('item-id');
         const $likeBtn = $(this);
         const $icon = $likeBtn.find('i');
@@ -11,17 +33,40 @@ $(document).ready(function() {
         $.ajax({
             url: `/Item/ToggleLike/${itemId}`,
             type: 'POST',
+            headers: {
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+            },
             success: function(result) {
-                if (result.isLiked) {
-                    $icon.removeClass('bi-heart').addClass('bi-heart-fill');
-                    $likesCount.text(parseInt($likesCount.text()) + 1);
-                } else {
-                    $icon.removeClass('bi-heart-fill').addClass('bi-heart');
-                    $likesCount.text(Math.max(0, parseInt($likesCount.text()) - 1));
+                if (result.success) {
+                    if (result.isLiked) {
+                        $icon.removeClass('bi-heart').addClass('bi-heart-fill');
+                        $likeBtn.attr('data-bs-original-title', 'Unlike');
+                    } else {
+                        $icon.removeClass('bi-heart-fill').addClass('bi-heart');
+                        $likeBtn.attr('data-bs-original-title', 'Like');
+                    }
+                    
+                    // Update tooltip
+                    var tooltip = bootstrap.Tooltip.getInstance($likeBtn[0]);
+                    if (tooltip) {
+                        tooltip.dispose();
+                    }
+                    new bootstrap.Tooltip($likeBtn[0]);
+                    
+                    // Update like count if it's returned in the response
+                    if (result.likesCount !== undefined) {
+                        $likesCount.text(result.likesCount);
+                    }
                 }
             },
             error: function(error) {
                 console.error('Error toggling like:', error);
+                if (error.status === 401) {
+                    alert('You must be logged in to like items.');
+                } else {
+                    console.log('Response:', error.responseJSON);
+                    alert('Failed to toggle like. Please try again.');
+                }
             }
         });
     });

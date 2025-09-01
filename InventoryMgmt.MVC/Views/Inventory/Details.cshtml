@@ -4,6 +4,7 @@
     ViewData["Title"] = Model.Title;
 }
 
+@Html.AntiForgeryToken()
 <div class="container-fluid">
     <!-- Inventory Header -->
     <div class="row mb-4">
@@ -173,8 +174,13 @@
                                     <td>@item.CreatedAt.ToString("MMM dd, yyyy")</td>
                                     <td>
                                         <span class="likes-count" data-item-id="@item.Id">@item.LikesCount</span>
-                                        <button class="btn btn-sm btn-link like-btn p-0" data-item-id="@item.Id">
-                                            <i class="bi bi-heart@(item.IsLikedByCurrentUser ? "-fill" : "")"></i>
+                                        <button class="btn btn-sm btn-link like-btn p-0" 
+                                                data-item-id="@item.Id" 
+                                                data-authenticated="@(User.Identity?.IsAuthenticated == true ? "true" : "false")"
+                                                data-bs-toggle="tooltip" 
+                                                title="@(User.Identity?.IsAuthenticated == true ? (item.IsLikedByCurrentUser ? "Unlike" : "Like") : "Login to like this item")">
+                                            <i class="bi bi-heart@(item.IsLikedByCurrentUser ? "-fill" : "") heart-icon"></i>
+                                            <span class="visually-hidden">Like</span>
                                         </button>
                                     </td>
                                 </tr>
@@ -677,6 +683,8 @@
 }
 
 @section Scripts {
+    <!-- Like button handler -->
+    <script src="~/js/like-handler.js"></script>
     <script src="~/js/inventory-detail.js"></script>
     <script src="~/js/custom-fields-manager.js"></script>
     <!-- Using only direct-access.js for simpler access control implementation -->

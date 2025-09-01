@@ -474,6 +474,7 @@ namespace InventoryMgmt.MVC.Controllers
         }
         
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleLike(int id)
         {
             if (!User.Identity!.IsAuthenticated)
@@ -490,7 +491,17 @@ namespace InventoryMgmt.MVC.Controllers
             try
             {
                 var result = await _itemService.ToggleLikeAsync(id, currentUserId);
-                return Json(new { success = true, isLiked = result });
+                
+                // Get the updated like count to return to the client
+                var item = await _itemService.GetItemByIdAsync(id, currentUserId);
+                int likesCount = item?.LikesCount ?? 0;
+                
+                return Json(new { 
+                    success = true, 
+                    isLiked = result, 
+                    likesCount = likesCount,
+                    liked = result // For backward compatibility with existing code
+                });
             }
             catch (Exception ex)
             {
