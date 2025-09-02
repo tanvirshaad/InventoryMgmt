@@ -17,11 +17,6 @@ namespace InventoryMgmt.BLL.Services
     public class InventoryService : IInventoryService
     {
         private readonly DataAccess _dataAccess;
-        //private readonly IInventoryRepo _dataAccess.InventoryData;
-        //private readonly IRepo<Tag> _tagRepository;
-        //private readonly IRepo<InventoryTag> _inventoryTagRepository;
-        //private readonly IRepo<InventoryAccess> _inventoryUserAccessRepository;
-        //private readonly IRepo<User> _userRepository; // Added for GetInventoryAccessUsersAsync
         private readonly IMapper _mapper;
 
         public InventoryService(

@@ -44,16 +44,17 @@ namespace InventoryMgmt.MVC.Controllers
 
         public async Task<IActionResult> Details(int id, string tab = "items")
         {
-            // Check if user can view this inventory
-            if (!await CanCurrentUserViewInventoryAsync(id))
-            {
-                return NotFoundOrForbiddenResult();
-            }
-
+            // First check if inventory exists
             var inventory = await _inventoryService.GetInventoryByIdAsync(id);
             if (inventory == null)
             {
-                return NotFound();
+                return View("InventoryNotFound");
+            }
+            
+            // Then check if user can view this inventory
+            if (!await CanCurrentUserViewInventoryAsync(id))
+            {
+                return NotFoundOrForbiddenResult();
             }
 
             var permissions = await GetCurrentUserInventoryPermissionsAsync(id);

@@ -1,0 +1,43 @@
+/* Toast styles */
+.toast-container {
+    min-width: 280px;
+}
+
+.toast {
+    opacity: 1 !important; /* Override Bootstrap's default opacity */
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.toast-success .toast-header {
+    background-color: #198754;
+    color: white;
+}
+
+.toast-error .toast-header {
+    background-color: #dc3545;
+    color: white;
+}
+
+.toast-warning .toast-header {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.toast-info .toast-header {
+    background-color: #0dcaf0;
+    color: white;
+}
+
+/* Add animation for toast appearance */
+@keyframes toast-in-right {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+.toast {
+    animation: toast-in-right .3s ease-in-out;
+}

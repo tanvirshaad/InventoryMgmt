@@ -36,7 +36,7 @@ namespace InventoryMgmt.MVC.Controllers
 
             if (item == null)
             {
-                return NotFound();
+                return View("~/Views/Item/ItemNotFound.cshtml");
             }
 
             // Check if user can view the inventory this item belongs to
@@ -63,13 +63,13 @@ namespace InventoryMgmt.MVC.Controllers
             // Check if user can create items in this inventory
             if (!await CanCurrentUserCreateItemAsync(inventoryId))
             {
-                return ForbiddenResult();
+                return View("AccessDenied");
             }
 
             var inventory = await _inventoryService.GetInventoryByIdAsync(inventoryId);
             if (inventory == null)
             {
-                return NotFound();
+                return View("~/Views/Inventory/InventoryNotFound.cshtml");
             }
 
             // Prepare the custom fields for the view
@@ -159,20 +159,20 @@ namespace InventoryMgmt.MVC.Controllers
             var item = await _itemService.GetItemByIdAsync(id, currentUserId);
             if (item == null)
             {
-                return NotFound();
+                return View("~/Views/Item/ItemNotFound.cshtml");
             }
 
             var canEdit = await _inventoryService.CanUserEditInventoryAsync(item.InventoryId, currentUserId, isAdmin);
             if (!canEdit)
             {
-                return Forbid();
+                return View("AccessDenied");
             }
             
             // Get the inventory to get custom field configurations
             var inventory = await _inventoryService.GetInventoryByIdAsync(item.InventoryId);
             if (inventory == null)
             {
-                return NotFound();
+                return View("~/Views/Inventory/InventoryNotFound.cshtml");
             }
             
             // Prepare the custom fields for the view
@@ -277,13 +277,13 @@ namespace InventoryMgmt.MVC.Controllers
             var item = await _itemService.GetItemByIdAsync(id, currentUserId);
             if (item == null)
             {
-                return NotFound();
+                return View("~/Views/Item/ItemNotFound.cshtml");
             }
 
             var canEdit = await _inventoryService.CanUserEditInventoryAsync(item.InventoryId, currentUserId, isAdmin);
             if (!canEdit)
             {
-                return Forbid();
+                return View("AccessDenied");
             }
 
             return View(item);
@@ -327,19 +327,34 @@ namespace InventoryMgmt.MVC.Controllers
         {
             if (ids == null || !ids.Any())
             {
-                return BadRequest("No items selected for deletion");
+                return BadRequest(new { 
+                    success = false, 
+                    message = "No items selected for deletion" 
+                });
+            }
+
+            if (!User.Identity!.IsAuthenticated)
+            {
+                return Unauthorized(new { 
+                    success = false, 
+                    message = "You must be logged in to delete items",
+                    requiresAuthentication = true
+                });
             }
 
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var isAdmin = User.IsInRole("Admin");
             var successCount = 0;
             var inventoryId = 0;
+            var failedDueToPermissions = 0;
+            var notFoundCount = 0;
 
             foreach (var id in ids)
             {
                 var item = await _itemService.GetItemByIdAsync(id, currentUserId);
                 if (item == null)
                 {
+                    notFoundCount++;
                     continue;
                 }
 
@@ -352,6 +367,7 @@ namespace InventoryMgmt.MVC.Controllers
                 var canEdit = await _inventoryService.CanUserEditInventoryAsync(item.InventoryId, currentUserId, isAdmin);
                 if (!canEdit)
                 {
+                    failedDueToPermissions++;
                     continue;
                 }
 
@@ -362,9 +378,19 @@ namespace InventoryMgmt.MVC.Controllers
                 }
             }
 
+            var message = $"Successfully deleted {successCount} of {ids.Count} items";
+            if (notFoundCount > 0)
+            {
+                message += $" ({notFoundCount} items not found)";
+            }
+            if (failedDueToPermissions > 0)
+            {
+                message += $" ({failedDueToPermissions} items you don't have permission to delete)";
+            }
+
             return Json(new { 
-                success = true, 
-                message = $"Successfully deleted {successCount} of {ids.Count} items",
+                success = successCount > 0, 
+                message = message,
                 inventoryId = inventoryId
             });
         }
@@ -379,13 +405,19 @@ namespace InventoryMgmt.MVC.Controllers
             var originalItem = await _itemService.GetItemByIdAsync(id, currentUserId);
             if (originalItem == null)
             {
-                return NotFound();
+                return NotFound(new { 
+                    success = false, 
+                    message = "Item not found" 
+                });
             }
 
             var canEdit = await _inventoryService.CanUserEditInventoryAsync(originalItem.InventoryId, currentUserId, isAdmin);
             if (!canEdit)
             {
-                return Forbid();
+                return StatusCode(403, new {
+                    success = false,
+                    message = "You don't have permission to duplicate this item"
+                });
             }
 
             // Create a new item based on the original one
@@ -419,17 +451,24 @@ namespace InventoryMgmt.MVC.Controllers
                     return Json(new { 
                         success = true, 
                         message = "Item duplicated successfully",
-                        itemId = result.Id
+                        itemId = result.Id,
+                        inventoryId = result.InventoryId
                     });
                 }
                 else
                 {
-                    return Json(new { success = false, message = "Failed to duplicate item" });
+                    return Json(new { 
+                        success = false, 
+                        message = "Failed to duplicate item" 
+                    });
                 }
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = $"Error: {ex.Message}" });
+                return Json(new { 
+                    success = false, 
+                    message = $"Error duplicating item: {ex.Message}" 
+                });
             }
         }
 
@@ -479,17 +518,45 @@ namespace InventoryMgmt.MVC.Controllers
         {
             if (!User.Identity!.IsAuthenticated)
             {
-                return Unauthorized();
+                return Unauthorized(new { 
+                    success = false, 
+                    message = "You must be logged in to like items",
+                    requiresAuthentication = true
+                });
             }
 
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(currentUserId))
             {
-                return Unauthorized();
+                return Unauthorized(new { 
+                    success = false, 
+                    message = "Unable to determine your user ID",
+                    requiresAuthentication = true
+                });
             }
 
             try
             {
+                // First check if the item exists
+                var itemExists = await _itemService.GetItemByIdAsync(id, currentUserId);
+                if (itemExists == null)
+                {
+                    return NotFound(new {
+                        success = false,
+                        message = "Item not found"
+                    });
+                }
+                
+                // Check if user has permission to like this item
+                var canLike = await CanCurrentUserLikeItemAsync(id);
+                if (!canLike)
+                {
+                    return StatusCode(403, new {
+                        success = false,
+                        message = "You don't have permission to like this item"
+                    });
+                }
+                
                 var result = await _itemService.ToggleLikeAsync(id, currentUserId);
                 
                 // Get the updated like count to return to the client
@@ -500,24 +567,50 @@ namespace InventoryMgmt.MVC.Controllers
                     success = true, 
                     isLiked = result, 
                     likesCount = likesCount,
-                    liked = result // For backward compatibility with existing code
+                    liked = result, // For backward compatibility with existing code
+                    message = result ? "Item liked" : "Item unliked"
                 });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = ex.Message });
+                return Json(new { 
+                    success = false, 
+                    message = $"Error: {ex.Message}" 
+                });
             }
         }
         
         [HttpGet]
         public async Task<IActionResult> GenerateItemCustomId(int inventoryId)
         {
+            if (!User.Identity!.IsAuthenticated)
+            {
+                return Unauthorized(new { 
+                    success = false, 
+                    message = "You must be logged in to generate custom IDs",
+                    requiresAuthentication = true
+                });
+            }
+            
             try
             {
                 var inventory = await _inventoryService.GetInventoryByIdAsync(inventoryId);
                 if (inventory == null)
                 {
-                    return Json(new { success = false, message = "Inventory not found" });
+                    return NotFound(new { 
+                        success = false, 
+                        message = "Inventory not found" 
+                    });
+                }
+                
+                // Check if user has permission to create items in this inventory
+                var canCreate = await CanCurrentUserCreateItemAsync(inventoryId);
+                if (!canCreate)
+                {
+                    return StatusCode(403, new {
+                        success = false,
+                        message = "You don't have permission to create items in this inventory"
+                    });
                 }
                 
                 string customId;
@@ -532,11 +625,18 @@ namespace InventoryMgmt.MVC.Controllers
                     customId = $"ITEM-{Guid.NewGuid().ToString("N").Substring(0, 8)}";
                 }
                 
-                return Json(new { success = true, customId = customId });
+                return Json(new { 
+                    success = true, 
+                    customId = customId,
+                    message = "Custom ID generated successfully"
+                });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = ex.Message });
+                return Json(new { 
+                    success = false, 
+                    message = $"Error generating custom ID: {ex.Message}" 
+                });
             }
         }
         

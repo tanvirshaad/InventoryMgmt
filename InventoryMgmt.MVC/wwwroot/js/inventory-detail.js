@@ -77,7 +77,7 @@ function loadCustomIdElements(inventoryId) {
             
             if (!response) {
                 console.error("Empty response received");
-                alert("Error: Empty response received from server");
+                ToastUtility.error("Error: Empty response received from server");
                 return;
             }
             
@@ -105,14 +105,14 @@ function loadCustomIdElements(inventoryId) {
                 renderCustomIdElements(validElements);
             } else {
                 console.error("Elements is not an array:", response.elements);
-                alert("Error: Invalid elements data received from server");
+                ToastUtility.error("Error: Invalid elements data received from server");
             }
         },
         error: function(xhr, status, error) {
             console.error("Error loading custom ID elements:", error);
             console.error("Status:", status);
             console.error("Response:", xhr.responseText);
-            alert("Error loading custom ID elements. Check console for details.");
+            ToastUtility.error("Error loading custom ID elements. Check console for details.");
             
             // Display error message in the container
             if (container) {
@@ -130,7 +130,7 @@ function renderCustomIdElements(elements) {
     const container = document.getElementById('custom-id-elements');
     if (!container) {
         console.error("Could not find custom-id-elements container");
-        alert("Error: Could not find custom-id-elements container");
+        ToastUtility.error("Error: Could not find custom-id-elements container");
         return;
     }
     

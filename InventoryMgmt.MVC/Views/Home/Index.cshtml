@@ -338,5 +338,72 @@
                 }
             });
         });
+        
+        // Toast demo functions
+        function showSuccessToast() {
+            ToastUtility.success('This is a success notification!');
+        }
+        
+        function showErrorToast() {
+            ToastUtility.error('This is an error notification!');
+        }
+        
+        function showWarningToast() {
+            ToastUtility.warning('This is a warning notification!');
+        }
+        
+        function showInfoToast() {
+            ToastUtility.info('This is an info notification!');
+        }
+        
+        function showLegacyAlert() {
+            alert('This is a legacy alert that now uses Toast!');
+        }
+        
+        // Position demo
+        function changeToastPosition(position) {
+            ToastUtility.setPosition(position);
+            ToastUtility.info(`Toast position changed to: ${position}`);
+        }
     </script>
+    
+    @* <!-- Add toast demo buttons to the hero section -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const heroSection = document.querySelector('.hero-section .container .row');
+            if (heroSection) {
+                const demoDiv = document.createElement('div');
+                demoDiv.className = 'col-12 mt-4';
+                demoDiv.innerHTML = `
+                    <div class="card bg-white shadow-sm">
+                        <div class="card-body">
+                            <h5 class="text-dark">Toast Notification Demo</h5>
+                            <p class="text-muted">Click the buttons below to see the modern toast notifications in action:</p>
+                            <div class="btn-group mb-3">
+                                <button onclick="showSuccessToast()" class="btn btn-success btn-sm">Success</button>
+                                <button onclick="showErrorToast()" class="btn btn-danger btn-sm">Error</button>
+                                <button onclick="showWarningToast()" class="btn btn-warning btn-sm">Warning</button>
+                                <button onclick="showInfoToast()" class="btn btn-info btn-sm">Info</button>
+                                <button onclick="showLegacyAlert()" class="btn btn-secondary btn-sm">Legacy Alert</button>
+                            </div>
+                            <div>
+                                <p class="text-muted mb-2">Change toast position:</p>
+                                <div class="btn-group btn-group-sm">
+                                    <button onclick="changeToastPosition('top-start')" class="btn btn-outline-primary btn-sm">⬆️ Left</button>
+                                    <button onclick="changeToastPosition('top-center')" class="btn btn-outline-primary btn-sm">⬆️ Center</button>
+                                    <button onclick="changeToastPosition('top-end')" class="btn btn-outline-primary btn-sm">⬆️ Right</button>
+                                </div>
+                                <div class="btn-group btn-group-sm ms-1">
+                                    <button onclick="changeToastPosition('bottom-start')" class="btn btn-outline-primary btn-sm">⬇️ Left</button>
+                                    <button onclick="changeToastPosition('bottom-center')" class="btn btn-outline-primary btn-sm">⬇️ Center</button>
+                                    <button onclick="changeToastPosition('bottom-end')" class="btn btn-outline-primary btn-sm">⬇️ Right</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                heroSection.appendChild(demoDiv);
+            }
+        });
+    </script> *@
 }

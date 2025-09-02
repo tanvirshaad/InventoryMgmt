@@ -1,0 +1,59 @@
+@{
+    ViewData["Title"] = "Private Inventory";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">
+                        <i class="bi bi-lock me-2"></i>Private Inventory
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-shield-lock display-1 text-primary opacity-50"></i>
+                    </div>
+                    
+                    @if (User.Identity!.IsAuthenticated)
+                    {
+                        <h4 class="text-center mb-4">You don't have permission to access this inventory</h4>
+                        <p class="text-muted">
+                            This inventory is private and you don't have permission to view it. If you believe you should have access,
+                            please contact the owner or an administrator.
+                        </p>
+                    }
+                    else
+                    {
+                        <h4 class="text-center mb-4">Please log in to access this inventory</h4>
+                        <p class="text-muted">
+                            This inventory requires authentication. Please log in or register to access this content.
+                        </p>
+                        
+                        <div class="d-flex justify-content-center mt-4">
+                            <a asp-controller="Auth" asp-action="Login" asp-route-returnUrl="@Context.Request.Path" class="btn btn-primary me-3">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Log In
+                            </a>
+                            <a asp-controller="Auth" asp-action="Register" class="btn btn-outline-primary">
+                                <i class="bi bi-person-plus me-2"></i>Register
+                            </a>
+                        </div>
+                    }
+                    
+                    <hr class="my-4">
+                    
+                    <div class="d-flex justify-content-between">
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-house me-2"></i>Return to Home
+                        </a>
+                        
+                        <button class="btn btn-link text-secondary" onclick="window.history.back()">
+                            <i class="bi bi-arrow-left me-1"></i>Go Back
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

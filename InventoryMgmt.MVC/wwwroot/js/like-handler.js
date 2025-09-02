@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Only show the alert if explicitly false (not if null, undefined, etc.)
         if (authState === 'false') {
             console.log('User is not authenticated, showing alert');
-            alert('You must be logged in to like items.');
+            ToastUtility.warning('You must be logged in to like items.');
             return;
         } else {
             console.log('User is authenticated, continuing with like action');
@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Failed to process like. Please try again.');
+            ToastUtility.error('Failed to process like. Please try again.');
         });
     });
 });

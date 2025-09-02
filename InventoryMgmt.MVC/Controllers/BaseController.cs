@@ -103,7 +103,16 @@ namespace InventoryMgmt.MVC.Controllers
 
         protected IActionResult NotFoundOrForbiddenResult()
         {
-            return NotFound();
+            if (User.Identity!.IsAuthenticated)
+            {
+                // User is logged in but doesn't have permission
+                return View("AccessDenied");
+            }
+            else
+            {
+                // User is not logged in
+                return View("~/Views/Inventory/PrivateInventory.cshtml");
+            }
         }
     }
 }
