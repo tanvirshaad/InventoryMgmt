@@ -3,6 +3,18 @@
   "WorkspaceRootPath": "D:\\itransition\\InventoryMgmt.MVC\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|d:\\itransition\\inventorymgmt.mvc\\inventorymgmt.mvc\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|solutionrelative:inventorymgmt.mvc\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|d:\\itransition\\inventorymgmt.mvc\\inventorymgmt.mvc\\inventorymgmt.mvc.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|solutionrelative:inventorymgmt.mvc\\inventorymgmt.mvc.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1C51A8D4-E1A6-48DE-8E50-15EF8D1CFCE6}|InventoryMgmt.DAL\\InventoryMgmt.DAL.csproj|d:\\itransition\\inventorymgmt.mvc\\inventorymgmt.dal\\ef\\tablemodels\\inventorytag.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1C51A8D4-E1A6-48DE-8E50-15EF8D1CFCE6}|InventoryMgmt.DAL\\InventoryMgmt.DAL.csproj|solutionrelative:inventorymgmt.dal\\ef\\tablemodels\\inventorytag.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|d:\\itransition\\inventorymgmt.mvc\\inventorymgmt.mvc\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|solutionrelative:inventorymgmt.mvc\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
@@ -21,18 +33,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|d:\\itransition\\inventorymgmt.mvc\\inventorymgmt.mvc\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|solutionrelative:inventorymgmt.mvc\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|d:\\itransition\\inventorymgmt.mvc\\inventorymgmt.mvc\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|solutionrelative:inventorymgmt.mvc\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|d:\\itransition\\inventorymgmt.mvc\\inventorymgmt.mvc\\inventorymgmt.mvc.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{7A9DFB3D-C24A-46A1-932F-64BC5F4415BE}|InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj|solutionrelative:inventorymgmt.mvc\\inventorymgmt.mvc.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1C51A8D4-E1A6-48DE-8E50-15EF8D1CFCE6}|InventoryMgmt.DAL\\InventoryMgmt.DAL.csproj|d:\\itransition\\inventorymgmt.mvc\\inventorymgmt.dal\\ef\\tablemodels\\inventorytag.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{1C51A8D4-E1A6-48DE-8E50-15EF8D1CFCE6}|InventoryMgmt.DAL\\InventoryMgmt.DAL.csproj|solutionrelative:inventorymgmt.dal\\ef\\tablemodels\\inventorytag.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{1C51A8D4-E1A6-48DE-8E50-15EF8D1CFCE6}|InventoryMgmt.DAL\\InventoryMgmt.DAL.csproj|d:\\itransition\\inventorymgmt.mvc\\inventorymgmt.dal\\ef\\tablemodels\\inventoryaccesspermission.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -274,23 +274,24 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 9,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 0,
               "Title": "Program.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Program.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.MVC\\Program.cs",
               "ToolTip": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Program.cs",
               "RelativeToolTip": "InventoryMgmt.MVC\\Program.cs",
-              "ViewState": "AgIAADEAAAAAAAAAAADwvzUAAAAUAAAAAAAAAA==",
+              "ViewState": "AgIAADMAAAAAAAAAAAAAAEMAAABDAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-24T16:40:06.596Z"
+              "WhenOpened": "2025-08-24T16:40:06.596Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 7,
               "Title": "appsettings.json",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\appsettings.json",
               "RelativeDocumentMoniker": "InventoryMgmt.MVC\\appsettings.json",
@@ -314,7 +315,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 2,
               "Title": "InventoryTag.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\EF\\TableModels\\InventoryTag.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.DAL\\EF\\TableModels\\InventoryTag.cs",
@@ -326,7 +327,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 1,
               "Title": "InventoryMgmt.MVC.csproj",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj",
               "RelativeDocumentMoniker": "InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj",
@@ -338,7 +339,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 5,
               "Title": "Inventory.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\EF\\TableModels\\Inventory.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.DAL\\EF\\TableModels\\Inventory.cs",
@@ -350,7 +351,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 4,
               "Title": "MappingProfile.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.BLL\\Profiles\\MappingProfile.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.BLL\\Profiles\\MappingProfile.cs",
@@ -358,8 +359,7 @@
               "RelativeToolTip": "InventoryMgmt.BLL\\Profiles\\MappingProfile.cs",
               "ViewState": "AgIAAKAAAAAAAAAAAAAlwLAAAACGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-24T12:24:50.695Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-24T12:24:50.695Z"
             },
             {
               "$type": "Document",
@@ -387,7 +387,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 3,
               "Title": "Index.cshtml",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\Views\\Home\\Index.cshtml",
               "RelativeDocumentMoniker": "InventoryMgmt.MVC\\Views\\Home\\Index.cshtml",
@@ -395,12 +395,11 @@
               "RelativeToolTip": "InventoryMgmt.MVC\\Views\\Home\\Index.cshtml",
               "ViewState": "AgIAAGoBAAAAAAAAAAAWwHcBAAAyAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-08-24T16:18:02.952Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-24T16:18:02.952Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 6,
               "Title": "Item.cs",
               "DocumentMoniker": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.DAL\\EF\\TableModels\\Item.cs",
               "RelativeDocumentMoniker": "InventoryMgmt.DAL\\EF\\TableModels\\Item.cs",

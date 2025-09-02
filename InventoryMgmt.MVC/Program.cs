@@ -62,6 +62,14 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<InventoryMgmt.BLL.Interfaces.IAuthorizationService, AuthorizationService>();
 builder.Services.AddScoped<DataAccess>();
+builder.Services.AddScoped<ICustomFieldService, CustomFieldService>();
+builder.Services.AddScoped<ICustomFieldProcessor, CustomFieldProcessor>();
+
+// Register the new specialized services created during refactoring
+builder.Services.AddScoped<InventoryMgmt.BLL.Services.ICustomFieldService, InventoryMgmt.BLL.Services.CustomFieldService>();
+builder.Services.AddScoped<InventoryMgmt.BLL.Services.ICustomIdService, InventoryMgmt.BLL.Services.CustomIdService>();
+builder.Services.AddScoped<InventoryMgmt.BLL.Services.ITagService, InventoryMgmt.BLL.Services.TagService>();
+builder.Services.AddScoped<InventoryMgmt.BLL.Services.IInventoryAccessService, InventoryMgmt.BLL.Services.InventoryAccessService>();
 
 // Add SignalR
 builder.Services.AddSignalR();

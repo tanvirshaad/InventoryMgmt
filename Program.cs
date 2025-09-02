@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using InventoryMgmt.DAL.Repos;
 using InventoryMgmt.DAL.Interfaces;
 using InventoryMgmt.BLL.Services;
+using InventoryMgmt.BLL.Interfaces;
 using InventoryMgmt.DAL.EF.TableModels;
 using InventoryMgmt.BLL.Profiles;
 using AutoMapper;
@@ -52,12 +53,18 @@ builder.Services.AddScoped<IInventoryTagRepo, InventoryTagRepo>();
 builder.Services.AddScoped<IItemLikeRepo, ItemLikeRepo>();
 
 // Register services
-builder.Services.AddScoped<InventoryService>();
+builder.Services.AddScoped<IInventoryService, InventoryService>();
 builder.Services.AddScoped<ItemService>();
 builder.Services.AddScoped<CommentService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+// Register the new specialized services created during refactoring
+builder.Services.AddScoped<InventoryMgmt.BLL.Services.ICustomFieldService, InventoryMgmt.BLL.Services.CustomFieldService>();
+builder.Services.AddScoped<InventoryMgmt.BLL.Services.ICustomIdService, InventoryMgmt.BLL.Services.CustomIdService>();
+builder.Services.AddScoped<InventoryMgmt.BLL.Services.ITagService, InventoryMgmt.BLL.Services.TagService>();
+builder.Services.AddScoped<InventoryMgmt.BLL.Services.IInventoryAccessService, InventoryMgmt.BLL.Services.InventoryAccessService>();
 
 var app = builder.Build();
 

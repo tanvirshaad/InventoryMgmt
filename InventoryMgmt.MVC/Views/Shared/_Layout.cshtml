@@ -116,5 +116,21 @@
     <script src="~/js/item-handler.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+    
+    @* Display toast notifications from TempData using existing toast-utility.js *@
+    @if (TempData["ToastMessage"] != null)
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const message = "@Html.Raw(TempData["ToastMessage"])";
+                const type = "@(TempData["ToastType"] ?? "info")";
+                
+                console.log("Displaying toast:", message, type);
+                
+                // Use the toast-utility.js directly
+                ToastUtility.show(message, type);
+            });
+        </script>
+    }
 </body>
 </html>

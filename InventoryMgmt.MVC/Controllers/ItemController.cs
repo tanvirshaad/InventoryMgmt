@@ -130,16 +130,27 @@ namespace InventoryMgmt.MVC.Controllers
 
                     if (result != null)
                     {
+                        // Add success toast message and ensure it persists through redirect
+                        TempData["ToastMessage"] = "Item created successfully!";
+                        TempData["ToastType"] = "success";
+                        TempData.Keep("ToastMessage");
+                        TempData.Keep("ToastType");
+                        
                         return RedirectToAction("Details", "Inventory", new { id = itemDto.InventoryId });
                     }
                     else
                     {
                         ModelState.AddModelError("", "Failed to create item");
+                        TempData["ToastMessage"] = "Failed to create item";
+                        TempData["ToastType"] = "error";
                     }
                 }
                 catch (Exception ex)
                 {
                     ModelState.AddModelError("", $"Error creating item: {ex.Message}");
+                    // Add error toast message
+                    TempData["ToastMessage"] = $"Error creating item: {ex.Message}";
+                    TempData["ToastType"] = "error";
                     // Log the full exception for debugging
                     System.Diagnostics.Debug.WriteLine($"Item creation error: {ex}");
                 }
@@ -245,16 +256,29 @@ namespace InventoryMgmt.MVC.Controllers
                         await PrepareCustomFieldsForView(result.InventoryId, ViewBag);
                         ViewBag.Inventory = await _inventoryService.GetInventoryByIdAsync(result.InventoryId);
                         
+                        // Add toast message
+                        TempData["ToastMessage"] = "Item has been updated by another user. Please review your changes.";
+                        TempData["ToastType"] = "warning";
+                        
                         // Return the refreshed item
                         return View(result);
                     }
                     
-                    // Regular successful update
+                    // Regular successful update - set persistent toast message
+                    TempData["ToastMessage"] = "Item updated successfully!";
+                    TempData["ToastType"] = "success";
+                    TempData.Keep("ToastMessage");  // Make sure TempData persists through redirect
+                    TempData.Keep("ToastType");
+                    
                     return RedirectToAction("Details", "Inventory", new { id = itemDto.InventoryId });
                 }
                 else
                 {
                     ModelState.AddModelError("", "Failed to update item. Please try again.");
+                    
+                    // Add toast message for error
+                    TempData["ToastMessage"] = "Failed to update item. Please try again.";
+                    TempData["ToastType"] = "error";
                     
                     // Reload the inventory and custom fields to ensure they're available
                     await PrepareCustomFieldsForView(itemDto.InventoryId, ViewBag);
@@ -312,11 +336,20 @@ namespace InventoryMgmt.MVC.Controllers
             var result = await _itemService.DeleteItemAsync(id);
             if (result)
             {
+                // Add success toast message
+                TempData["ToastMessage"] = "Item deleted successfully!";
+                TempData["ToastType"] = "success";
+                
                 return RedirectToAction("Details", "Inventory", new { id = item.InventoryId });
             }
             else
             {
                 ModelState.AddModelError("", "Failed to delete item");
+                
+                // Add error toast message
+                TempData["ToastMessage"] = "Failed to delete item";
+                TempData["ToastType"] = "error";
+                
                 return View(item);
             }
         }
