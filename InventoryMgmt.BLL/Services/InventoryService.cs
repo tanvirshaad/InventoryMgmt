@@ -264,42 +264,96 @@ namespace InventoryMgmt.BLL.Services
             var result = new StringBuilder();
             var random = new Random();
 
+            // Debug log
+            System.Diagnostics.Debug.WriteLine($"Generating advanced custom ID with {elements?.Count ?? 0} elements");
+            
+            if (elements == null)
+            {
+                System.Diagnostics.Debug.WriteLine("Elements list is null");
+                return string.Empty;
+            }
+            
             foreach (var element in elements.OrderBy(e => e.Order))
             {
+                System.Diagnostics.Debug.WriteLine($"Processing element: Type={element.Type}, Value='{element.Value}'");
+                
                 switch (element.Type.ToLower())
                 {
                     case "fixed":
-                        result.Append(element.Value);
+                        // Fixed text, supports Unicode including emojis
+                        System.Diagnostics.Debug.WriteLine($"Adding fixed value: '{element.Value}'");
+                        
+                        // Use the GetCleanValue method to ensure we get the exact value
+                        string fixedValue = element.GetCleanValue();
+                        
+                        // Special handling and debugging for special characters
+                        if (fixedValue.Contains("_") || fixedValue.Any(c => char.GetUnicodeCategory(c) == System.Globalization.UnicodeCategory.OtherSymbol))
+                        {
+                            System.Diagnostics.Debug.WriteLine("SPECIAL CHARACTER DETECTED IN FIXED VALUE");
+                            
+                            // Log each character in detail
+                            foreach (char c in fixedValue)
+                            {
+                                var category = char.GetUnicodeCategory(c);
+                                System.Diagnostics.Debug.WriteLine($"Character: '{c}' Unicode: U+{((int)c).ToString("X4")} Category: {category}");
+                            }
+                            
+                            // Ensure no character is lost in conversion
+                            var bytes = System.Text.Encoding.UTF8.GetBytes(fixedValue);
+                            var reconstructed = System.Text.Encoding.UTF8.GetString(bytes);
+                            
+                            if (reconstructed != fixedValue)
+                            {
+                                System.Diagnostics.Debug.WriteLine("WARNING: Character encoding issue detected!");
+                            }
+                        }
+                        
+                        // Additional debugging
+                        System.Diagnostics.Debug.WriteLine($"Fixed value characters: {string.Join(", ", fixedValue.Select(c => $"{c}(U+{((int)c).ToString("X4")})"))}");
+                        
+                        // Preserve the exact value as is - directly append each character
+                        foreach (char c in fixedValue)
+                        {
+                            result.Append(c);
+                        }
                         break;
                     case "20-bit random":
                         var random20Bit = random.Next(0, 1048576); // 2^20
+                        System.Diagnostics.Debug.WriteLine($"Adding 20-bit random value: {random20Bit}, format: {element.Value}");
                         result.Append(FormatRandomValue(random20Bit, element.Value));
                         break;
                     case "32-bit random":
                         var random32Bit = random.Next();
+                        System.Diagnostics.Debug.WriteLine($"Adding 32-bit random value: {random32Bit}, format: {element.Value}");
                         result.Append(FormatRandomValue(random32Bit, element.Value));
                         break;
                     case "6-digit random":
                         var random6Digit = random.Next(100000, 999999);
+                        System.Diagnostics.Debug.WriteLine($"Adding 6-digit random value: {random6Digit}, format: {element.Value}");
                         result.Append(FormatRandomValue(random6Digit, element.Value));
                         break;
                     case "9-digit random":
                         var random9Digit = random.Next(100000000, 999999999);
+                        System.Diagnostics.Debug.WriteLine($"Adding 9-digit random value: {random9Digit}, format: {element.Value}");
                         result.Append(FormatRandomValue(random9Digit, element.Value));
                         break;
                     case "guid":
                         var guid = Guid.NewGuid();
+                        System.Diagnostics.Debug.WriteLine($"Adding GUID value: {guid}, format: {element.Value}");
                         result.Append(FormatGuid(guid, element.Value));
                         break;
                     case "date/time":
+                        System.Diagnostics.Debug.WriteLine($"Adding date/time value with format: {element.Value}");
                         result.Append(FormatDateTime(DateTime.Now, element.Value));
                         break;
                     case "sequence":
+                        System.Diagnostics.Debug.WriteLine($"Adding sequence value: {sequenceNumber}, format: {element.Value}");
                         result.Append(FormatSequence(sequenceNumber, element.Value));
                         break;
                 }
             }
 
+            System.Diagnostics.Debug.WriteLine($"Generated ID: '{result.ToString()}'");
             return result.ToString();
         }
 
@@ -307,68 +361,202 @@ namespace InventoryMgmt.BLL.Services
         {
             if (string.IsNullOrEmpty(format)) return value.ToString();
 
+            // Debug the format string
+            System.Diagnostics.Debug.WriteLine($"FormatRandomValue: format='{format}'");
+            
+            // Extract format information and any suffix
+            string formatSpecifier = string.Empty;
+            string suffix = string.Empty;
+            int digitCount = 0;
+            
             if (format.StartsWith("X"))
             {
-                var digits = format.Substring(1);
-                if (int.TryParse(digits, out int digitCount))
+                // Extract the digit count and any trailing characters
+                var match = System.Text.RegularExpressions.Regex.Match(format, @"X(\d+)(.*)");
+                if (match.Success)
                 {
-                    return value.ToString($"X{digitCount}");
+                    if (int.TryParse(match.Groups[1].Value, out digitCount))
+                    {
+                        formatSpecifier = $"X{digitCount}";
+                        // Capture everything after the number as suffix (including underscores)
+                        suffix = match.Groups[2].Value;
+                    }
                 }
             }
             else if (format.StartsWith("D"))
             {
-                var digits = format.Substring(1);
-                if (int.TryParse(digits, out int digitCount))
+                // Extract the digit count and any trailing characters
+                var match = System.Text.RegularExpressions.Regex.Match(format, @"D(\d+)(.*)");
+                if (match.Success)
                 {
-                    return value.ToString($"D{digitCount}");
+                    if (int.TryParse(match.Groups[1].Value, out digitCount))
+                    {
+                        formatSpecifier = $"D{digitCount}";
+                        // Capture everything after the number as suffix (including underscores)
+                        suffix = match.Groups[2].Value;
+                    }
                 }
             }
-
-            return value.ToString();
+            
+            // Format the value and append any suffix
+            string result;
+            if (!string.IsNullOrEmpty(formatSpecifier))
+            {
+                result = value.ToString(formatSpecifier) + suffix;
+                System.Diagnostics.Debug.WriteLine($"Formatted with '{formatSpecifier}' and suffix '{suffix}': {result}");
+            }
+            else
+            {
+                // Fall back to default formatting
+                result = value.ToString() + format.Substring(1);
+                System.Diagnostics.Debug.WriteLine($"Default formatting with appended suffix: {result}");
+            }
+            
+            return result;
         }
 
         private string FormatGuid(Guid guid, string format)
         {
             if (string.IsNullOrEmpty(format)) return guid.ToString("N");
 
-            switch (format.ToLower())
+            // Debug the format string
+            System.Diagnostics.Debug.WriteLine($"FormatGuid: format='{format}'");
+            
+            string formatSpecifier;
+            string suffix = string.Empty;
+            
+            // Extract format specifier and any suffix
+            var match = System.Text.RegularExpressions.Regex.Match(format, @"^([ndbp])(.*)$", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            
+            if (match.Success)
             {
-                case "n": return guid.ToString("N");
-                case "d": return guid.ToString("D");
-                case "b": return guid.ToString("B");
-                case "p": return guid.ToString("P");
-                default: return guid.ToString("N");
+                formatSpecifier = match.Groups[1].Value.ToUpper();
+                suffix = match.Groups[2].Value;
+                System.Diagnostics.Debug.WriteLine($"GUID format specifier: {formatSpecifier}, suffix: '{suffix}'");
             }
+            else
+            {
+                // If no valid format specifier, use the default and consider everything as suffix
+                formatSpecifier = "N";
+                suffix = format;
+                System.Diagnostics.Debug.WriteLine($"Using default GUID format specifier: {formatSpecifier}, with suffix: '{suffix}'");
+            }
+            
+            string result;
+            
+            switch (formatSpecifier.ToUpper())
+            {
+                case "N": result = guid.ToString("N") + suffix; break;
+                case "D": result = guid.ToString("D") + suffix; break;
+                case "B": result = guid.ToString("B") + suffix; break;
+                case "P": result = guid.ToString("P") + suffix; break;
+                default: result = guid.ToString("N") + suffix; break;
+            }
+            
+            System.Diagnostics.Debug.WriteLine($"Formatted GUID result: '{result}'");
+            return result;
         }
 
         private string FormatDateTime(DateTime dateTime, string format)
         {
             if (string.IsNullOrEmpty(format)) return dateTime.ToString("yyyy");
 
-            try
+            // Debug the format string
+            System.Diagnostics.Debug.WriteLine($"FormatDateTime: format='{format}'");
+            
+            // Handle potential custom formats with underscores or special characters
+            if (format.Contains('_') || format.IndexOfAny(new[] { '-', '/', '\\' }) >= 0)
             {
-                return dateTime.ToString(format);
+                // Special handling for formats with underscores or other special chars
+                System.Diagnostics.Debug.WriteLine("Format contains special characters, doing special handling");
+                
+                try {
+                    // Try to split the format by known format separators (like _ or other special chars)
+                    var match = System.Text.RegularExpressions.Regex.Match(format, @"([yMdHhms]+)([_\-/\\].*)");
+                    if (match.Success)
+                    {
+                        string dateFormat = match.Groups[1].Value;
+                        string suffix = match.Groups[2].Value;
+                        
+                        // Format the date using the date part and append the suffix
+                        string result = dateTime.ToString(dateFormat) + suffix;
+                        System.Diagnostics.Debug.WriteLine($"Split into dateFormat='{dateFormat}' and suffix='{suffix}', result='{result}'");
+                        return result;
+                    }
+                    
+                    // If we couldn't split it, try using the format directly
+                    return dateTime.ToString(format);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error in date formatting: {ex.Message}");
+                    // Special handling for common patterns
+                    if (format.Contains("yyyy") && format.Contains("_"))
+                    {
+                        string result = format.Replace("yyyy", dateTime.Year.ToString());
+                        System.Diagnostics.Debug.WriteLine($"Manually replaced 'yyyy' with year: {result}");
+                        return result;
+                    }
+                }
             }
-            catch
+            else
             {
-                return dateTime.ToString("yyyy");
+                try
+                {
+                    // Standard date format without special characters
+                    return dateTime.ToString(format);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error in standard date formatting: {ex.Message}");
+                }
             }
+            
+            // Fallback to default format
+            return dateTime.ToString("yyyy");
         }
 
         private string FormatSequence(int sequence, string format)
         {
             if (string.IsNullOrEmpty(format)) return sequence.ToString("D3");
+            
+            // Debug the format string
+            System.Diagnostics.Debug.WriteLine($"FormatSequence: format='{format}'");
+            
+            string formatSpecifier = string.Empty;
+            string suffix = string.Empty;
+            int digitCount = 0;
 
             if (format.StartsWith("D"))
             {
-                var digits = format.Substring(1);
-                if (int.TryParse(digits, out int digitCount))
+                // Extract the digit count and any trailing characters (like underscores)
+                var match = System.Text.RegularExpressions.Regex.Match(format, @"D(\d+)(.*)");
+                if (match.Success)
                 {
-                    return sequence.ToString($"D{digitCount}");
+                    if (int.TryParse(match.Groups[1].Value, out digitCount))
+                    {
+                        formatSpecifier = $"D{digitCount}";
+                        // Capture everything after the number as suffix (including underscores)
+                        suffix = match.Groups[2].Value;
+                    }
                 }
             }
-
-            return sequence.ToString("D3");
+            
+            // Format the sequence and append any suffix
+            string result;
+            if (!string.IsNullOrEmpty(formatSpecifier))
+            {
+                result = sequence.ToString(formatSpecifier) + suffix;
+                System.Diagnostics.Debug.WriteLine($"Sequence formatted with '{formatSpecifier}' and suffix '{suffix}': {result}");
+            }
+            else
+            {
+                // Default to D3 formatting
+                result = sequence.ToString("D3") + (format.Length > 1 ? format.Substring(1) : "");
+                System.Diagnostics.Debug.WriteLine($"Default D3 formatting with appended suffix: {result}");
+            }
+            
+            return result;
         }
 
         public async Task<bool> UpdateCustomIdConfigurationAsync(int inventoryId, List<CustomIdElement> elements)

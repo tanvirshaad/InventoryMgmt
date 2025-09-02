@@ -1,0 +1,130 @@
+/* inventory-detail.css - Specific styles for inventory detail view */
+
+/* Item table styles */
+.item-row {
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.item-row:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.05);
+}
+
+.item-row.selected-row {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+    border-left: 3px solid var(--bs-primary);
+}
+
+/* Selection toolbar */
+.selection-toolbar {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1040;
+    transition: all 0.3s ease;
+    background-color: var(--bs-primary);
+    color: white;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.selection-toolbar.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.selection-toolbar.hide {
+    opacity: 0;
+    transform: translateX(-50%) translateY(100%);
+    pointer-events: none;
+}
+
+.selection-toolbar .btn-light {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: transparent;
+    color: white;
+}
+
+.selection-toolbar .btn-light:hover:not(.disabled) {
+    background-color: rgba(255, 255, 255, 0.25);
+    color: white;
+}
+
+.selection-toolbar .btn-light.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Badge styles */
+.selection-count {
+    background-color: white;
+    color: var(--bs-primary);
+    font-weight: bold;
+    border-radius: 1rem;
+    min-width: 1.5rem;
+}
+
+/* Context menu */
+.context-menu {
+    position: absolute;
+    z-index: 1050;
+    min-width: 10rem;
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    padding: 0.5rem 0;
+    border: 1px solid var(--theme-border);
+}
+
+.context-menu-item {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--theme-text);
+    transition: all 0.15s ease;
+}
+
+.context-menu-item:hover {
+    background-color: var(--bs-primary);
+    color: white;
+}
+
+.context-menu-item.text-danger:hover {
+    background-color: var(--bs-danger);
+    color: white;
+}
+
+/* Checkbox styling */
+.item-checkbox {
+    cursor: pointer;
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .selection-toolbar {
+        left: 1rem;
+        right: 1rem;
+        width: calc(100% - 2rem);
+        transform: none;
+    }
+    
+    .selection-toolbar.hide {
+        transform: translateY(100%);
+    }
+    
+    .selection-toolbar.show {
+        transform: translateY(0);
+    }
+    
+    .context-menu {
+        max-width: 90%;
+    }
+}

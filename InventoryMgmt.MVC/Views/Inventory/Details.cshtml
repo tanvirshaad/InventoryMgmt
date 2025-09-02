@@ -329,7 +329,11 @@
                     </p>
                     
                     <div class="alert alert-info mb-4">
-                        <strong>Example:</strong> <code id="custom-id-preview">📦-A7E3A_013_2025</code>
+                        <strong>Example:</strong> 
+                        <div class="bg-light p-2 mt-2 border rounded custom-id-preview-wrapper">
+                            <div id="custom-id-preview" class="d-inline-block">📦-A7E3A_013_2025</div>
+                        </div>
+                        <small class="d-block mt-1">(Supports Unicode emoji and special characters like underscores (_))</small>
                     </div>
                     
                     <div id="custom-id-elements" class="mb-3">
@@ -714,6 +718,26 @@
             // Initialize custom fields manager with the inventory ID
             initCustomFieldsManager(window.currentInventoryId);
             
+            // Special handling for custom ID preview to ensure underscores and emojis display properly
+            const previewElement = document.getElementById('custom-id-preview');
+            if (previewElement) {
+                // Apply special style to ensure unicode characters render correctly
+                previewElement.style.fontFamily = 'monospace';
+                previewElement.style.whiteSpace = 'pre';
+                previewElement.style.wordBreak = 'keep-all';
+                
+                // Force a repaint to ensure special characters display properly
+                setTimeout(() => {
+                    // If there are underscores in the preview, ensure they're displayed
+                    const content = previewElement.textContent;
+                    if (content && content.includes('_')) {
+                        console.log("Detected underscores in initial preview, ensuring display");
+                        // Force a redraw with a pre element
+                        previewElement.innerHTML = `<pre style="margin: 0; font-family: inherit; display: inline;">${content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>`;
+                    }
+                }, 500);
+            }
+            
             // Direct handler for add element button in custom ID tab
             $(document).on('click', '#add-custom-id-element', function(e) {
                 console.log("Add custom ID element button clicked directly");
@@ -800,7 +824,10 @@
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <input type="text" class="form-control element-value" placeholder="Format or text" data-element-id="${elementId}">
+                            <input type="text" class="form-control element-value" 
+                                   placeholder="Text (can include _, emoji, etc)" 
+                                   data-element-id="${elementId}"
+                                   onchange="updateCustomIdPreview()">
                         </div>
                         <div class="col-md-3">
                             <div class="d-flex gap-1">
@@ -818,6 +845,15 @@
             `;
             
             container.insertAdjacentHTML('beforeend', elementHtml);
+            
+            // Initialize description right away
+            const typeSelect = document.querySelector(`[data-element-id="${elementId}"].element-type`);
+            const descriptionDiv = document.querySelector(`[data-element-id="${elementId}"] .element-description`);
+            if (typeSelect && descriptionDiv) {
+                // Show description for Fixed type by default
+                descriptionDiv.textContent = 'A piece of unchanging text. Supports any characters including underscores, dashes, and Unicode emoji (📦, 🔑, etc).';
+            }
+            
             updateCustomIdPreview();
             initializeElementEventListeners(elementId);
         }
@@ -830,9 +866,27 @@
             
             if (typeSelect) {
                 typeSelect.addEventListener('change', function() {
+                    // Update placeholder based on type
+                    if (valueInput) {
+                        if (typeSelect.value === 'fixed') {
+                            valueInput.placeholder = 'Text (can include _, emoji, etc)';
+                        } else if (typeSelect.value === 'sequence') {
+                            valueInput.placeholder = 'Format (e.g., D3)';
+                        } else if (typeSelect.value === 'date/time') {
+                            valueInput.placeholder = 'Format (e.g., yyyy)';
+                        } else {
+                            valueInput.placeholder = 'Format or text';
+                        }
+                    }
+                    
                     updateElementDescription(elementId);
                     updateCustomIdPreview();
                 });
+                
+                // Set initial placeholder
+                if (valueInput && typeSelect.value === 'fixed') {
+                    valueInput.placeholder = 'Text (can include _, emoji, etc)';
+                }
             }
             
             if (valueInput) {
@@ -856,7 +910,7 @@
             if (!typeSelect || !descriptionDiv) return;
             
             const descriptions = {
-                'fixed': 'A piece of unchanging text. E.g., you can use Unicode emoji.',
+                'fixed': 'A piece of unchanging text. Supports any characters including underscores, dashes, and Unicode emoji (📦, 🔑, etc).',
                 '20-bit random': 'A random value. E.g., you can format it as a six-digit decimal (D6) or 5-digit hex (X5).',
                 '32-bit random': 'A random value. E.g., you can format it as a six-digit decimal (D6) or 5-digit hex (X5).',
                 '6-digit random': 'A random value. E.g., you can format it as a six-digit decimal (D6) or 5-digit hex (X5).',
@@ -908,6 +962,18 @@
             
             if (!previewElement) return;
             
+            // If no elements, show placeholder
+            if (elements.length === 0) {
+                previewElement.textContent = '(Preview will appear here)';
+                return;
+            }
+            
+            // Show loading indicator
+            previewElement.textContent = 'Generating preview...';
+            
+            // Debug - log the elements being sent
+            console.log("Sending elements to preview:", JSON.stringify(elements));
+            
             // Generate preview using the current elements
             fetch('/Inventory/GenerateAdvancedCustomIdPreview', {
                 method: 'POST',
@@ -918,6 +984,8 @@
             })
             .then(response => response.json())
             .then(data => {
+                console.log("Preview response:", data);
+                // Use textContent to preserve all characters including underscores and emoji
                 previewElement.textContent = data.preview || 'Invalid format';
             })
             .catch(err => {
@@ -940,12 +1008,34 @@
             const elements = getCustomIdElements();
             console.log("Elements to save:", elements);
             
+            // Additional debug for fixed elements with underscores
+            elements.forEach(elem => {
+                if (elem.type === 'fixed') {
+                    console.log(`Fixed element ${elem.id} value: "${elem.value}"`);
+                    
+                    // Explicitly check for underscore
+                    if (elem.value.includes('_')) {
+                        console.log('UNDERSCORE DETECTED in element value: ' + elem.id);
+                    }
+                    
+                    console.log(`Characters:`, Array.from(elem.value).map(c => c + ' (' + c.charCodeAt(0).toString(16) + ')').join(', '));
+                }
+            });
+            
+            // Build the request payload
+            const payload = { 
+                inventoryId: parseInt(inventoryId), 
+                elements: elements 
+            };
+            
+            console.log("Sending payload:", JSON.stringify(payload));
+            
             // Send the request directly
             $.ajax({
                 url: '/Inventory/SaveCustomIdConfiguration',
                 type: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify({ inventoryId: parseInt(inventoryId), elements: elements }),
+                data: JSON.stringify(payload),
                 success: function(response) {
                     console.log("Save response:", response);
                     if (response.success) {

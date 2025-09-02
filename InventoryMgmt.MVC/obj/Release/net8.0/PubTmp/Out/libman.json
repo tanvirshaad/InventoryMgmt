@@ -1,0 +1,30 @@
+{
+  "version": "3.0",
+  "defaultProvider": "unpkg",
+  "libraries": [
+    {
+      "library": "@microsoft/signalr@latest",
+      "destination": "wwwroot/lib/microsoft/signalr/",
+      "files": [
+        "dist/browser/signalr.js",
+        "dist/browser/signalr.js.map",
+        "dist/browser/signalr.min.js",
+        "dist/browser/signalr.min.js.map"
+      ]
+    },
+    {
+      "library": "jquery-ui@1.13.2",
+      "destination": "wwwroot/lib/jquery-ui/",
+      "files": [
+        "jquery-ui.min.js",
+        "jquery-ui.min.css",
+        "themes/base/images/ui-icons_444444_256x240.png",
+        "themes/base/images/ui-icons_555555_256x240.png",
+        "themes/base/images/ui-icons_777620_256x240.png",
+        "themes/base/images/ui-icons_777777_256x240.png",
+        "themes/base/images/ui-icons_cc0000_256x240.png",
+        "themes/base/images/ui-icons_ffffff_256x240.png"
+      ]
+    }
+  ]
+}

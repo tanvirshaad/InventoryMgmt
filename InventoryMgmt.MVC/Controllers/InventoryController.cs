@@ -271,13 +271,54 @@ namespace InventoryMgmt.MVC.Controllers
         [HttpPost]
         public IActionResult GenerateAdvancedCustomIdPreview([FromBody] CustomIdPreviewRequest request)
         {
+            System.Diagnostics.Debug.WriteLine("GenerateAdvancedCustomIdPreview called");
+            
             if (request?.Elements == null || !request.Elements.Any())
             {
+                System.Diagnostics.Debug.WriteLine("No elements provided in request");
                 return Json(new { preview = "" });
             }
+            
+            System.Diagnostics.Debug.WriteLine($"Request contains {request.Elements.Count} elements");
+            foreach (var elem in request.Elements)
+            {
+                System.Diagnostics.Debug.WriteLine($"Element: Id={elem.Id}, Type={elem.Type}, Value='{elem.Value}'");
+                
+                // Log character codes for debugging
+                if (elem.Value != null && elem.Type?.ToLower() == "fixed")
+                {
+                    var charCodes = string.Join(", ", elem.Value.Select(c => $"{c}(U+{(int)c:X4})"));
+                    System.Diagnostics.Debug.WriteLine($"Fixed value characters: {charCodes}");
+                }
+            }
 
+            // Generate the preview
             var preview = _inventoryService.GenerateAdvancedCustomId(request.Elements, 1);
-            return Json(new { preview });
+            System.Diagnostics.Debug.WriteLine($"Generated preview: '{preview}'");
+            
+            // Log character codes of the final preview
+            if (!string.IsNullOrEmpty(preview))
+            {
+                var previewCharCodes = string.Join(", ", preview.Select(c => $"{c}(U+{(int)c:X4})"));
+                System.Diagnostics.Debug.WriteLine($"Preview characters: {previewCharCodes}");
+            }
+            
+            // Create a special HTML-safe representation for display while preserving special characters
+            
+            // Check if preview contains underscores specifically
+            if (!string.IsNullOrEmpty(preview) && preview.Contains('_'))
+            {
+                System.Diagnostics.Debug.WriteLine("Final preview contains underscores - ensuring preservation");
+            }
+
+            // Return the preview exactly as is - the client will handle the display
+            return Json(new { 
+                preview = preview,
+                // Include debug information to help diagnose issues
+                debugInfo = !string.IsNullOrEmpty(preview) ? 
+                    string.Join(", ", preview.Select(c => $"{c}(U+{(int)c:X4})")) : 
+                    "empty preview" 
+            });
         }
 
         [HttpGet]
@@ -322,20 +363,37 @@ namespace InventoryMgmt.MVC.Controllers
         {
             try
             {
+                System.Diagnostics.Debug.WriteLine("SaveCustomIdConfiguration called");
+                
                 if (request == null || request.InventoryId <= 0)
                 {
+                    System.Diagnostics.Debug.WriteLine("Invalid request: null or invalid ID");
                     return Json(new { success = false, error = "Invalid request" });
                 }
 
                 // Check permissions
                 if (!await CanCurrentUserManageInventoryAsync(request.InventoryId))
                 {
+                    System.Diagnostics.Debug.WriteLine("Access denied for user");
                     return Json(new { success = false, error = "Access denied" });
                 }
 
                 if (request.Elements == null)
                 {
+                    System.Diagnostics.Debug.WriteLine("Elements is null, creating empty list");
                     request.Elements = new List<CustomIdElement>();
+                }
+                
+                // Log the elements being saved
+                foreach (var elem in request.Elements)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Saving element: Id={elem.Id}, Type={elem.Type}, Value='{elem.Value}'");
+                    // Log character codes for debugging
+                    if (elem.Value != null && elem.Type?.ToLower() == "fixed")
+                    {
+                        var charCodes = string.Join(", ", elem.Value.Select(c => $"{c}(U+{(int)c:X4})"));
+                        System.Diagnostics.Debug.WriteLine($"Fixed value characters: {charCodes}");
+                    }
                 }
 
                 var result = await _inventoryService.UpdateCustomIdConfigurationAsync(request.InventoryId, request.Elements);

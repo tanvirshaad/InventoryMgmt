@@ -107,6 +107,38 @@
     height: 1.25rem;
 }
 
+/* Custom ID preview styling */
+#custom-id-preview {
+    font-family: monospace;
+    white-space: pre;
+    word-break: keep-all;
+    word-wrap: normal;
+    font-size: 1.1rem;
+    letter-spacing: 0.5px;
+    user-select: all;
+    /* Enhanced CSS for special characters */
+    unicode-bidi: embed;
+    font-variant-ligatures: none;
+    -webkit-font-feature-settings: normal;
+    font-feature-settings: normal;
+}
+
+/* Styles for the pre tag inside custom-id-preview */
+#custom-id-preview pre {
+    margin: 0;
+    padding: 0;
+    font-family: inherit;
+    white-space: pre;
+    display: inline;
+}
+
+.custom-id-preview-wrapper {
+    overflow-x: auto;
+    padding: 8px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .selection-toolbar {
