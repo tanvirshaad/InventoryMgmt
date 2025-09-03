@@ -1,0 +1,65 @@
+# .NET build artifacts
+bin/
+obj/
+*.dll
+*.pdb
+*.exe
+*.user
+*.suo
+*.cache
+*.log
+
+# Environment variables
+.env
+
+# VS Code files
+.vs/
+.vscode/
+*.code-workspace
+
+# Visual Studio files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+*.vssscc
+*_i.c
+*_p.c
+*.ncb
+*.suo
+*.tlb
+*.tlh
+*.bak
+*.cache
+*.ilk
+*.log
+*.lib
+*.sbr
+*.sdf
+*.opensdf
+*.unsuccessfulbuild
+ipch/
+[Bb]in
+[Dd]ebug*/
+[Rr]elease*/
+Ankh.NoLoad
+
+# Rider files
+.idea/
+*.sln.iml
+.idea/
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# NuGet Packages
+*.nupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets

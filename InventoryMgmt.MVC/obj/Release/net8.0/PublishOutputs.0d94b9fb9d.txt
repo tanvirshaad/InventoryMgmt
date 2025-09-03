@@ -8,6 +8,7 @@ D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\obj\Release\net8.0\PubTmp\Out
 D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\obj\Release\net8.0\PubTmp\Out\AutoMapper.dll
 D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\obj\Release\net8.0\PubTmp\Out\Azure.Core.dll
 D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\obj\Release\net8.0\PubTmp\Out\Azure.Identity.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\obj\Release\net8.0\PubTmp\Out\CloudinaryDotNet.dll
 D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\obj\Release\net8.0\PubTmp\Out\Microsoft.AspNetCore.Connections.Abstractions.dll
 D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\obj\Release\net8.0\PubTmp\Out\Microsoft.AspNetCore.Http.Connections.Client.dll
 D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\obj\Release\net8.0\PubTmp\Out\Microsoft.AspNetCore.Http.Connections.Common.dll

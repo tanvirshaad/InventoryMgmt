@@ -11,11 +11,56 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.SignalR;
 using InventoryMgmt.MVC.Hubs;
 using InventoryMgmt.DAL;
+using InventoryMgmt.BLL.DTOs;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Server.IISIntegration;
+using Microsoft.AspNetCore.Server.IIS;
+using DotNetEnv;
+using System.IO;
+
+// Load environment variables from .env file - try multiple possible locations
+var rootPath = Directory.GetCurrentDirectory();
+Console.WriteLine($"Current directory: {rootPath}");
+
+var envFiles = new[] {
+    Path.Combine(rootPath, ".env"),                   // Current directory
+    Path.Combine(rootPath, "..", ".env"),             // Parent directory
+    Path.Combine(Directory.GetCurrentDirectory(), ".env") // Current working directory
+};
+
+bool envLoaded = false;
+foreach (var envFile in envFiles)
+{
+    Console.WriteLine($"Checking for .env file at: {envFile}");
+    if (File.Exists(envFile))
+    {
+        Console.WriteLine($"Loading .env file from: {envFile}");
+        Env.Load(envFile);
+        envLoaded = true;
+        break;
+    }
+}
+
+if (!envLoaded)
+{
+    Console.WriteLine("Warning: No .env file found. Using hardcoded values.");
+}
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Configure request size limits for file uploads (10MB)
+builder.Services.Configure<IISServerOptions>(options =>
+{
+    options.MaxRequestBodySize = 10 * 1024 * 1024;
+});
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 10 * 1024 * 1024; // 10MB
+});
 
 builder.Services.AddDbContext<ApplicationDbContext>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("InventoryMgmt")));
@@ -73,6 +118,9 @@ builder.Services.AddScoped<InventoryMgmt.BLL.Services.IInventoryAccessService, I
 
 // Add SignalR
 builder.Services.AddSignalR();
+
+// Configure Cloudinary - Use DirectCloudinaryService that doesn't rely on IOptions
+builder.Services.AddScoped<ICloudinaryService, DirectCloudinaryService>();
 
 var app = builder.Build();
 

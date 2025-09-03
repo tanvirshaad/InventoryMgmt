@@ -163,4 +163,6 @@ D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Debug\net8.0\Microsoft.As
 D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Debug\net8.0\Microsoft.AspNetCore.SignalR.Protocols.Json.dll
 D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Debug\net8.0\Microsoft.Extensions.Features.dll
 D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Debug\net8.0\libman.json
-D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Debug\net8.0\CloudinaryDotNet.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Debug\net8.0\DotNetEnv.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Debug\net8.0\Sprache.dll

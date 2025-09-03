@@ -5,20 +5,48 @@
 }
 
 @Html.AntiForgeryToken()
+<!-- TEST CHANGE TO VERIFY UPDATES -->
 <div class="container-fluid">
     <!-- Inventory Header -->
     <div class="row mb-4">
         <div class="col">
             <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <h2>@Model.Title <span class="badge bg-success">All changes saved</span></h2>
-                    <p class="text-muted mb-2">
-                        <i class="bi bi-person me-2"></i>@Model.Owner?.FirstName @Model.Owner?.LastName
-                        <span class="mx-2">•</span>
-                        <i class="bi bi-folder me-2"></i>@Model.Category?.Name
-                        <span class="mx-2">•</span>
-                        <i class="bi bi-calendar me-2"></i>@Model.CreatedAt.ToString("MMM dd, yyyy")
-                    </p>
+                <div class="d-flex align-items-start">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <div class="me-4">
+                            <img src="@Model.ImageUrl" alt="@Model.Title" class="img-thumbnail" style="max-width: 150px;" />
+                            @if (ViewBag.CanEdit == true)
+                            {
+                                <a asp-controller="Image" asp-action="Upload" asp-route-inventoryId="@Model.Id" class="btn btn-sm btn-outline-secondary mt-1">
+                                    <i class="bi bi-arrow-repeat"></i> Change
+                                </a>
+                            }
+                        </div>
+                    }
+                    else if (ViewBag.CanEdit == true)
+                    {
+                        <div class="me-4">
+                            <div class="border rounded p-3 text-center" style="width: 150px; height: 150px; display: flex; align-items: center; justify-content: center;">
+                                <div>
+                                    <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
+                                    <p class="small text-muted mb-0">No image</p>
+                                    <a asp-controller="Image" asp-action="Upload" asp-route-inventoryId="@Model.Id" class="btn btn-sm btn-outline-primary mt-2">
+                                        <i class="bi bi-upload"></i> Add Image
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    <div>
+                        <h2>@Model.Title <span class="badge bg-success">All changes saved</span></h2>
+                        <p class="text-muted mb-2">
+                            <i class="bi bi-person me-2"></i>@Model.Owner?.FirstName @Model.Owner?.LastName
+                            <span class="mx-2">•</span>
+                            <i class="bi bi-folder me-2"></i>@Model.Category?.Name
+                            <span class="mx-2">•</span>
+                            <i class="bi bi-calendar me-2"></i>@Model.CreatedAt.ToString("MMM dd, yyyy")
+                        </p>
                     @if (Model.Tags != null && Model.Tags.Any(t => t != null && !string.IsNullOrEmpty(t.Name)))
                     {
                         <div class="d-flex flex-wrap gap-1 mb-2">
@@ -34,22 +62,24 @@
                         <p class="lead">@Model.Description</p>
                     }
                 </div>
-                <div class="d-flex gap-2">
-                    @if (ViewBag.CanEdit == true)
-                    {
-                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">
-                            <i class="bi bi-pencil me-2"></i>Edit
-                        </a>
-                        <a asp-action="Create" asp-controller="Item" asp-route-inventoryId="@Model.Id" class="btn btn-primary">
-                            <i class="bi bi-plus-circle me-2"></i>Add Item
-                        </a>
-                    }
-                    else if (ViewBag.CanAddItems == true)
-                    {
-                        <a asp-action="Create" asp-controller="Item" asp-route-inventoryId="@Model.Id" class="btn btn-primary">
-                            <i class="bi bi-plus-circle me-2"></i>Add Item
-                        </a>
-                    }
+                <div class="ms-auto">
+                    <div class="d-flex gap-2">
+                        @if (ViewBag.CanEdit == true)
+                        {
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">
+                                <i class="bi bi-pencil me-2"></i>Edit
+                            </a>
+                            <a asp-action="Create" asp-controller="Item" asp-route-inventoryId="@Model.Id" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-2"></i>Add Item
+                            </a>
+                        }
+                        else if (ViewBag.CanAddItems == true)
+                        {
+                            <a asp-action="Create" asp-controller="Item" asp-route-inventoryId="@Model.Id" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-2"></i>Add Item
+                            </a>
+                        }
+                    </div>
                 </div>
             </div>
         </div>
@@ -131,6 +161,7 @@
             
             @if (ViewBag.Items != null && ((IEnumerable<dynamic>)ViewBag.Items).Any())
             {
+                <div class="mb-4"></div> <!-- Extra space before item list -->
                 <div class="table-responsive">
                     <table class="table table-hover" id="itemsTable">
                         <thead>
@@ -191,6 +222,7 @@
             }
             else
             {
+                <div class="mb-4"></div> <!-- Extra space before empty state -->
                 <div class="text-center py-5">
                     <i class="bi bi-box display-4 text-muted"></i>
                     <h5 class="text-muted mt-3">No items yet</h5>
@@ -305,7 +337,7 @@
                     
                     @if (ViewBag.CanEdit == true)
                     {
-                        <div class="d-flex gap-2">
+                        <div class="d-flex gap-2 justify-content-end">
                             <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
                                 <i class="bi bi-pencil me-2"></i>Edit Settings
                             </a>

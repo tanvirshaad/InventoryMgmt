@@ -7,6 +7,7 @@ using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using InventoryMgmt.DAL.EF.TableModels;
+using DotNetEnv;
 
 namespace InventoryMgmt.BLL.Services
 {
@@ -30,7 +31,13 @@ namespace InventoryMgmt.BLL.Services
         public string GenerateToken(User user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"] ?? "YourSuperSecretKeyHere12345678901234567890");
+            
+            // Try to get JWT key from environment variables first, then fall back to configuration
+            var jwtKey = Env.GetString("JWT_KEY") ?? 
+                _configuration["Jwt:Key"] ?? 
+                "YourSuperSecretKeyHere12345678901234567890";
+                
+            var key = Encoding.ASCII.GetBytes(jwtKey);
 
             var claims = new List<Claim>
             {
@@ -42,16 +49,32 @@ namespace InventoryMgmt.BLL.Services
                 new Claim("LastName", user.LastName ?? "")
             };
 
+            // Try to get JWT issuer and audience from environment variables first, then fall back to configuration
+            var issuer = Env.GetString("JWT_ISSUER") ?? 
+                _configuration["Jwt:Issuer"] ?? 
+                "InventoryMgmt";
+                
+            var audience = Env.GetString("JWT_AUDIENCE") ?? 
+                _configuration["Jwt:Audience"] ?? 
+                "InventoryMgmtUsers";
+                
+            // Try to get JWT expiry days from environment variables first, then fall back to configuration
+            var expiryDays = Env.GetString("JWT_EXPIRY_DAYS") ?? 
+                _configuration["Jwt:ExpiryInDays"] ?? 
+                "7";
+                
+            var expiryDaysInt = int.Parse(expiryDays);
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddDays(7),
+                Expires = DateTime.UtcNow.AddDays(expiryDaysInt),
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
                     SecurityAlgorithms.HmacSha256Signature
                 ),
-                Issuer = _configuration["Jwt:Issuer"] ?? "InventoryMgmt",
-                Audience = _configuration["Jwt:Audience"] ?? "InventoryMgmtUsers"
+                Issuer = issuer,
+                Audience = audience
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
@@ -74,7 +97,22 @@ namespace InventoryMgmt.BLL.Services
         public ClaimsPrincipal? ValidateToken(string token)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"] ?? "YourSuperSecretKeyHere12345678901234567890");
+            
+            // Try to get JWT key from environment variables first, then fall back to configuration
+            var jwtKey = Env.GetString("JWT_KEY") ?? 
+                _configuration["Jwt:Key"] ?? 
+                "YourSuperSecretKeyHere12345678901234567890";
+                
+            var key = Encoding.ASCII.GetBytes(jwtKey);
+            
+            // Try to get JWT issuer and audience from environment variables first, then fall back to configuration
+            var issuer = Env.GetString("JWT_ISSUER") ?? 
+                _configuration["Jwt:Issuer"] ?? 
+                "InventoryMgmt";
+                
+            var audience = Env.GetString("JWT_AUDIENCE") ?? 
+                _configuration["Jwt:Audience"] ?? 
+                "InventoryMgmtUsers";
 
             try
             {
@@ -83,9 +121,9 @@ namespace InventoryMgmt.BLL.Services
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = true,
-                    ValidIssuer = _configuration["Jwt:Issuer"] ?? "InventoryMgmt",
+                    ValidIssuer = issuer,
                     ValidateAudience = true,
-                    ValidAudience = _configuration["Jwt:Audience"] ?? "InventoryMgmtUsers",
+                    ValidAudience = audience,
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
                 }, out SecurityToken validatedToken);

@@ -77,7 +77,7 @@ function loadCustomIdElements(inventoryId) {
             
             if (!response) {
                 console.error("Empty response received");
-                alert("Error: Empty response received from server");
+                ToastUtility.error("Error: Empty response received from server");
                 return;
             }
             
@@ -105,14 +105,14 @@ function loadCustomIdElements(inventoryId) {
                 renderCustomIdElements(validElements);
             } else {
                 console.error("Elements is not an array:", response.elements);
-                alert("Error: Invalid elements data received from server");
+                ToastUtility.error("Error: Invalid elements data received from server");
             }
         },
         error: function(xhr, status, error) {
             console.error("Error loading custom ID elements:", error);
             console.error("Status:", status);
             console.error("Response:", xhr.responseText);
-            alert("Error loading custom ID elements. Check console for details.");
+            ToastUtility.error("Error loading custom ID elements. Check console for details.");
             
             // Display error message in the container
             if (container) {
@@ -130,7 +130,7 @@ function renderCustomIdElements(elements) {
     const container = document.getElementById('custom-id-elements');
     if (!container) {
         console.error("Could not find custom-id-elements container");
-        alert("Error: Could not find custom-id-elements container");
+        ToastUtility.error("Error: Could not find custom-id-elements container");
         return;
     }
     
@@ -161,6 +161,16 @@ function renderCustomIdElements(elements) {
         // Fix for case-sensitivity in type comparison
         const typeValue = (element.type || '').toLowerCase();
         
+        // Properly encode the value to ensure all characters are preserved
+        const escapedValue = element.value
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+            
+        console.log(`Element value: "${element.value}" -> escaped: "${escapedValue}"`);
+            
         const elementHtml = `
             <div class="custom-id-element field-item" draggable="true" data-element-id="${elementId}">
                 <div class="row align-items-center">
@@ -182,7 +192,7 @@ function renderCustomIdElements(elements) {
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <input type="text" class="form-control element-value" placeholder="Format or text" value="${element.value || ''}" data-element-id="${elementId}">
+                        <input type="text" class="form-control element-value" placeholder="Format or text" value="${escapedValue}" data-element-id="${elementId}">
                     </div>
                     <div class="col-md-3">
                         <div class="d-flex gap-1">
@@ -221,10 +231,19 @@ function getCustomIdElements() {
         const valueInput = div.querySelector('.element-value');
         
         if (typeSelect && valueInput) {
+            // Log raw value to debug any character issues
+            const rawValue = valueInput.value;
+            console.log(`Element ${elementId} raw value:`, rawValue);
+            
+            // For fixed elements, show exact characters for debugging
+            if (typeSelect.value.toLowerCase() === 'fixed') {
+                console.log(`Fixed element characters:`, Array.from(rawValue).map(c => c + ' (' + c.charCodeAt(0).toString(16) + ')').join(', '));
+            }
+            
             elements.push({
                 id: elementId,
                 type: typeSelect.value,
-                value: valueInput.value,
+                value: rawValue,
                 order: index
             });
         }
@@ -269,6 +288,19 @@ function updateCustomIdPreview() {
     // Show loading indicator
     previewElement.textContent = 'Generating preview...';
     
+    // Debug - log the elements being sent
+    console.log("Sending elements to preview:", JSON.stringify(elements));
+    
+    // Generate a debug representation of the elements
+    const debugElementsText = elements.map(elem => {
+        if (elem.type === 'fixed') {
+            return `Fixed: "${elem.value}" chars: ${Array.from(elem.value).map(c => c + '(' + c.charCodeAt(0).toString(16) + ')').join('')}`;
+        }
+        return `${elem.type}: ${elem.value}`;
+    }).join(', ');
+    
+    console.log("Elements debug representation:", debugElementsText);
+    
     // Generate preview using the current elements
     fetch('/Inventory/GenerateAdvancedCustomIdPreview', {
         method: 'POST',
@@ -280,7 +312,45 @@ function updateCustomIdPreview() {
     .then(response => response.json())
     .then(data => {
         console.log("Preview generated:", data);
-        previewElement.textContent = data.preview || 'Invalid format';
+        
+        // Debug - inspect the raw characters
+        if (data.preview) {
+            console.log("Preview characters:", Array.from(data.preview).map(c => c + ' (' + c.charCodeAt(0).toString(16) + ')').join(', '));
+        }
+        
+        // Use the innerText property to directly set the text with all special characters
+        if (data.preview) {
+            // Create a pre-formatted element to ensure all characters are displayed exactly as-is
+            previewElement.innerHTML = `<pre style="margin: 0; font-family: inherit; display: inline;">${data.preview.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>`;
+            
+            // Double-check for underscores - they should be preserved with the pre tag approach
+            if (data.preview.includes('_')) {
+                console.log("UNDERSCORE DETECTED IN PREVIEW!");
+                const preElement = previewElement.querySelector('pre');
+                if (!preElement.innerText.includes('_')) {
+                    console.error("Underscore lost in display! Using alternative rendering...");
+                    // Try an alternative approach with explicit space preservation
+                    previewElement.innerHTML = '';
+                    const formattedText = document.createElement('span');
+                    formattedText.style.whiteSpace = 'pre';
+                    formattedText.textContent = data.preview;
+                    previewElement.appendChild(formattedText);
+                }
+            }
+        } else {
+            previewElement.textContent = 'Invalid format';
+        }
+        
+        // Extra validation to confirm the preview contains the correct characters
+        console.log("Preview element content:", previewElement.textContent);
+        if (data.preview) {
+            console.log("Content characters:", Array.from(previewElement.textContent).map(c => c + ' (' + c.charCodeAt(0).toString(16) + ')').join(', '));
+            
+            // Log any server-side debug information
+            if (data.debugInfo) {
+                console.log("Server debug info:", data.debugInfo);
+            }
+        }
     })
     .catch(err => {
         console.error('Error generating preview:', err);
@@ -344,14 +414,14 @@ function updateElementDescription(elementId) {
     }
     
     const descriptions = {
-        'fixed': 'A piece of unchanging text. You can use Unicode emoji.',
-        '20-bit random': 'A random value. Format it as a decimal (D6) or hex (X5).',
-        '32-bit random': 'A random value. Format it as a decimal (D10) or hex (X8).',
-        '6-digit random': 'A random 6-digit number.',
-        '9-digit random': 'A random 9-digit number.',
-        'guid': 'A globally unique identifier. Format: N (no dashes), D (dashes), B (braces), P (parentheses).',
-        'date/time': 'Item creation date/time. Format like: yyyy (year), MM (month), dd (day), HH (hour), mm (minute).',
-        'sequence': 'A sequential index. Format with leading zeros (D4) or without (D).'
+        'fixed': 'A piece of unchanging text. Supports any characters including underscores (_) and Unicode emoji.',
+        '20-bit random': 'A random value. Format it as a decimal (D6) or hex (X5). You can include underscores or other characters (e.g., X5_).',
+        '32-bit random': 'A random value. Format it as a decimal (D10) or hex (X8). You can include underscores or other characters (e.g., D10_).',
+        '6-digit random': 'A random 6-digit number. You can include underscores or other characters after the format (e.g., D6_).',
+        '9-digit random': 'A random 9-digit number. You can include underscores or other characters after the format (e.g., D9_).',
+        'guid': 'A globally unique identifier. Format: N (no dashes), D (dashes), B (braces), P (parentheses). You can append underscores (e.g., N_).',
+        'date/time': 'Item creation date/time. Format like: yyyy (year), MM (month), dd (day). You can include underscores (e.g., yyyy_MM).',
+        'sequence': 'A sequential index. Format with leading zeros (D4) or without (D). You can include underscores (e.g., D3_).'
     };
     
     const selectedType = typeSelect.value;
@@ -362,22 +432,24 @@ function updateElementDescription(elementId) {
     if (valueInput) {
         switch (selectedType) {
             case 'fixed':
-                valueInput.placeholder = 'Text (e.g., ABC-, 📦, etc.)';
+                valueInput.placeholder = 'Text (e.g., ABC-, 📦, ABC_123, etc.)';
                 break;
             case '20-bit random':
             case '32-bit random':
+                valueInput.placeholder = 'Format (e.g., X5, D6, X5_, D6_)';
+                break;
             case '6-digit random':
             case '9-digit random':
-                valueInput.placeholder = 'Format (e.g., X5, D6)';
+                valueInput.placeholder = 'Format (e.g., D6, D6_)';
                 break;
             case 'guid':
-                valueInput.placeholder = 'Format (N, D, B, P)';
+                valueInput.placeholder = 'Format (N, D, B, P, N_, D_)';
                 break;
             case 'date/time':
-                valueInput.placeholder = 'Format (e.g., yyyyMMdd)';
+                valueInput.placeholder = 'Format (e.g., yyyy, MM-dd, yyyy_MM)';
                 break;
             case 'sequence':
-                valueInput.placeholder = 'Format (e.g., D3)';
+                valueInput.placeholder = 'Format (e.g., D3, D, D3_)';
                 break;
             default:
                 valueInput.placeholder = 'Format or text';

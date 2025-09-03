@@ -1,0 +1,88 @@
+@model InventoryMgmt.MVC.Models.ImageUploadModel
+
+@{
+    ViewData["Title"] = "Upload Image";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Upload Image</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Upload" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        
+                        @if (Model.InventoryId.HasValue)
+                        {
+                            <input type="hidden" asp-for="InventoryId" />
+                            <div class="alert alert-info">
+                                Uploading image for inventory ID: @Model.InventoryId
+                            </div>
+                        }
+                        else if (Model.ItemId.HasValue && !string.IsNullOrEmpty(Model.FieldName))
+                        {
+                            <input type="hidden" asp-for="ItemId" />
+                            <input type="hidden" asp-for="FieldName" />
+                            <div class="alert alert-info">
+                                Uploading document for item ID: @Model.ItemId, field: @Model.FieldName
+                            </div>
+                        }
+                        
+                        <div class="mb-3">
+                            <label asp-for="Image" class="form-label">Select Image</label>
+                            <input asp-for="Image" type="file" class="form-control" accept="image/*" />
+                            <span asp-validation-for="Image" class="text-danger"></span>
+                            <small class="form-text text-muted">Supported formats: JPG, PNG, GIF. Maximum file size: 10MB.</small>
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-upload"></i> Upload
+                            </button>
+                            <a href="javascript:history.back()" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Preview the selected image
+        document.querySelector('input[type="file"]').addEventListener('change', function(event) {
+            var preview = document.querySelector('#imagePreview');
+            
+            // Create preview if it doesn't exist
+            if (!preview) {
+                preview = document.createElement('div');
+                preview.id = 'imagePreview';
+                preview.className = 'mt-3';
+                this.parentNode.appendChild(preview);
+            }
+            
+            preview.innerHTML = '';
+            
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'img-thumbnail';
+                    img.style.maxHeight = '200px';
+                    preview.appendChild(img);
+                }
+                
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+}

@@ -5,6 +5,7 @@ wwwroot\css\inventory-detail.css
 wwwroot\css\item-form.css
 wwwroot\css\site.css
 wwwroot\css\tags.css
+wwwroot\css\toast.css
 wwwroot\favicon.ico
 wwwroot\js\chat.js
 wwwroot\js\custom-fields-manager.js
@@ -12,10 +13,12 @@ wwwroot\js\direct-access.js
 wwwroot\js\inventory-detail.js
 wwwroot\js\item-detail.js
 wwwroot\js\item-form.js
+wwwroot\js\item-handler.js
 wwwroot\js\like-handler.js
 wwwroot\js\numeric-field-config.js
 wwwroot\js\site.js
 wwwroot\js\tag-manager.js
+wwwroot\js\toast-utility.js
 wwwroot\lib\bootstrap\dist\css\bootstrap.css
 wwwroot\lib\bootstrap\dist\css\bootstrap.css.map
 wwwroot\lib\bootstrap\dist\css\bootstrap.min.css

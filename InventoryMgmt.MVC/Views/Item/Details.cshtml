@@ -110,6 +110,84 @@
                                 <p>@Model.NumericField3Value.Value</p>
                             </div>
                         }
+                        @if (!string.IsNullOrEmpty(Model.DocumentField1Value))
+                        {
+                            <div class="col-md-6 mb-3">
+                                <h6>Document Field 1</h6>
+                                <div>
+                                    <a href="@Model.DocumentField1Value" target="_blank" class="d-block mb-2">
+                                        <img src="@Model.DocumentField1Value" alt="Document 1" class="img-thumbnail" style="max-width: 150px; max-height: 150px;" />
+                                    </a>
+                                    @if (ViewBag.CanEdit == true)
+                                    {
+                                        <a asp-controller="Image" asp-action="Upload" asp-route-itemId="@Model.Id" asp-route-fieldName="DocumentField1Value" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-arrow-repeat"></i> Change
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        }
+                        else if (ViewBag.CanEdit == true && !string.IsNullOrEmpty(Model.DocumentField1Name))
+                        {
+                            <div class="col-md-6 mb-3">
+                                <h6>@Model.DocumentField1Name</h6>
+                                <a asp-controller="Image" asp-action="Upload" asp-route-itemId="@Model.Id" asp-route-fieldName="DocumentField1Value" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-upload"></i> Upload
+                                </a>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.DocumentField2Value))
+                        {
+                            <div class="col-md-6 mb-3">
+                                <h6>Document Field 2</h6>
+                                <div>
+                                    <a href="@Model.DocumentField2Value" target="_blank" class="d-block mb-2">
+                                        <img src="@Model.DocumentField2Value" alt="Document 2" class="img-thumbnail" style="max-width: 150px; max-height: 150px;" />
+                                    </a>
+                                    @if (ViewBag.CanEdit == true)
+                                    {
+                                        <a asp-controller="Image" asp-action="Upload" asp-route-itemId="@Model.Id" asp-route-fieldName="DocumentField2Value" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-arrow-repeat"></i> Change
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        }
+                        else if (ViewBag.CanEdit == true && !string.IsNullOrEmpty(Model.DocumentField2Name))
+                        {
+                            <div class="col-md-6 mb-3">
+                                <h6>@Model.DocumentField2Name</h6>
+                                <a asp-controller="Image" asp-action="Upload" asp-route-itemId="@Model.Id" asp-route-fieldName="DocumentField2Value" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-upload"></i> Upload
+                                </a>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.DocumentField3Value))
+                        {
+                            <div class="col-md-6 mb-3">
+                                <h6>Document Field 3</h6>
+                                <div>
+                                    <a href="@Model.DocumentField3Value" target="_blank" class="d-block mb-2">
+                                        <img src="@Model.DocumentField3Value" alt="Document 3" class="img-thumbnail" style="max-width: 150px; max-height: 150px;" />
+                                    </a>
+                                    @if (ViewBag.CanEdit == true)
+                                    {
+                                        <a asp-controller="Image" asp-action="Upload" asp-route-itemId="@Model.Id" asp-route-fieldName="DocumentField3Value" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-arrow-repeat"></i> Change
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        }
+                        else if (ViewBag.CanEdit == true && !string.IsNullOrEmpty(Model.DocumentField3Name))
+                        {
+                            <div class="col-md-6 mb-3">
+                                <h6>@Model.DocumentField3Name</h6>
+                                <a asp-controller="Image" asp-action="Upload" asp-route-itemId="@Model.Id" asp-route-fieldName="DocumentField3Value" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-upload"></i> Upload
+                                </a>
+                            </div>
+                        }
                         @if (Model.BooleanField1Value.HasValue)
                         {
                             <div class="col-md-6 mb-3">

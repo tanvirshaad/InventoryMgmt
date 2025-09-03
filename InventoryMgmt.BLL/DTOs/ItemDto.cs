@@ -33,8 +33,11 @@ namespace InventoryMgmt.BLL.DTOs
         public decimal? NumericField1Value { get; set; }
         public decimal? NumericField2Value { get; set; }
         public decimal? NumericField3Value { get; set; }
+        public string? DocumentField1Name { get; set; }
         public string? DocumentField1Value { get; set; }
+        public string? DocumentField2Name { get; set; }
         public string? DocumentField2Value { get; set; }
+        public string? DocumentField3Name { get; set; }
         public string? DocumentField3Value { get; set; }
         public bool? BooleanField1Value { get; set; }
         public bool? BooleanField2Value { get; set; }

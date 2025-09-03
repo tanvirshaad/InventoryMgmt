@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("InventoryMgmt.DAL")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ccc5ce4792913e6144b516f56a9baea6c8e05d62")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4381398c3894d6c045cd35b57097e4d6d06da1f1")]
 [assembly: System.Reflection.AssemblyProductAttribute("InventoryMgmt.DAL")]
 [assembly: System.Reflection.AssemblyTitleAttribute("InventoryMgmt.DAL")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

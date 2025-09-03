@@ -17,58 +17,35 @@ $(document).ready(function() {
         e.stopPropagation();
         e.preventDefault();
         
-        console.log('Like button clicked in item detail view');
-        
         // Check if user is authenticated
         if ($(this).data('authenticated') !== 'true') {
-            alert('You must be logged in to like items.');
+            ToastUtility.warning('You must be logged in to like items', {
+                header: 'Authentication Required',
+                action: {
+                    text: 'Login',
+                    url: '/Auth/Login'
+                }
+            });
             return;
         }
         
         const itemId = $(this).data('item-id');
-        const $likeBtn = $(this);
-        const $icon = $likeBtn.find('i');
-        const $likesCount = $likeBtn.find('.likes-count');
-        
-        $.ajax({
-            url: `/Item/ToggleLike/${itemId}`,
-            type: 'POST',
-            headers: {
-                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
-            },
-            success: function(result) {
-                if (result.success) {
-                    if (result.isLiked) {
-                        $icon.removeClass('bi-heart').addClass('bi-heart-fill');
-                        $likeBtn.attr('data-bs-original-title', 'Unlike');
-                    } else {
-                        $icon.removeClass('bi-heart-fill').addClass('bi-heart');
-                        $likeBtn.attr('data-bs-original-title', 'Like');
-                    }
-                    
-                    // Update tooltip
-                    var tooltip = bootstrap.Tooltip.getInstance($likeBtn[0]);
-                    if (tooltip) {
-                        tooltip.dispose();
-                    }
-                    new bootstrap.Tooltip($likeBtn[0]);
-                    
-                    // Update like count if it's returned in the response
-                    if (result.likesCount !== undefined) {
-                        $likesCount.text(result.likesCount);
-                    }
-                }
-            },
-            error: function(error) {
-                console.error('Error toggling like:', error);
-                if (error.status === 401) {
-                    alert('You must be logged in to like items.');
-                } else {
-                    console.log('Response:', error.responseJSON);
-                    alert('Failed to toggle like. Please try again.');
-                }
-            }
-        });
+        // Use our ItemHandler utility
+        ItemHandler.toggleLike(itemId, this);
+    });
+    
+    // Add duplicate button handler
+    $('.duplicate-item').on('click', function() {
+        const itemId = $(this).data('item-id');
+        ItemHandler.duplicateItem(itemId);
+    });
+    
+    // Add delete button handler for the modal
+    $('#deleteModal .btn-danger').on('click', function(e) {
+        e.preventDefault();
+        const itemId = $(this).closest('form').attr('action').split('/').pop();
+        ItemHandler.deleteItem(itemId);
+        $('#deleteModal').modal('hide');
     });
     
     // Initialize comment functionality if the hub exists
