@@ -29,7 +29,7 @@ namespace InventoryMgmt.MVC.Controllers
                 return NotFound();
             }
 
-            var accessUsers = await _inventoryService.GetInventoryAccessUsersAsync(inventoryId);
+            var accessUsers = await _inventoryService.AccessService.GetInventoryAccessUsersAsync(inventoryId);
             
             ViewBag.Inventory = inventory;
             ViewBag.AccessUsers = accessUsers;
@@ -67,7 +67,7 @@ namespace InventoryMgmt.MVC.Controllers
             }
 
             // Check if the user already has access
-            var accessUsers = await _inventoryService.GetInventoryAccessUsersAsync(inventoryId);
+            var accessUsers = await _inventoryService.AccessService.GetInventoryAccessUsersAsync(inventoryId);
             var existingAccess = accessUsers.FirstOrDefault(a => a.Email == userEmail);
             
             if (existingAccess != null)
@@ -81,7 +81,7 @@ namespace InventoryMgmt.MVC.Controllers
 
             try
             {
-                await _inventoryService.GrantUserAccessAsync(inventoryId, user.Id, permission);
+                await _inventoryService.AccessService.GrantUserAccessAsync(inventoryId, user.Id, permission);
                 return Json(new { 
                     success = true, 
                     message = $"Access granted to {user.FirstName} {user.LastName} with {permission} permission",
@@ -122,7 +122,7 @@ namespace InventoryMgmt.MVC.Controllers
             
             try
             {
-                await _inventoryService.UpdateUserAccessPermissionAsync(inventoryId, userId, permission);
+                await _inventoryService.AccessService.UpdateUserAccessPermissionAsync(inventoryId, userId, permission);
                 return Json(new { success = true, message = $"Permission updated successfully to {permission}" });
             }
             catch (Exception ex)
@@ -151,7 +151,7 @@ namespace InventoryMgmt.MVC.Controllers
             
             try
             {
-                await _inventoryService.RevokeUserAccessAsync(inventoryId, userId);
+                await _inventoryService.AccessService.RevokeUserAccessAsync(inventoryId, userId);
                 return Json(new { success = true, message = "Access revoked successfully" });
             }
             catch (Exception ex)
@@ -216,7 +216,7 @@ namespace InventoryMgmt.MVC.Controllers
                 }
 
                 // Check if the user already has access
-                var accessUsers = await _inventoryService.GetInventoryAccessUsersAsync(inventoryId);
+                var accessUsers = await _inventoryService.AccessService.GetInventoryAccessUsersAsync(inventoryId);
                 var existingAccess = accessUsers.FirstOrDefault(a => a.Email == email);
                 
                 if (existingAccess != null)
@@ -226,7 +226,7 @@ namespace InventoryMgmt.MVC.Controllers
                 }
 
                 // Grant the user access
-                await _inventoryService.GrantUserAccessAsync(inventoryId, user.Id, InventoryPermission.Write);
+                await _inventoryService.AccessService.GrantUserAccessAsync(inventoryId, user.Id, InventoryPermission.Write);
                 
                 // Success message with more details
                 TempData["Success"] = $"Success! Access granted to {user.FirstName} {user.LastName} ({user.Email}) with Write permission. " +
@@ -292,7 +292,7 @@ namespace InventoryMgmt.MVC.Controllers
                 }
 
                 // Check if the user already has access
-                var accessUsers = await _inventoryService.GetInventoryAccessUsersAsync(inventoryId);
+                var accessUsers = await _inventoryService.AccessService.GetInventoryAccessUsersAsync(inventoryId);
                 var existingAccess = accessUsers.FirstOrDefault(a => a.Email == email);
                 
                 if (existingAccess != null)
@@ -302,7 +302,7 @@ namespace InventoryMgmt.MVC.Controllers
                 }
 
                 // Grant the user access
-                await _inventoryService.GrantUserAccessAsync(inventoryId, user.Id, InventoryPermission.Write);
+                await _inventoryService.AccessService.GrantUserAccessAsync(inventoryId, user.Id, InventoryPermission.Write);
                 
                 // Success message with more details
                 TempData["Success"] = $"Success! Access granted to {user.FirstName} {user.LastName} ({user.Email}) with Write permission. " +
@@ -355,11 +355,11 @@ namespace InventoryMgmt.MVC.Controllers
             try
             {
                 // Get user details before removing for better messaging
-                var users = await _inventoryService.GetInventoryAccessUsersAsync(inventoryId);
+                var users = await _inventoryService.AccessService.GetInventoryAccessUsersAsync(inventoryId);
                 var userToRemove = users.FirstOrDefault(u => u.Id == userId);
                 
                 // Remove the user access
-                await _inventoryService.RevokeUserAccessAsync(inventoryId, userId);
+                await _inventoryService.AccessService.RevokeUserAccessAsync(inventoryId, userId);
                 
                 // Set success message
                 if (userToRemove != null)

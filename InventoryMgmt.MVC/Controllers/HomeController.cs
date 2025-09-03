@@ -20,7 +20,7 @@ namespace InventoryMgmt.MVC.Controllers
             {
                 LatestInventories = await _inventoryService.GetLatestInventoriesAsync(10),
                 PopularInventories = await _inventoryService.GetMostPopularInventoriesAsync(5),
-                PopularTags = await _inventoryService.GetPopularTagsAsync(20)
+                PopularTags = await _inventoryService.TagService.GetPopularTagsAsync(20)
             };
 
             // Load user-specific inventories if the user is authenticated

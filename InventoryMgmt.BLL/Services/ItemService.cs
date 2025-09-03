@@ -105,8 +105,8 @@ namespace InventoryMgmt.BLL.Services
             do
             {
                 customId = string.IsNullOrEmpty(inventory.CustomIdElements)
-                    ? _inventoryService.GenerateCustomId(inventory.CustomIdFormat ?? "{SEQUENCE}", nextSequence + attempts)
-                    : _inventoryService.GenerateAdvancedCustomId(
+                    ? _inventoryService.CustomIdService.GenerateCustomId(inventory.CustomIdFormat ?? "{SEQUENCE}", nextSequence + attempts)
+                    : _inventoryService.CustomIdService.GenerateAdvancedCustomId(
                         JsonSerializer.Deserialize<List<CustomIdElement>>(inventory.CustomIdElements) ?? new List<CustomIdElement>(),
                         nextSequence + attempts);
                 

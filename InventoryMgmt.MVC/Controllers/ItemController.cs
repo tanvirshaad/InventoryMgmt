@@ -173,7 +173,7 @@ namespace InventoryMgmt.MVC.Controllers
                 return View("~/Views/Item/ItemNotFound.cshtml");
             }
 
-            var canEdit = await _inventoryService.CanUserEditInventoryAsync(item.InventoryId, currentUserId, isAdmin);
+            var canEdit = await _inventoryService.AccessService.CanUserEditInventoryAsync(item.InventoryId, currentUserId, isAdmin);
             if (!canEdit)
             {
                 return View("AccessDenied");
@@ -207,7 +207,7 @@ namespace InventoryMgmt.MVC.Controllers
                 var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var isAdmin = User.IsInRole("Admin");
 
-                var canEdit = await _inventoryService.CanUserEditInventoryAsync(itemDto.InventoryId, currentUserId, isAdmin);
+                var canEdit = await _inventoryService.AccessService.CanUserEditInventoryAsync(itemDto.InventoryId, currentUserId, isAdmin);
                 if (!canEdit)
                 {
                     return Forbid();
@@ -304,7 +304,7 @@ namespace InventoryMgmt.MVC.Controllers
                 return View("~/Views/Item/ItemNotFound.cshtml");
             }
 
-            var canEdit = await _inventoryService.CanUserEditInventoryAsync(item.InventoryId, currentUserId, isAdmin);
+            var canEdit = await _inventoryService.AccessService.CanUserEditInventoryAsync(item.InventoryId, currentUserId, isAdmin);
             if (!canEdit)
             {
                 return View("AccessDenied");
@@ -327,7 +327,7 @@ namespace InventoryMgmt.MVC.Controllers
                 return NotFound();
             }
 
-            var canEdit = await _inventoryService.CanUserEditInventoryAsync(item.InventoryId, currentUserId, isAdmin);
+            var canEdit = await _inventoryService.AccessService.CanUserEditInventoryAsync(item.InventoryId, currentUserId, isAdmin);
             if (!canEdit)
             {
                 return Forbid();
@@ -397,7 +397,7 @@ namespace InventoryMgmt.MVC.Controllers
                     inventoryId = item.InventoryId;
                 }
 
-                var canEdit = await _inventoryService.CanUserEditInventoryAsync(item.InventoryId, currentUserId, isAdmin);
+                var canEdit = await _inventoryService.AccessService.CanUserEditInventoryAsync(item.InventoryId, currentUserId, isAdmin);
                 if (!canEdit)
                 {
                     failedDueToPermissions++;
@@ -444,7 +444,7 @@ namespace InventoryMgmt.MVC.Controllers
                 });
             }
 
-            var canEdit = await _inventoryService.CanUserEditInventoryAsync(originalItem.InventoryId, currentUserId, isAdmin);
+            var canEdit = await _inventoryService.AccessService.CanUserEditInventoryAsync(originalItem.InventoryId, currentUserId, isAdmin);
             if (!canEdit)
             {
                 return StatusCode(403, new {
@@ -517,7 +517,7 @@ namespace InventoryMgmt.MVC.Controllers
                 return isAjax ? Json(new { success = false, message = "Item not found" }) : NotFound();
             }
 
-            var canEdit = await _inventoryService.CanUserEditInventoryAsync(item.InventoryId, currentUserId, isAdmin);
+            var canEdit = await _inventoryService.AccessService.CanUserEditInventoryAsync(item.InventoryId, currentUserId, isAdmin);
             if (!canEdit)
             {
                 return isAjax ? Json(new { success = false, message = "Not authorized" }) : Forbid();
@@ -650,7 +650,7 @@ namespace InventoryMgmt.MVC.Controllers
                 if (!string.IsNullOrEmpty(inventory.CustomIdFormat))
                 {
                     // Use the inventory's custom ID format
-                    customId = _inventoryService.GenerateCustomId(inventory.CustomIdFormat, new Random().Next(1, 9999));
+                    customId = _inventoryService.CustomIdService.GenerateCustomId(inventory.CustomIdFormat, new Random().Next(1, 9999));
                 }
                 else
                 {

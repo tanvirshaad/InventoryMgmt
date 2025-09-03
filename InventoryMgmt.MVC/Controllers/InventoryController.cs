@@ -130,7 +130,7 @@ namespace InventoryMgmt.MVC.Controllers
                                 var tags = System.Text.Json.JsonSerializer.Deserialize<List<string>>(tagNames);
                                 if (tags != null && tags.Any())
                                 {
-                                    await _inventoryService.AddTagsToInventoryAsync(result.Id, tags);
+                                    await _inventoryService.TagService.AddTagsToInventoryAsync(result.Id, tags);
                                 }
                             }
                             catch (Exception ex)
@@ -265,7 +265,7 @@ namespace InventoryMgmt.MVC.Controllers
                 return Json(new { preview = "" });
             }
 
-            var preview = _inventoryService.GenerateCustomId(format, 1);
+            var preview = _inventoryService.CustomIdService.GenerateCustomId(format, 1);
             return Json(new { preview });
         }
 
@@ -294,7 +294,7 @@ namespace InventoryMgmt.MVC.Controllers
             }
 
             // Generate the preview
-            var preview = _inventoryService.GenerateAdvancedCustomId(request.Elements, 1);
+            var preview = _inventoryService.CustomIdService.GenerateAdvancedCustomId(request.Elements, 1);
             System.Diagnostics.Debug.WriteLine($"Generated preview: '{preview}'");
             
             // Log character codes of the final preview
@@ -397,7 +397,7 @@ namespace InventoryMgmt.MVC.Controllers
                     }
                 }
 
-                var result = await _inventoryService.UpdateCustomIdConfigurationAsync(request.InventoryId, request.Elements);
+                var result = await _inventoryService.CustomIdService.UpdateCustomIdConfigurationAsync(request.InventoryId, request.Elements);
                 return Json(new { success = result });
             }
             catch (Exception ex)
@@ -686,11 +686,11 @@ namespace InventoryMgmt.MVC.Controllers
                 if (request.Fields.Count == 0)
                 {
                     // Clear all fields
-                    bool clearResult = await _inventoryService.ClearAllCustomFieldsAsync(request.InventoryId);
+                    bool clearResult = await _inventoryService.CustomFieldService.ClearAllCustomFieldsAsync(request.InventoryId);
                     return Json(new { success = clearResult });
                 }
 
-                var result = await _inventoryService.UpdateCustomFieldsAsync(request.InventoryId, request.Fields);
+                var result = await _inventoryService.CustomFieldService.UpdateCustomFieldsAsync(request.InventoryId, request.Fields);
                 return Json(new { success = result });
             }
             catch (Exception ex)
@@ -857,7 +857,7 @@ namespace InventoryMgmt.MVC.Controllers
                 return Json(new { isPublic = true, users = new object[0] });
             }
 
-            var users = await _inventoryService.GetInventoryAccessUsersAsync(id);
+            var users = await _inventoryService.AccessService.GetInventoryAccessUsersAsync(id);
             var userDtos = users.Select(u => new
             {
                 id = u.Id,
@@ -923,7 +923,7 @@ namespace InventoryMgmt.MVC.Controllers
         [HttpGet]
         public async Task<IActionResult> GetInventoryTags(int id)
         {
-            var tags = await _inventoryService.GetInventoryTagsAsync(id);
+            var tags = await _inventoryService.TagService.GetInventoryTagsAsync(id);
             return Json(new { tags = tags });
         }
         
@@ -933,7 +933,7 @@ namespace InventoryMgmt.MVC.Controllers
         [HttpGet]
         public async Task<IActionResult> SearchTags(string term)
         {
-            var tags = await _inventoryService.SearchTagsAsync(term);
+            var tags = await _inventoryService.TagService.SearchTagsAsync(term);
             return Json(tags);
         }
         
@@ -943,7 +943,7 @@ namespace InventoryMgmt.MVC.Controllers
         [HttpGet]
         public async Task<IActionResult> GetPopularTags(int count = 10)
         {
-            var tags = await _inventoryService.GetPopularTagsAsync(count);
+            var tags = await _inventoryService.TagService.GetPopularTagsAsync(count);
             return Json(new { tags = tags });
         }
         
@@ -958,7 +958,7 @@ namespace InventoryMgmt.MVC.Controllers
                 return Json(new { success = false, message = "Access denied" });
             }
             
-            var result = await _inventoryService.AddTagToInventoryAsync(inventoryId, tagName);
+            var result = await _inventoryService.TagService.AddTagToInventoryAsync(inventoryId, tagName);
             return Json(new { success = result });
         }
         
@@ -973,7 +973,7 @@ namespace InventoryMgmt.MVC.Controllers
                 return Json(new { success = false, message = "Access denied" });
             }
             
-            var result = await _inventoryService.AddTagsToInventoryAsync(inventoryId, tagNames);
+            var result = await _inventoryService.TagService.AddTagsToInventoryAsync(inventoryId, tagNames);
             return Json(new { success = result });
         }
         
@@ -988,7 +988,7 @@ namespace InventoryMgmt.MVC.Controllers
                 return Json(new { success = false, message = "Access denied" });
             }
             
-            var result = await _inventoryService.RemoveTagFromInventoryAsync(inventoryId, tagId);
+            var result = await _inventoryService.TagService.RemoveTagFromInventoryAsync(inventoryId, tagId);
             return Json(new { success = result });
         }
         
@@ -1482,7 +1482,7 @@ namespace InventoryMgmt.MVC.Controllers
             try
             {
                 // Get direct access to the DbContext through the repository
-                var rawInventory = await _inventoryService.GetRawInventoryDataAsync(id);
+                var rawInventory = await _inventoryService.CustomFieldService.GetRawInventoryDataAsync(id);
                 
                 if (rawInventory == null)
                 {

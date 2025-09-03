@@ -48,7 +48,7 @@ namespace InventoryMgmt.MVC.Controllers
                 var fields = new List<CustomFieldData> { testField };
                 
                 // Save it
-                var result = await _inventoryService.UpdateCustomFieldsAsync(inventoryId, fields);
+                var result = await _inventoryService.CustomFieldService.UpdateCustomFieldsAsync(inventoryId, fields);
                 
                 return Ok(new { 
                     success = result, 
