@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "kfjMaHd7E8Q=",
+  "dgSpecHash": "EM0lXRcq5IM=",
   "success": true,
   "projectFilePath": "D:\\itransition\\InventoryMgmt.MVC\\InventoryMgmt.MVC\\InventoryMgmt.MVC.csproj",
   "expectedPackageFiles": [
@@ -11,6 +11,8 @@
     "C:\\Users\\tanvi\\.nuget\\packages\\dotnetenv\\3.1.1\\dotnetenv.3.1.1.nupkg.sha512",
     "C:\\Users\\tanvi\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\tanvi\\.nuget\\packages\\microsoft.aspnetcore.authentication.abstractions\\2.3.0\\microsoft.aspnetcore.authentication.abstractions.2.3.0.nupkg.sha512",
+    "C:\\Users\\tanvi\\.nuget\\packages\\microsoft.aspnetcore.authentication.facebook\\8.0.0\\microsoft.aspnetcore.authentication.facebook.8.0.0.nupkg.sha512",
+    "C:\\Users\\tanvi\\.nuget\\packages\\microsoft.aspnetcore.authentication.google\\8.0.0\\microsoft.aspnetcore.authentication.google.8.0.0.nupkg.sha512",
     "C:\\Users\\tanvi\\.nuget\\packages\\microsoft.aspnetcore.authorization\\2.3.0\\microsoft.aspnetcore.authorization.2.3.0.nupkg.sha512",
     "C:\\Users\\tanvi\\.nuget\\packages\\microsoft.aspnetcore.authorization.policy\\2.3.0\\microsoft.aspnetcore.authorization.policy.2.3.0.nupkg.sha512",
     "C:\\Users\\tanvi\\.nuget\\packages\\microsoft.aspnetcore.connections.abstractions\\8.0.19\\microsoft.aspnetcore.connections.abstractions.8.0.19.nupkg.sha512",

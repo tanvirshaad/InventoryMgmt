@@ -165,3 +165,7 @@ D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Release\net8.0\Microsoft.
 D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Release\net8.0\Microsoft.Extensions.Features.dll
 D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\obj\Release\net8.0\staticwebassets.upToDateCheck.txt
 D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Release\net8.0\CloudinaryDotNet.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Release\net8.0\DotNetEnv.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Release\net8.0\Microsoft.AspNetCore.Authentication.Google.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Release\net8.0\Sprache.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Release\net8.0\Microsoft.AspNetCore.Authentication.Facebook.dll

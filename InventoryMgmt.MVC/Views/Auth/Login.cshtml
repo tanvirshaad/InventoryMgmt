@@ -45,7 +45,14 @@
                     </div>
                 </form>
                 
-                <div class="text-center">
+                <div class="text-center mt-3">
+                    <p>Or sign in with:</p>
+                    <a asp-action="GoogleLogin" class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2">
+                        <i class="bi bi-google"></i> <span>Sign in with Google</span>
+                    </a>
+                </div>
+                
+                <div class="text-center mt-3">
                     <p>Don't have an account? <a asp-action="Register">Register here</a></p>
                 </div>
             </div>
