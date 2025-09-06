@@ -52,25 +52,13 @@
                         <input type="hidden" id="inventoryId" value="0" />
                     </div>
                     
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label asp-for="IsPublic" class="form-label">Public Access</label>
-                                <div class="form-check">
-                                    <input asp-for="IsPublic" class="form-check-input" />
-                                    <label asp-for="IsPublic" class="form-check-label">
-                                        Allow public access to this inventory
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label asp-for="CustomIdFormat" class="form-label">Custom ID Format</label>
-                                <input asp-for="CustomIdFormat" class="form-control" placeholder="e.g., INV-{SEQUENCE}" />
-                                <small class="form-text text-muted">Use {SEQUENCE} as a placeholder for sequential numbering</small>
-                                <span asp-validation-for="CustomIdFormat" class="text-danger"></span>
-                            </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="IsPublic" class="form-label">Public Access</label>
+                        <div class="form-check">
+                            <input asp-for="IsPublic" class="form-check-input" />
+                            <label asp-for="IsPublic" class="form-check-label">
+                                Allow public access to this inventory
+                            </label>
                         </div>
                     </div>
                     

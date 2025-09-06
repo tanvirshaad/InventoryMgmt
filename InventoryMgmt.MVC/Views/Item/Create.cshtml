@@ -23,13 +23,6 @@
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     <input type="hidden" asp-for="InventoryId" />
                     
-                    <div class="form-group mb-3">
-                        <label asp-for="CustomId" class="form-label">Custom ID</label>
-                        <input asp-for="CustomId" class="form-control" placeholder="Leave empty for auto-generation" />
-                        <small class="form-text text-muted">Optional: Custom identifier for this item</small>
-                        <span asp-validation-for="CustomId" class="text-danger"></span>
-                    </div>
-                    
                     <partial name="_CustomFieldsForm" model="Model" />
                     
                     <div class="form-group mb-3">
