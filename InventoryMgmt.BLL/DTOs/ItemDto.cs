@@ -17,7 +17,7 @@ namespace InventoryMgmt.BLL.DTOs
         public byte[] Version { get; set; } = Array.Empty<byte>();
         public int LikesCount { get; set; }
         
-        // Basic information
+        // Basic information - Name is kept for compatibility but populated from TextField1Value
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
         public string InventoryTitle { get; set; } = string.Empty;

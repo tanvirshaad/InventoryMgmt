@@ -173,7 +173,7 @@
                                     </div>
                                 </th>
                                 <th>ID</th>
-                                <th>Name</th>
+                                <th>Attribute</th>
                                 <th>Created</th>
                                 <th>Likes</th>
                             </tr>
@@ -191,16 +191,9 @@
                                     </td>
                                     <td><code>@item.CustomId</code></td>
                                     <td>
-                                        @if (ViewBag.CanEdit == true)
-                                        {
-                                            <a href="javascript:void(0)" class="item-link" data-item-id="@item.Id">
-                                                @(item.TextField1Value ?? "Unnamed item")
-                                            </a>
-                                        }
-                                        else
-                                        {
-                                            <span>@(item.TextField1Value ?? "Unnamed item")</span>
-                                        }
+                                        <a href="/Item/Details/@item.Id" class="item-link" data-item-id="@item.Id">
+                                            @(item.TextField1Value ?? "Unnamed item")
+                                        </a>
                                     </td>
                                     <td>@item.CreatedAt.ToString("MMM dd, yyyy")</td>
                                     <td>
@@ -718,9 +711,38 @@
     </div>
 }
 
+<!-- Item Details Modal -->
+<div class="modal fade" id="itemDetailsModal" tabindex="-1" aria-labelledby="itemDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="itemDetailsModalLabel">Item Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="itemDetailsModalBody">
+                <!-- Content will be loaded here via AJAX -->
+                <div class="text-center p-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading item details...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="editItemModalBtn">
+                    <i class="bi bi-pencil me-1"></i>Edit
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <!-- Like button handler -->
     <script src="~/js/like-handler.js"></script>
+    <!-- Modal initialization script - load BEFORE inventory-detail.js -->
+    <script src="~/js/modal-init.js"></script>
     <script src="~/js/inventory-detail.js"></script>
     <script src="~/js/custom-fields-manager.js"></script>
     <!-- Using only direct-access.js for simpler access control implementation -->

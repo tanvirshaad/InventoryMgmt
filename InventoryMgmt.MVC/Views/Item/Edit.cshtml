@@ -26,13 +26,6 @@
                     <input type="hidden" asp-for="InventoryId" />
                     <input type="hidden" asp-for="Version" />
                     
-                    <div class="form-group mb-3">
-                        <label asp-for="CustomId" class="form-label">Custom ID</label>
-                        <input asp-for="CustomId" class="form-control" placeholder="Custom identifier" />
-                        <small class="form-text text-muted">Unique identifier for this item</small>
-                        <span asp-validation-for="CustomId" class="text-danger"></span>
-                    </div>
-                    
                     <partial name="_CustomFieldsForm" model="Model" />
                     
                     <div class="form-group mb-3">
@@ -64,6 +57,58 @@
             $('.document-upload-btn').on('click', function() {
                 const fieldId = $(this).data('field-id');
                 alert('Document upload will be implemented in a future update');
+            });
+            
+            // Automatically generate preview ID on page load
+            function generatePreviewId() {
+                const inventoryId = $('input[name="InventoryId"]').val();
+                const customIdInput = $('#CustomId');
+                
+                // Only generate if CustomId field is empty
+                if (customIdInput.val() === '') {
+                    if (!inventoryId) {
+                        console.error("Inventory ID not found");
+                        return;
+                    }
+                    
+                    // Call API to generate a preview ID
+                    $.ajax({
+                        url: `/Item/GenerateItemCustomId?inventoryId=${inventoryId}`,
+                        type: 'GET',
+                        success: function(response) {
+                            if (response && response.success) {
+                                customIdInput.val(response.customId);
+                                customIdInput.attr('placeholder', 'Will be auto-generated if left empty');
+                            } else {
+                                console.error('Error generating ID preview:', response.message || 'Unknown error');
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error generating ID preview:', error);
+                        }
+                    });
+                }
+            }
+            
+            // Generate preview ID when page loads
+            generatePreviewId();
+            
+            // Update the hidden Name field with the TextField1Value before form submission
+            $('form').on('submit', function(e) {
+                // Get the first text field value (usually TextField1Value)
+                const firstTextField = customFields.find(f => f.type === 'text');
+                if (firstTextField) {
+                    const firstFieldValue = $('#' + firstTextField.id).val();
+                    // Copy it to the Name field
+                    $('#Name').val(firstFieldValue || 'Unnamed Item');
+                }
+                
+                // Disable any validation errors for the CustomId field
+                const customIdField = $('#CustomId');
+                customIdField.removeClass('input-validation-error');
+                customIdField.closest('.form-group').find('.field-validation-error').remove();
+                
+                return true;
             });
         });
     </script>

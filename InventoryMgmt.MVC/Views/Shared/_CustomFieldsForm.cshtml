@@ -7,23 +7,17 @@
     var hasCustomFields = customFields.Any();
 }
 
-<div class="form-group mb-4 item-name-field">
-    <label for="Name" class="form-label">Item Name</label>
-    <input type="text" id="Name" name="Name" value="@Model.Name" class="form-control" placeholder="Enter item name" required />
-    <span class="text-danger" id="NameValidation"></span>
-    <small class="field-description">This name will be used to identify the item in lists and search results</small>
-</div>
+<!-- Name field removed - first custom field will be used for identification -->
+
+<input type="hidden" id="Name" name="Name" asp-for="Name" />
 
 <div class="form-group mb-4 custom-id-field">
     <label for="CustomId" class="form-label">Custom ID</label>
     <div class="input-group">
-        <input type="text" id="CustomId" name="CustomId" value="@Model.CustomId" class="form-control" placeholder="Leave empty for auto-generated ID" />
-        <button type="button" class="btn btn-outline-secondary" id="autoGenerateIdBtn">
-            <i class="bi bi-magic"></i> Auto-generate ID
-        </button>
+        <input type="text" id="CustomId" name="CustomId" value="@Model.CustomId" class="form-control" placeholder="Will be auto-generated if left empty" data-val="false" />
     </div>
     <span class="text-danger" id="CustomIdValidation"></span>
-    <small class="field-description">Optional: Provide a unique identifier for this item or click the button to generate one</small>
+    <small class="field-description">Optional: Custom ID will be automatically generated when item is created if left empty</small>
 </div>
 
 @if (!hasCustomFields)

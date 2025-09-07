@@ -95,15 +95,24 @@ namespace InventoryMgmt.MVC.Controllers
                 // Fix: Initialize CreatedById with a valid value to prevent validation errors
                 itemDto.CreatedById = currentUserId?.ToString() ?? "1"; // Use a default ID if no user ID is found
                 
-                // Make sure we have a name value
-                if (string.IsNullOrWhiteSpace(itemDto.Name))
+                // Use the first custom field (TextField1Value) as the identifier
+                // The Name field is now just a copy of the first custom field
+                if (string.IsNullOrWhiteSpace(itemDto.Name) && !string.IsNullOrWhiteSpace(itemDto.TextField1Value))
                 {
-                    // Fall back to TextField1Value if no name provided
-                    itemDto.Name = itemDto.TextField1Value ?? "Unnamed Item";
+                    // If Name is empty but TextField1Value is not, copy the value from TextField1Value to Name
+                    itemDto.Name = itemDto.TextField1Value;
                 }
-                
-                // Store the Name in TextField1Value for database persistence
-                itemDto.TextField1Value = itemDto.Name;
+                else if (string.IsNullOrWhiteSpace(itemDto.TextField1Value) && !string.IsNullOrWhiteSpace(itemDto.Name))
+                {
+                    // If TextField1Value is empty but Name is not, copy the value from Name to TextField1Value
+                    itemDto.TextField1Value = itemDto.Name;
+                }
+                else if (string.IsNullOrWhiteSpace(itemDto.TextField1Value) && string.IsNullOrWhiteSpace(itemDto.Name))
+                {
+                    // If both are empty, use a default value
+                    itemDto.Name = "Unnamed Item";
+                    itemDto.TextField1Value = "Unnamed Item";
+                }
                 
                 // Validate custom fields
                 var inventory = await _inventoryService.GetInventoryByIdAsync(itemDto.InventoryId);
@@ -213,15 +222,24 @@ namespace InventoryMgmt.MVC.Controllers
                     return Forbid();
                 }
                 
-                // Make sure we have a name value
-                if (string.IsNullOrWhiteSpace(itemDto.Name))
+                // Use the first custom field (TextField1Value) as the identifier
+                // The Name field is now just a copy of the first custom field
+                if (string.IsNullOrWhiteSpace(itemDto.Name) && !string.IsNullOrWhiteSpace(itemDto.TextField1Value))
                 {
-                    // Fall back to TextField1Value if no name provided
-                    itemDto.Name = itemDto.TextField1Value ?? "Unnamed Item";
+                    // If Name is empty but TextField1Value is not, copy the value from TextField1Value to Name
+                    itemDto.Name = itemDto.TextField1Value;
                 }
-                
-                // Store the Name in TextField1Value for database persistence
-                itemDto.TextField1Value = itemDto.Name;
+                else if (string.IsNullOrWhiteSpace(itemDto.TextField1Value) && !string.IsNullOrWhiteSpace(itemDto.Name))
+                {
+                    // If TextField1Value is empty but Name is not, copy the value from Name to TextField1Value
+                    itemDto.TextField1Value = itemDto.Name;
+                }
+                else if (string.IsNullOrWhiteSpace(itemDto.TextField1Value) && string.IsNullOrWhiteSpace(itemDto.Name))
+                {
+                    // If both are empty, use a default value
+                    itemDto.Name = "Unnamed Item";
+                    itemDto.TextField1Value = "Unnamed Item";
+                }
                 
                 // Validate custom fields
                 var inventory = await _inventoryService.GetInventoryByIdAsync(itemDto.InventoryId);
@@ -456,7 +474,7 @@ namespace InventoryMgmt.MVC.Controllers
             // Create a new item based on the original one
             var newItem = new ItemDto
             {
-                TextField1Value = $"{(originalItem.TextField1Value ?? originalItem.Name ?? "Unnamed Item")} (Copy)",
+                TextField1Value = $"{(originalItem.TextField1Value ?? "Unnamed Item")} (Copy)",
                 MultiTextField1Value = originalItem.MultiTextField1Value ?? originalItem.Description,
                 TextField2Value = originalItem.TextField2Value,
                 TextField3Value = originalItem.TextField3Value,
@@ -614,6 +632,183 @@ namespace InventoryMgmt.MVC.Controllers
         }
         
         [HttpGet]
+        public async Task<IActionResult> GetDetails(int id)
+        {
+            var currentUserId = GetCurrentUserId();
+            var item = await _itemService.GetItemByIdAsync(id, currentUserId?.ToString());
+
+            if (item == null)
+            {
+                return NotFound(new { success = false, message = "Item not found" });
+            }
+
+            // Check if user can view the inventory this item belongs to
+            if (!await CanCurrentUserViewInventoryAsync(item.InventoryId))
+            {
+                return StatusCode(403, new { success = false, message = "You don't have permission to view this item" });
+            }
+
+            // Get the inventory to get custom field names
+            var inventory = await _inventoryService.GetInventoryByIdAsync(item.InventoryId);
+            
+            // Create a structured object with custom fields info
+            var customFields = new List<object>();
+            
+            // Add text fields if they have values
+            if (!string.IsNullOrEmpty(item.TextField1Value))
+                customFields.Add(new {
+                    type = "text",
+                    name = inventory?.TextField1?.Name ?? "Text Field 1",
+                    value = item.TextField1Value
+                });
+                
+            if (!string.IsNullOrEmpty(item.TextField2Value))
+                customFields.Add(new {
+                    type = "text",
+                    name = inventory?.TextField2?.Name ?? "Text Field 2",
+                    value = item.TextField2Value
+                });
+                
+            if (!string.IsNullOrEmpty(item.TextField3Value))
+                customFields.Add(new {
+                    type = "text",
+                    name = inventory?.TextField3?.Name ?? "Text Field 3",
+                    value = item.TextField3Value
+                });
+                
+            // Add multitext fields if they have values
+            if (!string.IsNullOrEmpty(item.MultiTextField1Value))
+                customFields.Add(new {
+                    type = "multitext",
+                    name = inventory?.MultiTextField1?.Name ?? "Description",
+                    value = item.MultiTextField1Value
+                });
+                
+            if (!string.IsNullOrEmpty(item.MultiTextField2Value))
+                customFields.Add(new {
+                    type = "multitext",
+                    name = inventory?.MultiTextField2?.Name ?? "Multitext Field 2",
+                    value = item.MultiTextField2Value
+                });
+                
+            if (!string.IsNullOrEmpty(item.MultiTextField3Value))
+                customFields.Add(new {
+                    type = "multitext",
+                    name = inventory?.MultiTextField3?.Name ?? "Multitext Field 3",
+                    value = item.MultiTextField3Value
+                });
+                
+            // Add numeric fields if they have values
+            if (item.NumericField1Value.HasValue)
+                customFields.Add(new {
+                    type = "numeric",
+                    name = inventory?.NumericField1?.Name ?? "Numeric Field 1",
+                    value = item.NumericField1Value
+                });
+                
+            if (item.NumericField2Value.HasValue)
+                customFields.Add(new {
+                    type = "numeric",
+                    name = inventory?.NumericField2?.Name ?? "Numeric Field 2",
+                    value = item.NumericField2Value
+                });
+                
+            if (item.NumericField3Value.HasValue)
+                customFields.Add(new {
+                    type = "numeric",
+                    name = inventory?.NumericField3?.Name ?? "Numeric Field 3",
+                    value = item.NumericField3Value
+                });
+                
+            // Add boolean fields - only add them if they have a name configured AND a non-null value
+            if (!string.IsNullOrWhiteSpace(inventory?.BooleanField1?.Name) && item.BooleanField1Value.HasValue) {
+                customFields.Add(new {
+                    type = "boolean",
+                    name = inventory.BooleanField1.Name,
+                    value = item.BooleanField1Value.Value
+                });
+            }
+                
+            if (!string.IsNullOrWhiteSpace(inventory?.BooleanField2?.Name) && item.BooleanField2Value.HasValue) {
+                customFields.Add(new {
+                    type = "boolean",
+                    name = inventory.BooleanField2.Name,
+                    value = item.BooleanField2Value.Value
+                });
+            }
+                
+            if (!string.IsNullOrWhiteSpace(inventory?.BooleanField3?.Name) && item.BooleanField3Value.HasValue) {
+                customFields.Add(new {
+                    type = "boolean",
+                    name = inventory.BooleanField3.Name,
+                    value = item.BooleanField3Value.Value
+                });
+            }
+            
+            // Filter out any fields with null or empty names
+            customFields = customFields.Where(f => {
+                dynamic field = f;
+                return !string.IsNullOrWhiteSpace(field.name);
+            }).ToList();
+
+            // Check if user can edit this item
+            var canEditItem = await CanCurrentUserEditItemAsync(id);
+
+            // Create a clean version of the item data without null boolean fields
+            var cleanItemData = new Dictionary<string, object>();
+            cleanItemData["ID"] = item.CustomId ?? item.Id.ToString();
+            cleanItemData["Created"] = item.CreatedAt.ToString("MM/dd/yyyy, HH:mm:ss");
+            
+            // Only add text fields that have values
+            if (!string.IsNullOrEmpty(item.TextField1Value))
+                cleanItemData["Details"] = item.TextField1Value;
+
+            // Add non-null custom fields with proper names
+            if (!string.IsNullOrEmpty(inventory?.TextField2?.Name) && !string.IsNullOrEmpty(item.TextField2Value))
+                cleanItemData[inventory.TextField2.Name] = item.TextField2Value;
+            
+            if (!string.IsNullOrEmpty(inventory?.TextField3?.Name) && !string.IsNullOrEmpty(item.TextField3Value))
+                cleanItemData[inventory.TextField3.Name] = item.TextField3Value;
+            
+            // Only add boolean fields that are configured and have values
+            if (!string.IsNullOrEmpty(inventory?.BooleanField1?.Name) && item.BooleanField1Value.HasValue)
+                cleanItemData[inventory.BooleanField1.Name] = item.BooleanField1Value.Value ? "true" : "false";
+            
+            if (!string.IsNullOrEmpty(inventory?.BooleanField2?.Name) && item.BooleanField2Value.HasValue)
+                cleanItemData[inventory.BooleanField2.Name] = item.BooleanField2Value.Value ? "true" : "false";
+            
+            if (!string.IsNullOrEmpty(inventory?.BooleanField3?.Name) && item.BooleanField3Value.HasValue)
+                cleanItemData[inventory.BooleanField3.Name] = item.BooleanField3Value.Value ? "true" : "false";
+            
+            // Add numeric fields if they have values
+            if (!string.IsNullOrEmpty(inventory?.NumericField1?.Name) && item.NumericField1Value.HasValue)
+                cleanItemData[inventory.NumericField1.Name] = item.NumericField1Value.Value;
+            
+            if (!string.IsNullOrEmpty(inventory?.NumericField2?.Name) && item.NumericField2Value.HasValue)
+                cleanItemData[inventory.NumericField2.Name] = item.NumericField2Value.Value;
+            
+            if (!string.IsNullOrEmpty(inventory?.NumericField3?.Name) && item.NumericField3Value.HasValue)
+                cleanItemData[inventory.NumericField3.Name] = item.NumericField3Value.Value;
+
+            // Return the response with both custom fields list and direct properties
+            return Json(new {
+                id = item.Id,
+                customId = item.CustomId,
+                name = item.TextField1Value, 
+                createdAt = item.CreatedAt,
+                updatedAt = item.UpdatedAt,
+                createdBy = item.CreatedBy,
+                likesCount = item.LikesCount,
+                customFields = customFields,
+                inventoryId = item.InventoryId,
+                inventoryTitle = inventory?.Title,
+                canEdit = canEditItem,
+                // Add this clean dictionary for direct property access
+                itemData = cleanItemData
+            });
+        }
+        
+        [HttpGet]
         public async Task<IActionResult> GenerateItemCustomId(int inventoryId)
         {
             if (!User.Identity!.IsAuthenticated)
@@ -647,15 +842,43 @@ namespace InventoryMgmt.MVC.Controllers
                 }
                 
                 string customId;
-                if (!string.IsNullOrEmpty(inventory.CustomIdFormat))
+                int randomSequence = new Random().Next(1, 9999);
+                
+                if (!string.IsNullOrEmpty(inventory.CustomIdElements))
+                {
+                    // Use advanced custom ID format if available
+                    try {
+                        var elements = System.Text.Json.JsonSerializer.Deserialize<List<CustomIdElement>>(inventory.CustomIdElements);
+                        customId = _inventoryService.CustomIdService.GenerateAdvancedCustomId(elements, randomSequence);
+                    }
+                    catch (Exception) {
+                        // Fall back to simple format if JSON parsing fails
+                        customId = _inventoryService.CustomIdService.GenerateCustomId(inventory.CustomIdFormat ?? "ITEM-{SEQUENCE}", randomSequence);
+                    }
+                }
+                else if (!string.IsNullOrEmpty(inventory.CustomIdFormat))
                 {
                     // Use the inventory's custom ID format
-                    customId = _inventoryService.CustomIdService.GenerateCustomId(inventory.CustomIdFormat, new Random().Next(1, 9999));
+                    string format = inventory.CustomIdFormat;
+                    
+                    // Ensure {SEQUENCE} is properly replaced
+                    if (format.Contains("{SEQUENCE}"))
+                    {
+                        // Actually replace the placeholder with a value
+                        format = format.Replace("{SEQUENCE}", randomSequence.ToString());
+                    }
+                    
+                    customId = _inventoryService.CustomIdService.GenerateCustomId(format, randomSequence);
+                    
+                    // If the result still contains {SEQUENCE}, something is wrong - provide a better format
+                    if (customId.Contains("{SEQUENCE}") || customId == "SEQUENCE") {
+                        customId = $"ITEM-{randomSequence}";
+                    }
                 }
                 else
                 {
                     // Use a default format
-                    customId = $"ITEM-{Guid.NewGuid().ToString("N").Substring(0, 8)}";
+                    customId = $"ITEM-{randomSequence}";
                 }
                 
                 return Json(new { 
@@ -821,9 +1044,9 @@ namespace InventoryMgmt.MVC.Controllers
                     type = "text", 
                     id = "TextField1Value", 
                     name = inventory.TextField1.Name, 
-                    description = inventory.TextField1.Description,
+                    description = inventory.TextField1.Description + " (This field will be used as the main identifier)",
                     maxLength = 255, // Max length for short text fields
-                    required = true  // Make the first field required as it's used for the name
+                    required = true  // Always required as it's used as the item's main attribute
                 });
             
             if (!string.IsNullOrEmpty(inventory.TextField2.Name)) 

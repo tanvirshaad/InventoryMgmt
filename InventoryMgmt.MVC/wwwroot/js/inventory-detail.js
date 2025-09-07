@@ -532,55 +532,109 @@ $(document).ready(function () {
     // Initialize tooltips
     $('[data-bs-toggle="tooltip"]').tooltip();
     
+    // Add debug logging for monitoring selection state
+    console.log('Document ready - initializing inventory-detail.js');
+    
+    // Handle item link clicks - open in modal instead of navigating
+    $(document).on('click', '.item-link', function(e) {
+        console.log('Item link clicked!');
+        e.preventDefault(); // Prevent default navigation
+        e.stopPropagation(); // Prevent event bubbling
+        
+        const itemId = $(this).data('item-id');
+        console.log('Item link clicked for ID:', itemId);
+        
+        if (itemId) {
+            console.log('Attempting to show modal for item ID:', itemId);
+            
+            try {
+                // First ensure we have a Bootstrap Modal instance
+                const modal = new bootstrap.Modal(document.getElementById('itemDetailsModal'));
+                console.log('Modal instance created');
+                
+                // Show the modal
+                modal.show();
+                console.log('Modal show() method called');
+                
+                // Load the item details via AJAX
+                loadItemDetailsInModal(itemId);
+            } catch (error) {
+                console.error('Error showing modal:', error);
+                
+                // Fallback to traditional navigation if modal fails
+                window.location.href = `/Item/Details/${itemId}`;
+            }
+        } else {
+            console.warn('Item link clicked but no item ID found');
+        }
+    });
+
     // Selection management
     const selectionToolbar = $('#selectionToolbar');
     const selectedCountBadge = $('#selectedCount');
     const selectAllCheckbox = $('#selectAllItems');
     const itemTable = $('#itemsTable');
-    const itemCheckboxes = $('.item-checkbox');
 
-    let selectedItems = [];
+    // Use window.selectedItems to make it globally accessible 
+    // and ensure it's available to all event handlers
+    window.selectedItems = [];
+    
+    // Log initial state
+    console.log('Initializing selection toolbar with selectedItems:', window.selectedItems);
+    
+    // Check if any checkboxes are already checked on page load (like in the image where one is selected)
+    $('.item-checkbox:checked').each(function() {
+        const itemId = parseInt($(this).data('item-id'), 10);
+        console.log('Found pre-checked item on page load:', itemId);
+        if (!window.selectedItems.includes(itemId)) {
+            window.selectedItems.push(itemId);
+            $(this).closest('tr').addClass('selected-row');
+        }
+    });
     
     // Initialize the toolbar state
     updateSelectionToolbar();
 
-    // Select all checkbox handler
-    selectAllCheckbox.on('change', function() {
+    // Select all checkbox handler - using delegate pattern to ensure it works with dynamically added elements
+    $(document).on('change', '#selectAllItems', function() {
         const isChecked = $(this).prop('checked');
-        itemCheckboxes.prop('checked', isChecked);
+        $('.item-checkbox').prop('checked', isChecked);
         
         if (isChecked) {
             // Select all items
             $('.item-checkbox:checked').each(function() {
-                const itemId = $(this).data('item-id');
-                if (!selectedItems.includes(itemId)) {
-                    selectedItems.push(itemId);
+                const itemId = parseInt($(this).data('item-id'), 10);
+                if (!window.selectedItems.includes(itemId)) {
+                    window.selectedItems.push(itemId);
                 }
                 $(this).closest('tr').addClass('selected-row');
             });
         } else {
             // Unselect all items
-            selectedItems = [];
+            window.selectedItems = [];
             $('.item-row').removeClass('selected-row');
         }
         
+        console.log('After select all, selectedItems:', window.selectedItems);
         updateSelectionToolbar();
     });
     
-    // Individual checkbox handler
-    itemCheckboxes.on('change', function() {
-        const itemId = $(this).data('item-id');
+    // Individual checkbox handler - using delegate pattern
+    $(document).on('change', '.item-checkbox', function() {
+        const itemId = parseInt($(this).data('item-id'), 10);
         const isChecked = $(this).prop('checked');
+        
+        console.log('Checkbox changed for item ID:', itemId, 'Checked:', isChecked);
         
         if (isChecked) {
             // Add item to selection
-            if (!selectedItems.includes(itemId)) {
-                selectedItems.push(itemId);
+            if (!window.selectedItems.includes(itemId)) {
+                window.selectedItems.push(itemId);
             }
             $(this).closest('tr').addClass('selected-row');
         } else {
             // Remove item from selection
-            selectedItems = selectedItems.filter(id => id !== itemId);
+            window.selectedItems = window.selectedItems.filter(id => id !== itemId);
             $(this).closest('tr').removeClass('selected-row');
             
             // Update "select all" checkbox
@@ -589,60 +643,184 @@ $(document).ready(function () {
             }
         }
         
+        console.log('After individual change, selectedItems:', window.selectedItems);
+        
+        // Update toolbar and explicitly handle the view button state
         updateSelectionToolbar();
+        
+        // Double check view button state
+        if (window.selectedItems && window.selectedItems.length === 1) {
+            $('#viewSelectedBtn').removeClass('disabled');
+            console.log('Explicitly enabled view button after checkbox change');
+        } else {
+            $('#viewSelectedBtn').addClass('disabled');
+        }
     });
     
     // Row click handler (excluding checkbox and action buttons)
-    $('.item-row').on('click', function(e) {
+    // Using delegate approach for better handling of dynamic content
+    $(document).on('click', '.item-row', function(e) {
         console.log('Row clicked, target:', e.target);
+        
+        // Check if it's a click on the attribute name (item link) - handle separately
+        if ($(e.target).hasClass('item-link') || $(e.target).closest('.item-link').length > 0) {
+            // This is handled by the item-link click handler
+            console.log('Row click handler: detected item-link click, letting that handler take over');
+            return;
+        }
         
         // Only toggle if the click wasn't on a checkbox, button, or link
         // Exclude specific elements to ensure they can handle their own clicks
         if (!$(e.target).is('input, button, a, .btn, i.bi, .heart-icon, .like-btn') && 
             !$(e.target).closest('.like-btn').length && 
-            !$(e.target).closest('button').length) {
+            !$(e.target).closest('button').length && 
+            !$(e.target).closest('a').length) {
             
             console.log('Row click handler: toggling checkbox');
             const checkbox = $(this).find('.item-checkbox');
-            checkbox.prop('checked', !checkbox.prop('checked')).trigger('change');
+            const currentState = checkbox.prop('checked');
+            console.log('Current checkbox state:', currentState, 'for item ID:', checkbox.data('item-id'));
+            
+            // Toggle the checkbox state
+            checkbox.prop('checked', !currentState);
+            // Trigger change event manually to ensure handlers run
+            checkbox.trigger('change');
         } else {
             console.log('Row click handler: click on excluded element, not toggling checkbox');
         }
     });
     
-    // Function to update the selection toolbar
-    function updateSelectionToolbar() {
-        if (selectedItems.length > 0) {
-            selectionToolbar.addClass('show').removeClass('hide');
-            selectedCountBadge.text(selectedItems.length);
+    // Double-click handler to view item details in modal - using delegate approach
+    $(document).on('dblclick', '.item-row', function(e) {
+        const checkbox = $(this).find('.item-checkbox');
+        const itemId = checkbox.data('item-id');
+        console.log('Row double-clicked for item ID:', itemId);
+        
+        if (itemId) {
+            console.log('Attempting to show modal from double-click for item ID:', itemId);
             
-            // Enable/disable certain actions based on selection count
-            if (selectedItems.length === 1) {
-                $('.single-item-action').removeClass('disabled');
-            } else {
-                $('.single-item-action').addClass('disabled');
+            try {
+                // First ensure we have a Bootstrap Modal instance
+                const modal = new bootstrap.Modal(document.getElementById('itemDetailsModal'));
+                console.log('Modal instance created from double-click');
+                
+                // Show the modal
+                modal.show();
+                console.log('Modal show() method called from double-click');
+                
+                // Load the item details via AJAX
+                loadItemDetailsInModal(itemId);
+            } catch (error) {
+                console.error('Error showing modal from double-click:', error);
+                
+                // Fallback to traditional navigation if modal fails
+                window.location.href = `/Item/Details/${itemId}`;
             }
-        } else {
-            selectionToolbar.addClass('hide').removeClass('show');
-        }
-    }
-    
-    // Action button handlers
-    $('#editSelectedBtn').on('click', function() {
-        if (selectedItems.length === 1) {
-            window.location.href = `/Item/Edit/${selectedItems[0]}`;
         }
     });
     
-    $('#deleteSelectedBtn').on('click', function() {
-        if (selectedItems.length > 0) {
-            if (confirm(`Are you sure you want to delete ${selectedItems.length} item(s)?`)) {
+    // Function to update the selection toolbar
+    function updateSelectionToolbar() {
+        console.log('Updating selection toolbar. Selected items:', window.selectedItems);
+        
+        if (window.selectedItems && window.selectedItems.length > 0) {
+            // Show the toolbar and update counter
+            selectionToolbar.addClass('show').removeClass('hide');
+            selectedCountBadge.text(window.selectedItems.length);
+            
+            // Enable/disable certain actions based on selection count
+            if (window.selectedItems.length === 1) {
+                // Enable single item actions
+                $('#editSelectedBtn, #viewSelectedBtn').removeClass('disabled');
+                console.log('Enabling single-item-actions (edit, view)');
+                
+                // Explicitly ensure the view button is enabled
+                const viewBtn = $('#viewSelectedBtn');
+                if (viewBtn.hasClass('disabled')) {
+                    viewBtn.removeClass('disabled');
+                    console.log('Explicitly removed disabled class from view button');
+                }
+            } else {
+                // Disable single item actions if multiple selected
+                $('.single-item-action').addClass('disabled');
+                console.log('Disabling single-item-actions - multiple items selected');
+            }
+        } else {
+            // No items selected, hide toolbar
+            selectionToolbar.addClass('hide').removeClass('show');
+            console.log('Hiding selection toolbar - no items selected');
+        }
+    }
+    
+    // Action button handlers - using delegate pattern to ensure it works after DOM changes
+    $(document).on('click', '#editSelectedBtn', function() {
+        console.log('Edit button clicked, selectedItems:', window.selectedItems);
+        if (window.selectedItems && window.selectedItems.length === 1) {
+            window.location.href = `/Item/Edit/${window.selectedItems[0]}`;
+        } else {
+            console.warn('Edit button clicked but no single item selected');
+        }
+    });
+    
+    // Enhanced view button handler - opens modal instead of navigating to a new page
+    $(document).on('click', '#viewSelectedBtn, #viewSelectedBtn i.bi-eye', function(e) {
+        console.log('View button (eye icon) clicked!');
+        console.log('Event target:', e.target);
+        console.log('Current selectedItems:', window.selectedItems);
+        
+        // Prevent default action (if any)
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (window.selectedItems && window.selectedItems.length === 1) {
+            const itemId = window.selectedItems[0];
+            console.log(`Loading item details for ID: ${itemId} in modal`);
+            
+            try {
+                // First ensure we have a Bootstrap Modal instance
+                const modal = new bootstrap.Modal(document.getElementById('itemDetailsModal'));
+                console.log('Modal instance created for view button');
+                
+                // Show the modal
+                modal.show();
+                console.log('Modal show() method called from view button');
+                
+                // Load the item details via AJAX
+                loadItemDetailsInModal(itemId);
+            } catch (error) {
+                console.error('Error showing modal from view button:', error);
+                
+                // Fallback to traditional navigation if modal fails
+                window.location.href = `/Item/Details/${itemId}`;
+            }
+        } else {
+            console.warn('View button clicked but no single item selected or multiple items selected');
+            if (!window.selectedItems || window.selectedItems.length === 0) {
+                alert('Please select an item to view');
+            } else if (window.selectedItems.length > 1) {
+                alert('Please select only one item to view details');
+            }
+        }
+    });
+    
+    $(document).on('click', '#duplicateSelectedBtn', function() {
+        console.log('Duplicate button clicked, selectedItems:', window.selectedItems);
+        if (window.selectedItems && window.selectedItems.length > 0) {
+            // Implement duplicate functionality
+            alert('Duplicate functionality is not implemented yet.');
+        }
+    });
+    
+    $(document).on('click', '#deleteSelectedBtn', function() {
+        console.log('Delete button clicked, selectedItems:', window.selectedItems);
+        if (window.selectedItems && window.selectedItems.length > 0) {
+            if (confirm(`Are you sure you want to delete ${window.selectedItems.length} item(s)?`)) {
                 // Send delete request using AJAX
                 $.ajax({
                     url: '/Item/DeleteMultiple',
                     type: 'POST',
                     contentType: 'application/json',
-                    data: JSON.stringify(selectedItems),
+                    data: JSON.stringify(window.selectedItems),
                     success: function(result) {
                         // Reload the page or remove the rows
                         location.reload();
@@ -653,6 +831,16 @@ $(document).ready(function () {
                 });
             }
         }
+    });
+    
+    // Clear selection button handler
+    $(document).on('click', '#clearSelectionBtn', function() {
+        console.log('Clear selection button clicked');
+        window.selectedItems = [];
+        $('.item-checkbox').prop('checked', false);
+        $('#selectAllItems').prop('checked', false);
+        $('.item-row').removeClass('selected-row');
+        updateSelectionToolbar();
     });
     
     // Context menu for item rows
@@ -766,27 +954,67 @@ $(document).ready(function () {
         // Only process if no input fields are focused
         if (!$(e.target).is('input, textarea, select')) {
             // Delete key to delete selected items
-            if (e.keyCode === 46 && selectedItems.length > 0) { // Delete key
+            if (e.keyCode === 46 && window.selectedItems && window.selectedItems.length > 0) { // Delete key
+                console.log('Delete key pressed, triggering delete button');
                 $('#deleteSelectedBtn').trigger('click');
             }
             
             // Ctrl+A to select all items
             if (e.keyCode === 65 && e.ctrlKey) { // Ctrl+A
+                console.log('Ctrl+A pressed, toggling select all');
                 e.preventDefault();
-                selectAllCheckbox.prop('checked', !selectAllCheckbox.prop('checked')).trigger('change');
+                $('#selectAllItems').prop('checked', !$('#selectAllItems').prop('checked')).trigger('change');
             }
             
             // Escape key to clear selection
             if (e.keyCode === 27) { // Escape
-                if (selectedItems.length > 0) {
-                    selectAllCheckbox.prop('checked', false).trigger('change');
+                console.log('Escape key pressed, clearing selection');
+                if (window.selectedItems && window.selectedItems.length > 0) {
+                    $('#selectAllItems').prop('checked', false).trigger('change');
                 }
+            }
+            
+            // Enter key to view selected item
+            if (e.keyCode === 13 && window.selectedItems && window.selectedItems.length === 1) { // Enter
+                console.log('Enter key pressed, viewing item:', window.selectedItems[0]);
+                e.preventDefault();
+                window.location.href = `/Item/Details/${window.selectedItems[0]}`;
             }
         }
     });
     
     // Initialize tooltips
     $('[data-bs-toggle="tooltip"]').tooltip();
+    
+    // Set up modal event handlers for debugging
+    $('#itemDetailsModal').on('show.bs.modal', function (e) {
+        console.log('Item details modal is about to be shown');
+    });
+    
+    $('#itemDetailsModal').on('shown.bs.modal', function (e) {
+        console.log('Item details modal is now visible');
+    });
+    
+    $('#itemDetailsModal').on('hide.bs.modal', function (e) {
+        console.log('Item details modal is about to be hidden');
+    });
+    
+    // Run a debug check on the toolbar state on page load
+    setTimeout(function() {
+        console.log('Running delayed check on toolbar state');
+        console.log('Current selectedItems:', window.selectedItems);
+        console.log('View button disabled status:', $('#viewSelectedBtn').hasClass('disabled'));
+        
+        // Force update the toolbar state one more time
+        updateSelectionToolbar();
+        
+        // Make sure any already selected items have the proper row highlighting
+        if (window.selectedItems && window.selectedItems.length > 0) {
+            window.selectedItems.forEach(itemId => {
+                $(`.item-checkbox[data-item-id="${itemId}"]`).closest('tr').addClass('selected-row');
+            });
+        }
+    }, 500);
     
     // Handle clicks on the heart icons inside like buttons
     $(document).on('click', '.like-btn i.heart-icon, .like-btn i.bi', function(e) {
@@ -831,6 +1059,184 @@ $(document).ready(function () {
             </form>
         `);
     }
+    
+    // Function to load and display item details in the modal
+    function loadItemDetailsInModal(itemId) {
+        console.log(`AJAX loading details for item ID: ${itemId}`);
+        
+        // Reset modal content to loading state
+        $('#itemDetailsModalBody').html(`
+            <div class="text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p>Loading item details...</p>
+            </div>
+        `);
+        
+        // Set up the edit button
+        $('#editItemModalBtn').attr('data-item-id', itemId);
+        
+        // Fetch item details via AJAX
+        $.ajax({
+            url: `/Item/GetDetails/${itemId}`,
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                console.log('Item details loaded:', response);
+                // Make sure we pass the complete item data including permissions
+                displayItemDetailsInModal(response);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading item details:', error);
+                $('#itemDetailsModalBody').html(`
+                    <div class="alert alert-danger">
+                        <h5>Error Loading Item Details</h5>
+                        <p>There was a problem loading the item details. Please try again later.</p>
+                        <p><small>Error: ${xhr.status} ${error}</small></p>
+                    </div>
+                `);
+            }
+        });
+    }
+    
+    // Function to display item details in the modal
+    function displayItemDetailsInModal(item) {
+        // Customize the modal title with the item's identifier
+        $('#itemDetailsModalLabel').text(item.customId || `Item #${item.id}`);
+        
+        // Show/hide edit button based on permissions
+        console.log('Permission check - Can edit item:', item.canEdit);
+        if (item.canEdit) {
+            $('#editItemModalBtn').show().attr('data-item-id', item.id);
+            console.log('Showing edit button');
+        } else {
+            $('#editItemModalBtn').hide();
+            console.log('Hiding edit button - user lacks edit permission');
+        }
+        
+        // Display an alert for successful loading
+        let content = `
+        <div class="alert alert-success alert-dismissible fade show mb-3">
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            Item <strong>${item.name || item.customId || `#${item.id}`}</strong> loaded successfully
+        </div>
+        <div class="item-details-container">`;
+        
+        // Item info section
+        content += `<div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">Item Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">`;
+        
+        // Add custom fields
+        if (item.customFields && item.customFields.length > 0) {
+            item.customFields.forEach((field, index) => {
+                // Format the value based on field type
+                let displayValue = field.value;
+                
+                if (field.type === 'boolean') {
+                    displayValue = field.value ? 
+                        '<span class="badge bg-success">Yes</span>' : 
+                        '<span class="badge bg-secondary">No</span>';
+                } else if (field.value === null || field.value === undefined || field.value === '') {
+                    displayValue = '<em class="text-muted">Not set</em>';
+                }
+                
+                content += `<div class="col-md-6 mb-3">
+                    <div class="form-group">
+                        <label class="fw-bold">${field.name || `Field ${index + 1}`}</label>
+                        <div>${displayValue}</div>
+                    </div>
+                </div>`;
+            });
+        } else {
+            content += `<div class="col-12"><p class="text-muted">No custom fields available</p></div>`;
+        }
+                
+        content += `</div></div>
+                </div>
+            </div>
+        </div>`;
+        
+        // Item metadata section
+        content += `<div class="row mb-3">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h6 class="card-title mb-0">Details</h6>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>ID:</strong> ${item.customId || item.id}</p>
+                        <p><strong>Created:</strong> ${item.createdAt ? new Date(item.createdAt).toLocaleString() : 'Unknown'}</p>
+                        <p><strong>Last Updated:</strong> ${item.updatedAt ? new Date(item.updatedAt).toLocaleString() : 'Unknown'}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h6 class="card-title mb-0">Tags</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="tags-container">`;
+        
+        // Add tags if available
+        if (item.tags && item.tags.length > 0) {
+            item.tags.forEach(tag => {
+                content += `<span class="badge bg-primary me-1">${tag.name}</span>`;
+            });
+        } else {
+            content += `<p class="text-muted">No tags</p>`;
+        }
+        
+        content += `</div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+        
+        // Likes & Comments section if available
+        content += `<div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h6 class="card-title mb-0">Likes</h6>
+                    </div>
+                    <div class="card-body">
+                        <p><i class="bi bi-heart-fill text-danger"></i> ${item.likesCount || 0} likes</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h6 class="card-title mb-0">Comments</h6>
+                    </div>
+                    <div class="card-body">
+                        <p><i class="bi bi-chat-dots"></i> ${item.commentsCount || 0} comments</p>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+        
+        content += `</div>`;
+        
+        // Update the modal body with the content
+        $('#itemDetailsModalBody').html(content);
+    }
+    
+    // Handle the edit button in the modal
+    $(document).on('click', '#editItemModalBtn', function() {
+        const itemId = $(this).attr('data-item-id');
+        if (itemId) {
+            window.location.href = `/Item/Edit/${itemId}`;
+        }
+    });
     
     function handleLikeButtonClick($likeBtn, e) {
         console.log('Handling like button click');
