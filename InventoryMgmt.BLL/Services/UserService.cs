@@ -51,6 +51,12 @@ namespace InventoryMgmt.BLL.Services
             return _mapper.Map<IEnumerable<UserDto>>(users.OrderBy(u => u.FirstName).ThenBy(u => u.LastName));
         }
 
+        public async Task<IEnumerable<UserDto>> GetAdminUsersAsync()
+        {
+            var adminUsers = await _userRepo.FindAsync(u => u.Role == "Admin");
+            return _mapper.Map<IEnumerable<UserDto>>(adminUsers);
+        }
+
         public async Task BlockUserAsync(int userId)
         {
             var user = await _userRepo.GetByIdAsync(userId);

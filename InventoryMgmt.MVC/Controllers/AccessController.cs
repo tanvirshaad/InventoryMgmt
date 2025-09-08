@@ -161,21 +161,71 @@ namespace InventoryMgmt.MVC.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> SearchUsers(string term)
+        public async Task<IActionResult> SearchUsers(string term, int? inventoryId = null)
         {
-            if (string.IsNullOrWhiteSpace(term) || term.Length < 2)
+            // Get current user ID
+            var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            int? currentUserId = null;
+            if (currentUserIdClaim != null && int.TryParse(currentUserIdClaim.Value, out int parsedUserId))
+            {
+                currentUserId = parsedUserId;
+            }
+
+            // Get inventory owner ID if inventoryId is provided
+            int? inventoryOwnerId = null;
+            if (inventoryId.HasValue)
+            {
+                var inventory = await _inventoryService.GetInventoryByIdAsync(inventoryId.Value);
+                if (inventory != null)
+                {
+                    inventoryOwnerId = inventory.OwnerId;
+                }
+            }
+
+            // Get all admin users
+            var adminUsers = await _userService.GetAdminUsersAsync();
+            var adminUserIds = adminUsers.Select(a => a.Id).ToHashSet();
+
+            // If term is null or empty, return all users (limited to 50 for performance)
+            if (string.IsNullOrWhiteSpace(term))
+            {
+                var allUsers = await _userService.GetAllUsersAsync();
+                var filteredUsers = allUsers.Where(u => 
+                    u.Id != currentUserId && // Exclude current user
+                    u.Id != inventoryOwnerId && // Exclude inventory owner
+                    !adminUserIds.Contains(u.Id) // Exclude admin users
+                );
+                
+                var allUsersList = filteredUsers.Select(u => new
+                {
+                    id = u.Id,
+                    email = u.Email,
+                    name = $"{u.FirstName} {u.LastName}",
+                    displayText = $"{u.FirstName} {u.LastName} ({u.Email})"
+                }).Take(50); // Limit to 50 users for performance
+
+                return Json(allUsersList);
+            }
+            // For specific search, require at least 2 characters
+            else if (term.Length < 2)
             {
                 return Json(new object[0]);
             }
 
             var users = await _userService.SearchUsersAsync(term);
-            var userList = users.Select(u => new
+            var filteredSearchUsers = users.Where(u => 
+                u.Id != currentUserId && // Exclude current user
+                u.Id != inventoryOwnerId && // Exclude inventory owner
+                !adminUserIds.Contains(u.Id) // Exclude admin users
+            );
+            
+            var userList = filteredSearchUsers.Select(u => new
             {
                 id = u.Id,
                 email = u.Email,
                 name = $"{u.FirstName} {u.LastName}",
                 displayText = $"{u.FirstName} {u.LastName} ({u.Email})"
-            }).Take(10);
+            }).Take(20);
 
             return Json(userList);
         }

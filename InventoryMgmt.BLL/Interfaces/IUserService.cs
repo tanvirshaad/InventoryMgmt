@@ -10,6 +10,7 @@ namespace InventoryMgmt.BLL.Interfaces
         Task<UserDto?> GetUserByIdAsync(int userId);
         Task<UserDto?> GetUserByEmailAsync(string email);
         Task<IEnumerable<UserDto>> SearchUsersAsync(string searchTerm);
+        Task<IEnumerable<UserDto>> GetAdminUsersAsync();
         Task BlockUserAsync(int userId);
         Task UnblockUserAsync(int userId);
         Task SetUserRoleAsync(int userId, string role);

@@ -5,13 +5,12 @@
 }
 
 @Html.AntiForgeryToken()
-<!-- TEST CHANGE TO VERIFY UPDATES -->
 <div class="container-fluid">
     <!-- Inventory Header -->
     <div class="row mb-4">
         <div class="col">
             <div class="d-flex justify-content-between align-items-start">
-                <div class="d-flex align-items-start">
+                <div class="d-flex align-items-start flex-grow-1">
                     @if (!string.IsNullOrEmpty(Model.ImageUrl))
                     {
                         <div class="me-4">
@@ -62,7 +61,7 @@
                         <p class="lead">@Model.Description</p>
                     }
                 </div>
-                <div class="ms-auto">
+                <div class="ms-auto d-flex align-items-start">
                     <div class="d-flex gap-2">
                         @if (ViewBag.CanEdit == true)
                         {
@@ -86,7 +85,7 @@
     </div>
 
     <!-- Navigation Tabs -->
-    <ul class="nav nav-tabs mb-4" id="inventoryTabs" role="tablist">
+    <ul class="nav nav-tabs mb-4 mt-4" id="inventoryTabs" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link @(ViewBag.CurrentTab == "items" ? "active" : "")" 
                     id="items-tab" data-bs-toggle="tab" data-bs-target="#items" 
@@ -495,7 +494,17 @@
                     {
                         <div class="mb-3">
                             <label class="form-label">Users with Access</label>
-                            <div id="access-users-list" class="mt-2">
+                            <div class="d-flex justify-content-end mb-2">
+                                <div class="btn-group btn-group-sm" role="group" aria-label="Sort options">
+                                    <button type="button" class="btn btn-primary sort-users-btn active" data-sort="name">
+                                        <i class="bi bi-arrow-down-up me-1"></i>Sort by Name
+                                    </button>
+                                    <button type="button" class="btn btn-outline-primary sort-users-btn" data-sort="email">
+                                        <i class="bi bi-arrow-down-up me-1"></i>Sort by Email
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="access-users-list" class="mt-2 user-access-table">
                                 <div class="text-center py-3">
                                     <div class="spinner-border text-primary" role="status">
                                         <span class="visually-hidden">Loading...</span>
@@ -509,14 +518,17 @@
                         {
                             <div id="add-user-form" class="mb-3">
                                 <label class="form-label">Add a User</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="add-user-input" 
-                                          placeholder="Enter user email...">
-                                    <button class="btn btn-primary" type="button" id="add-user-btn">
-                                        <i class="bi bi-plus-circle me-2"></i>Add User
-                                    </button>
+                                <div class="position-relative search-container">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="add-user-input" 
+                                              placeholder="Start typing to search users by name or email">
+                                        <button class="btn btn-primary" type="button" id="add-user-btn">
+                                            <i class="bi bi-plus-circle me-2"></i>Add User
+                                        </button>
+                                    </div>
+                                    <small class="form-text text-muted">Click in search box to see all available users</small>
+                                    <div id="user-autocomplete-results" class="user-search-dropdown" style="display: none; width: 100%; top: 100%; left: 0;"></div>
                                 </div>
-                                <small class="form-text text-muted">Enter the complete email address of the user you want to add.</small>
                                 
                                 <!-- Hidden elements for TempData messages -->
                                 @if (TempData["Success"] != null)
@@ -747,6 +759,8 @@
     <script src="~/js/custom-fields-manager.js"></script>
     <!-- Using only direct-access.js for simpler access control implementation -->
     <script src="~/js/direct-access.js"></script>
+    <!-- Simple autocomplete as backup -->
+    <script src="~/js/simple-autocomplete.js"></script>
     <!-- Markdown parser for chat -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <!-- Chat functionality -->
@@ -829,7 +843,7 @@
             // Handle tab changes for access tab
             $('button[data-bs-toggle="tab"][data-bs-target="#access"]').on('shown.bs.tab', function (e) {
                 console.log("Access tab shown via Bootstrap tab event");
-                loadAccessUsers(window.currentInventoryId);
+                loadAccessUsers();
             });
             
             // Initialize the page
@@ -847,7 +861,7 @@
             // Force reload of access users if we're on that tab
             if (@(ViewBag.CurrentTab == "access" ? "true" : "false")) {
                 console.log("Access tab is the current tab from ViewBag");
-                setTimeout(() => loadAccessUsers(window.currentInventoryId), 500);
+                setTimeout(() => loadAccessUsers(), 500);
             }
         });
         
@@ -1118,25 +1132,95 @@
     <link rel="stylesheet" href="~/css/chat.css" asp-append-version="true" />
     <!-- jQuery UI is not available, using Bootstrap styles -->
     <style>
-        /* Simple dropdown styles for user search */
+        /* User search dropdown styles */
+        .search-container {
+            position: relative;
+            width: 100%;
+        }
+        
         .user-search-dropdown {
             position: absolute;
-            z-index: 1000;
+            z-index: 1050; /* Higher z-index to ensure it's above other elements */
             background: white;
             border: 1px solid #ccc;
             border-radius: 4px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            max-height: 200px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            max-height: 250px;
             overflow-y: auto;
+            width: 100%; /* Full width of parent container */
+            margin-top: 2px;
+            left: 0;
+            top: 100%; /* Position directly below the input */
         }
         
         .user-search-dropdown .user-item {
             padding: 8px 12px;
             cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex !important; /* Ensure flex display is maintained */
+        }
+        
+        .user-search-dropdown .user-item:last-child {
+            border-bottom: none;
         }
         
         .user-search-dropdown .user-item:hover {
             background-color: #f5f5f5;
+        }
+        
+        /* User access table styles */
+        .user-access-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .user-access-table th {
+            background-color: #f8f9fa;
+            position: sticky;
+            top: 0;
+            padding: 8px;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .user-access-table td {
+            padding: 8px;
+            vertical-align: middle;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        /* Sort button styles */
+        .sort-users-btn {
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+        
+        .sort-users-btn.active {
+            background-color: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
+        }
+        
+        .sort-users-btn:not(.active) {
+            background-color: transparent;
+            color: #0d6efd;
+        }
+        
+        /* Highlight newly added users */
+        .highlight-row {
+            animation: highlight 2s ease-in-out;
+        }
+        
+        @@keyframes highlight {
+            0% {
+                background-color: rgba(255, 248, 220, 0.5);
+            }
+            50% {
+                background-color: rgba(255, 248, 220, 1);
+            }
+            100% {
+                background-color: transparent;
+            }
         }
     </style>
 }
