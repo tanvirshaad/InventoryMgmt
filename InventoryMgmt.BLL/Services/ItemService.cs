@@ -84,46 +84,8 @@ namespace InventoryMgmt.BLL.Services
             if (inventory == null)
                 throw new ArgumentException("Inventory not found");
 
-            // Find the highest ID number used for this inventory to use as the next sequence
-            var items = await _dataAccess.ItemData.FindAsync(
-                i => i.InventoryId == itemDto.InventoryId);
-            
-            // Get the next available sequence number for the custom ID
-            int nextSequence = 1;
-            if (items.Any())
-            {
-                // Try to generate a unique ID by using the highest ID + 1
-                nextSequence = items.Max(i => i.Id) + 1;
-            }
-            
-            // Generate a unique custom ID
-            string customId;
-            bool isUnique = false;
-            int attempts = 0;
-            const int maxAttempts = 10;
-            
-            do
-            {
-                customId = string.IsNullOrEmpty(inventory.CustomIdElements)
-                    ? _inventoryService.CustomIdService.GenerateCustomId(inventory.CustomIdFormat ?? "{SEQUENCE}", nextSequence + attempts)
-                    : _inventoryService.CustomIdService.GenerateAdvancedCustomId(
-                        JsonSerializer.Deserialize<List<CustomIdElement>>(inventory.CustomIdElements) ?? new List<CustomIdElement>(),
-                        nextSequence + attempts);
-                
-                // Check if this custom ID is already in use in this inventory
-                var exists = await _dataAccess.ItemData.ExistsAsync(i => 
-                    i.InventoryId == itemDto.InventoryId && i.CustomId == customId);
-                
-                isUnique = !exists;
-                attempts++;
-                
-                // If we've tried too many times, add a timestamp to ensure uniqueness
-                if (attempts >= maxAttempts && !isUnique)
-                {
-                    customId = $"{customId}_{DateTime.Now.Ticks}";
-                    isUnique = true;
-                }
-            } while (!isUnique);
+            // Generate a unique custom ID using the inventory's configuration
+            var customId = await _inventoryService.CustomIdService.GenerateUniqueCustomIdAsync(itemDto.InventoryId);
 
             var item = _mapper.Map<Item>(itemDto);
             item.CustomId = customId;
@@ -137,20 +99,50 @@ namespace InventoryMgmt.BLL.Services
             return _mapper.Map<ItemDto>(item);
         }
 
-        public async Task<ItemDto?> UpdateItemAsync(ItemDto itemDto)
+        public async Task<UpdateResult<ItemDto>> UpdateItemAsync(ItemDto itemDto)
         {
             try
             {
                 var existingItem = await _dataAccess.ItemData.GetByIdAsync(itemDto.Id);
-                if (existingItem == null) return null;
+                if (existingItem == null) 
+                    return UpdateResult<ItemDto>.Error("Item not found.");
 
                 // Check optimistic concurrency
                 if (!existingItem.Version.SequenceEqual(itemDto.Version))
                 {
-                    // Instead of returning null, return the current version of the item
-                    // This way, the controller can use this data to refresh the form
+                    // Concurrency conflict detected - return the current version of the item
                     var freshItem = await _dataAccess.ItemData.GetByIdAsync(itemDto.Id);
-                    return freshItem != null ? _mapper.Map<ItemDto>(freshItem) : null;
+                    var freshItemDto = freshItem != null ? _mapper.Map<ItemDto>(freshItem) : null;
+                    return UpdateResult<ItemDto>.ConcurrencyConflict(freshItemDto!);
+                }
+
+                // Validate custom ID uniqueness within the inventory if it has changed
+                if (existingItem.CustomId != itemDto.CustomId)
+                {
+                    // Check if the new custom ID is unique within the inventory
+                    var isUnique = await _inventoryService.CustomIdService.IsCustomIdUniqueInInventoryAsync(
+                        existingItem.InventoryId, itemDto.CustomId, existingItem.Id);
+                    
+                    if (!isUnique)
+                    {
+                        throw new InvalidOperationException($"Custom ID '{itemDto.CustomId}' is already in use in this inventory.");
+                    }
+
+                    // Get the inventory's current format configuration for validation
+                    var inventory = await _dataAccess.InventoryData.GetByIdAsync(existingItem.InventoryId);
+                    if (inventory != null && !string.IsNullOrEmpty(inventory.CustomIdElements))
+                    {
+                        var elements = JsonSerializer.Deserialize<List<CustomIdElement>>(inventory.CustomIdElements);
+                        if (elements != null && elements.Any())
+                        {
+                            var isValidFormat = _inventoryService.CustomIdService.ValidateCustomIdFormat(itemDto.CustomId, elements);
+                            if (!isValidFormat)
+                            {
+                                var errorMessage = _inventoryService.CustomIdService.GetCustomIdValidationErrorMessage(itemDto.CustomId, elements);
+                                throw new InvalidOperationException($"Custom ID format is invalid: {errorMessage}");
+                            }
+                        }
+                    }
                 }
 
                 // Manual property updates to avoid navigation property conflicts
@@ -175,13 +167,21 @@ namespace InventoryMgmt.BLL.Services
                 _dataAccess.ItemData.Update(existingItem);
                 await _dataAccess.ItemData.SaveChangesAsync();
 
-                return _mapper.Map<ItemDto>(existingItem);
+                // Return successful update
+                var updatedItemDto = _mapper.Map<ItemDto>(existingItem);
+                return UpdateResult<ItemDto>.Success(updatedItemDto);
             }
             catch (DbUpdateConcurrencyException)
             {
                 // Handle concurrency conflicts gracefully by getting the latest version
                 var freshItem = await _dataAccess.ItemData.GetByIdAsync(itemDto.Id);
-                return freshItem != null ? _mapper.Map<ItemDto>(freshItem) : null;
+                var freshItemDto = freshItem != null ? _mapper.Map<ItemDto>(freshItem) : null;
+                return UpdateResult<ItemDto>.ConcurrencyConflict(freshItemDto!);
+            }
+            catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("IX_Item_Inventory_CustomId") == true)
+            {
+                // Handle unique constraint violation at the database level
+                throw new InvalidOperationException($"Custom ID '{itemDto.CustomId}' is already in use in this inventory.");
             }
         }
 
@@ -233,6 +233,49 @@ namespace InventoryMgmt.BLL.Services
 
             await _dataAccess.ItemData.SaveChangesAsync();
             return existingLike == null; // Return true if like was added, false if removed
+        }
+
+        /// <summary>
+        /// Validates a custom ID for an item within its inventory context
+        /// </summary>
+        /// <param name="inventoryId">The inventory ID</param>
+        /// <param name="customId">The custom ID to validate</param>
+        /// <param name="excludeItemId">Item ID to exclude from uniqueness check (for updates)</param>
+        /// <returns>Validation result with success status and error message</returns>
+        public async Task<(bool IsValid, string ErrorMessage)> ValidateCustomIdAsync(int inventoryId, string customId, int? excludeItemId = null)
+        {
+            // Basic validation
+            if (string.IsNullOrWhiteSpace(customId))
+                return (false, "Custom ID cannot be empty.");
+
+            if (customId.Length > 100)
+                return (false, "Custom ID cannot be longer than 100 characters.");
+
+            // Check uniqueness within inventory
+            var isUnique = await _inventoryService.CustomIdService.IsCustomIdUniqueInInventoryAsync(
+                inventoryId, customId, excludeItemId);
+            
+            if (!isUnique)
+                return (false, $"Custom ID '{customId}' is already in use in this inventory.");
+
+            // Get inventory format configuration for validation
+            var inventory = await _dataAccess.InventoryData.GetByIdAsync(inventoryId);
+            if (inventory != null && !string.IsNullOrEmpty(inventory.CustomIdElements))
+            {
+                var elements = JsonSerializer.Deserialize<List<CustomIdElement>>(inventory.CustomIdElements);
+                if (elements != null && elements.Any())
+                {
+                    var isValidFormat = _inventoryService.CustomIdService.ValidateCustomIdFormat(customId, elements);
+                    if (!isValidFormat)
+                    {
+                        var errorMessage = _inventoryService.CustomIdService.GetCustomIdValidationErrorMessage(customId, elements);
+                        var exampleId = await _inventoryService.CustomIdService.GenerateValidCustomIdExampleAsync(inventoryId);
+                        return (false, $"{errorMessage} Expected format example: {exampleId}");
+                    }
+                }
+            }
+
+            return (true, string.Empty);
         }
     }
 }

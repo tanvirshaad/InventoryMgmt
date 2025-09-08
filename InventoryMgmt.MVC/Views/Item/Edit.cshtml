@@ -46,12 +46,21 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     
+    <script src="~/js/custom-id-validation.js"></script>
+    
     <script>
         // Store custom fields data in JavaScript
         const customFields = @Html.Raw(ViewBag.CustomFieldsJson ?? "[]");
         
         $(document).ready(function() {
             console.log("Custom fields:", customFields);
+            
+            // Initialize custom ID validation
+            const inventoryId = $('input[name="InventoryId"]').val();
+            const itemId = $('input[name="Id"]').val();
+            if (inventoryId) {
+                new CustomIdValidator(inventoryId, itemId);
+            }
             
             // Initialize document field upload buttons
             $('.document-upload-btn').on('click', function() {
@@ -90,8 +99,8 @@
                 }
             }
             
-            // Generate preview ID when page loads
-            generatePreviewId();
+            // Generate preview ID when page loads (only if field is empty)
+            // generatePreviewId();
             
             // Update the hidden Name field with the TextField1Value before form submission
             $('form').on('submit', function(e) {
@@ -102,11 +111,6 @@
                     // Copy it to the Name field
                     $('#Name').val(firstFieldValue || 'Unnamed Item');
                 }
-                
-                // Disable any validation errors for the CustomId field
-                const customIdField = $('#CustomId');
-                customIdField.removeClass('input-validation-error');
-                customIdField.closest('.form-group').find('.field-validation-error').remove();
                 
                 return true;
             });

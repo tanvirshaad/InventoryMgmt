@@ -3,6 +3,7 @@ using InventoryMgmt.BLL.Services;
 using InventoryMgmt.BLL.Interfaces;
 using InventoryMgmt.DAL.EF.TableModels;
 using InventoryMgmt.MVC.Attributes;
+using InventoryMgmt.MVC.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -260,42 +261,65 @@ namespace InventoryMgmt.MVC.Controllers
                     return View(itemDto);
                 }
 
-                var result = await _itemService.UpdateItemAsync(itemDto);
-                if (result != null)
+                try
                 {
-                    // Check if it's a new version due to concurrency
-                    if (!result.Version.SequenceEqual(itemDto.Version))
+                    var result = await _itemService.UpdateItemAsync(itemDto);
+                    
+                    if (result.IsSuccess)
                     {
-                        // This is a concurrency resolution - update the form with latest data
-                        ModelState.Clear(); // Clear validation errors
-                        ModelState.AddModelError("", "The item has been updated with the latest version from the database. Please review and save your changes again.");
+                        // Successful update - set success message
+                        TempData["ToastMessage"] = "Item updated successfully!";
+                        TempData["ToastType"] = "success";
+                        TempData.Keep("ToastMessage");  // Make sure TempData persists through redirect
+                        TempData.Keep("ToastType");
                         
-                        // Reload the inventory and custom fields to ensure they're available
-                        await PrepareCustomFieldsForView(result.InventoryId, ViewBag);
-                        ViewBag.Inventory = await _inventoryService.GetInventoryByIdAsync(result.InventoryId);
+                        return RedirectToAction("Details", "Inventory", new { id = itemDto.InventoryId });
+                    }
+                    else if (result.IsConcurrencyConflict)
+                    {
+                        ModelState.AddModelError("", "This item has been modified by another user. Please review the current values and try again.");
                         
-                        // Add toast message
-                        TempData["ToastMessage"] = "Item has been updated by another user. Please review your changes.";
+                        // Add toast message for concurrency conflict
+                        TempData["ToastMessage"] = "This item has been modified by another user. Please review the current values and try again.";
                         TempData["ToastType"] = "warning";
                         
-                        // Return the refreshed item
-                        return View(result);
+                        // Return the current version from the database for the user to see
+                        await PrepareCustomFieldsForView(itemDto.InventoryId, ViewBag);
+                        ViewBag.Inventory = await _inventoryService.GetInventoryByIdAsync(itemDto.InventoryId);
+                        return View(result.Data ?? itemDto);
                     }
-                    
-                    // Regular successful update - set persistent toast message
-                    TempData["ToastMessage"] = "Item updated successfully!";
-                    TempData["ToastType"] = "success";
-                    TempData.Keep("ToastMessage");  // Make sure TempData persists through redirect
-                    TempData.Keep("ToastType");
-                    
-                    return RedirectToAction("Details", "Inventory", new { id = itemDto.InventoryId });
+                    else
+                    {
+                        ModelState.AddModelError("", result.ErrorMessage ?? "Failed to update item. Please try again.");
+                        
+                        // Add toast message for error
+                        TempData["ToastMessage"] = result.ErrorMessage ?? "Failed to update item. Please try again.";
+                        TempData["ToastType"] = "error";
+                        
+                        // Reload the inventory and custom fields to ensure they're available
+                        await PrepareCustomFieldsForView(itemDto.InventoryId, ViewBag);
+                        ViewBag.Inventory = await _inventoryService.GetInventoryByIdAsync(itemDto.InventoryId);
+                    }
                 }
-                else
+                catch (InvalidOperationException ex)
                 {
-                    ModelState.AddModelError("", "Failed to update item. Please try again.");
+                    // Handle custom ID validation errors
+                    ModelState.AddModelError("CustomId", ex.Message);
                     
                     // Add toast message for error
-                    TempData["ToastMessage"] = "Failed to update item. Please try again.";
+                    TempData["ToastMessage"] = ex.Message;
+                    TempData["ToastType"] = "error";
+                    
+                    // Reload the inventory and custom fields to ensure they're available
+                    await PrepareCustomFieldsForView(itemDto.InventoryId, ViewBag);
+                    ViewBag.Inventory = await _inventoryService.GetInventoryByIdAsync(itemDto.InventoryId);
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", $"Error updating item: {ex.Message}");
+                    
+                    // Add toast message for error
+                    TempData["ToastMessage"] = $"Error updating item: {ex.Message}";
                     TempData["ToastType"] = "error";
                     
                     // Reload the inventory and custom fields to ensure they're available
@@ -892,6 +916,103 @@ namespace InventoryMgmt.MVC.Controllers
                 return Json(new { 
                     success = false, 
                     message = $"Error generating custom ID: {ex.Message}" 
+                });
+            }
+        }
+        
+        [HttpPost]
+        public async Task<IActionResult> ValidateCustomId([FromBody] CustomIdValidationRequest request)
+        {
+            if (!User.Identity!.IsAuthenticated)
+            {
+                return Unauthorized(new { 
+                    success = false, 
+                    message = "You must be logged in to validate custom IDs",
+                    requiresAuthentication = true
+                });
+            }
+            
+            try
+            {
+                var validation = await _itemService.ValidateCustomIdAsync(
+                    request.InventoryId, 
+                    request.CustomId, 
+                    request.ExcludeItemId);
+                
+                return Json(new { 
+                    success = validation.IsValid, 
+                    message = validation.ErrorMessage,
+                    isValid = validation.IsValid
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { 
+                    success = false, 
+                    message = $"Error validating custom ID: {ex.Message}",
+                    isValid = false
+                });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetCustomIdFormatInfo(int inventoryId)
+        {
+            if (!User.Identity!.IsAuthenticated)
+            {
+                return Unauthorized(new { 
+                    success = false, 
+                    message = "You must be logged in to get format information",
+                    requiresAuthentication = true
+                });
+            }
+            
+            try
+            {
+                var inventory = await _inventoryService.GetInventoryByIdAsync(inventoryId);
+                if (inventory == null)
+                {
+                    return NotFound(new { 
+                        success = false, 
+                        message = "Inventory not found" 
+                    });
+                }
+
+                // Get format elements
+                List<CustomIdElement>? elements = null;
+                if (!string.IsNullOrEmpty(inventory.CustomIdElements))
+                {
+                    try
+                    {
+                        elements = JsonSerializer.Deserialize<List<CustomIdElement>>(inventory.CustomIdElements);
+                    }
+                    catch (Exception)
+                    {
+                        // If JSON parsing fails, fall back to null
+                    }
+                }
+
+                var formatExample = elements != null 
+                    ? _inventoryService.CustomIdService.GetFormatExample(elements)
+                    : "No format defined";
+
+                var validExample = await _inventoryService.CustomIdService.GenerateValidCustomIdExampleAsync(inventoryId);
+
+                return Json(new { 
+                    success = true,
+                    formatExample = formatExample,
+                    validExample = validExample,
+                    hasFormat = elements != null && elements.Any(),
+                    message = elements != null && elements.Any() 
+                        ? "Custom ID must follow the defined format"
+                        : "No specific format required"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { 
+                    success = false, 
+                    message = $"Error getting format info: {ex.Message}"
                 });
             }
         }

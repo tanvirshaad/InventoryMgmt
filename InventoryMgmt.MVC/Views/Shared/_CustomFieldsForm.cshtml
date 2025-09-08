@@ -15,8 +15,14 @@
     <label for="CustomId" class="form-label">Custom ID</label>
     <div class="input-group">
         <input type="text" id="CustomId" name="CustomId" value="@Model.CustomId" class="form-control" placeholder="Will be auto-generated if left empty" data-val="false" />
+        <button type="button" id="generateCustomIdBtn" class="btn btn-outline-secondary" title="Generate a valid Custom ID">
+            <i class="bi bi-magic"></i> Generate
+        </button>
     </div>
     <span class="text-danger" id="CustomIdValidation"></span>
+    <div id="custom-id-format-info" class="form-text text-muted mt-1" style="display: none;">
+        <!-- Format info will be populated by JavaScript -->
+    </div>
     <small class="field-description">Optional: Custom ID will be automatically generated when item is created if left empty</small>
 </div>
 
