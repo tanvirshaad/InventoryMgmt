@@ -1,0 +1,168 @@
+@model InventoryMgmt.BLL.DTOs.SalesforceAccountDto
+
+@{
+    ViewData["Title"] = "Salesforce Integration";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">Connect to Salesforce</h3>
+                    <p class="text-muted small mb-0">Your data will be used to create an account in our CRM system</p>
+                </div>
+                <div class="card-body">
+                    <form asp-action="SalesforceIntegration" method="post">
+                        <input type="hidden" asp-for="UserId" />
+                        
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        
+                        <h4 class="mb-3">Company Information</h4>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="CompanyName" class="form-label"></label>
+                                    <input asp-for="CompanyName" class="form-control" />
+                                    <span asp-validation-for="CompanyName" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Industry" class="form-label"></label>
+                                    <select asp-for="Industry" class="form-select">
+                                        <option value="">-- Select Industry --</option>
+                                        <option value="Agriculture">Agriculture</option>
+                                        <option value="Apparel">Apparel</option>
+                                        <option value="Banking">Banking</option>
+                                        <option value="Biotechnology">Biotechnology</option>
+                                        <option value="Chemicals">Chemicals</option>
+                                        <option value="Communications">Communications</option>
+                                        <option value="Construction">Construction</option>
+                                        <option value="Consulting">Consulting</option>
+                                        <option value="Education">Education</option>
+                                        <option value="Electronics">Electronics</option>
+                                        <option value="Energy">Energy</option>
+                                        <option value="Engineering">Engineering</option>
+                                        <option value="Entertainment">Entertainment</option>
+                                        <option value="Environmental">Environmental</option>
+                                        <option value="Finance">Finance</option>
+                                        <option value="Food & Beverage">Food & Beverage</option>
+                                        <option value="Government">Government</option>
+                                        <option value="Healthcare">Healthcare</option>
+                                        <option value="Hospitality">Hospitality</option>
+                                        <option value="Insurance">Insurance</option>
+                                        <option value="Machinery">Machinery</option>
+                                        <option value="Manufacturing">Manufacturing</option>
+                                        <option value="Media">Media</option>
+                                        <option value="Not For Profit">Not For Profit</option>
+                                        <option value="Recreation">Recreation</option>
+                                        <option value="Retail">Retail</option>
+                                        <option value="Shipping">Shipping</option>
+                                        <option value="Technology">Technology</option>
+                                        <option value="Telecommunications">Telecommunications</option>
+                                        <option value="Transportation">Transportation</option>
+                                        <option value="Utilities">Utilities</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                    <span asp-validation-for="Industry" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="AnnualRevenue" class="form-label"></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input asp-for="AnnualRevenue" class="form-control" type="number" step="0.01" />
+                                    </div>
+                                    <span asp-validation-for="AnnualRevenue" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="PhoneNumber" class="form-label"></label>
+                                    <input asp-for="PhoneNumber" class="form-control" placeholder="(123) 456-7890" />
+                                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="Website" class="form-label"></label>
+                            <input asp-for="Website" class="form-control" placeholder="https://www.example.com" />
+                            <span asp-validation-for="Website" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            <label asp-for="Description" class="form-label"></label>
+                            <textarea asp-for="Description" class="form-control" rows="3" placeholder="Brief description of your company"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                        
+                        <h4 class="mb-3">Contact Information</h4>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="FirstName" class="form-label"></label>
+                                    <input asp-for="FirstName" class="form-control" />
+                                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="LastName" class="form-label"></label>
+                                    <input asp-for="LastName" class="form-control" />
+                                    <span asp-validation-for="LastName" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Email" class="form-label"></label>
+                                    <input asp-for="Email" class="form-control" />
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="JobTitle" class="form-label"></label>
+                                    <input asp-for="JobTitle" class="form-control" />
+                                    <span asp-validation-for="JobTitle" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            <label asp-for="MobilePhone" class="form-label"></label>
+                            <input asp-for="MobilePhone" class="form-control" placeholder="(123) 456-7890" />
+                            <span asp-validation-for="MobilePhone" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group d-flex justify-content-between">
+                            <div>
+                                <a asp-action="Profile" class="btn btn-secondary me-2">Cancel</a>
+                                <a asp-action="TestSalesforceAuth" class="btn btn-outline-info">
+                                    <i class="bi bi-key-fill me-1"></i>
+                                    Test Authentication
+                                </a>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-cloud-arrow-up-fill me-1"></i>
+                                Submit to Salesforce
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

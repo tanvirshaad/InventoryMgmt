@@ -1,12 +1,19 @@
 // direct-access.js - A direct implementation of the access control functionality
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Direct access script loaded');
-    
-    // Get references to the elements
+    // Get references to the elements with error checking
     const addUserBtn = document.getElementById('add-user-btn');
     const userInput = document.getElementById('add-user-input');
     const statusArea = document.getElementById('access-status');
+    const autocompleteResults = document.getElementById('user-autocomplete-results');
+    
+    if (!autocompleteResults) {
+        console.error('user-autocomplete-results element not found!');
+    }
+    
+    // Current sort state
+    let currentSortField = 'name'; // Default sort by name
+    let usersList = []; // Store the users list for sorting
     
     // Load the list of users with access
     const accessUsersList = document.getElementById('access-users-list');
@@ -14,25 +21,117 @@ document.addEventListener('DOMContentLoaded', function() {
         loadAccessUsers();
     }
     
-    if (addUserBtn && userInput) {
-        console.log('Found add user button and input field');
+    // Initialize sort buttons - using event delegation for reliability
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.classList.contains('sort-users-btn') || 
+            (e.target.parentElement && e.target.parentElement.classList.contains('sort-users-btn'))) {
+            
+            // Get the button element
+            const button = e.target.classList.contains('sort-users-btn') ? 
+                           e.target : e.target.parentElement;
+            
+            // Log the sort button clicked
+            console.log("Sort button clicked:", button.getAttribute('data-sort'));
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.sort-users-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to clicked button
+            button.classList.add('active');
+            
+            // Update sort field
+            currentSortField = button.getAttribute('data-sort');
+            
+            // Resort the user list
+            sortAndDisplayUsers();
+        }
+    });
+    
+    // Implement autocomplete functionality
+    if (userInput && autocompleteResults) {
+        // Store all users once loaded
+        let allUsersLoaded = false;
         
+        // Debounce function for input
+        let typingTimer;
+        const doneTypingInterval = 300;
+        
+        userInput.addEventListener('input', function() {
+            const query = this.value.trim();
+            
+            // Clear any existing timer
+            clearTimeout(typingTimer);
+            
+            // Show autocomplete and filter results
+            if (allUsersLoaded) {
+                autocompleteResults.style.display = 'block';
+                filterUserResults(query);
+            } else {
+                // Load all users on first input
+                fetchUserSuggestions('', true);
+                allUsersLoaded = true;
+                // Still filter by the current query
+                setTimeout(() => {
+                    filterUserResults(query);
+                }, 300);
+            }
+        });
+        
+        // Handle focus events - load all users on focus
+        userInput.addEventListener('focus', function() {
+            if (!allUsersLoaded) {
+                fetchUserSuggestions('', true); // Load all users
+                allUsersLoaded = true;
+            } else {
+                autocompleteResults.style.display = 'block';
+            }
+        });
+        
+        // Close autocomplete on click outside
+        document.addEventListener('click', function(e) {
+            if (e.target !== userInput && e.target !== autocompleteResults && !autocompleteResults.contains(e.target)) {
+                autocompleteResults.style.display = 'none';
+            }
+        });
+        
+        // Prevent closing when clicking inside the autocomplete dropdown
+        autocompleteResults.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+        
+        // Trigger load of all users immediately when the page loads
+        setTimeout(() => {
+            fetchUserSuggestions('', true);
+            allUsersLoaded = true;
+        }, 500); // Small delay to ensure DOM is fully ready
+    } else {
+        console.error('Cannot set up autocomplete - missing elements:', {
+            userInput: !!userInput,
+            autocompleteResults: !!autocompleteResults
+        });
+        
+        // Try to find the element again after a delay
+        setTimeout(() => {
+            const delayedAutocompleteResults = document.getElementById('user-autocomplete-results');
+            const delayedUserInput = document.getElementById('add-user-input');
+            
+            if (delayedAutocompleteResults && delayedUserInput) {
+                setupAutocompleteDelayed(delayedUserInput, delayedAutocompleteResults);
+            }
+        }, 1000);
+    }
+    
+    if (addUserBtn && userInput) {
         // Add click event listener
         addUserBtn.addEventListener('click', function(e) {
             e.preventDefault();
             
             const userEmail = userInput.value.trim();
-            console.log('Email entered:', userEmail);
             
             if (!userEmail) {
                 showMessage('Please enter a user email', 'danger');
-                return;
-            }
-            
-            // Validate email format (basic validation)
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(userEmail)) {
-                showMessage('Please enter a valid email address', 'danger');
                 return;
             }
             
@@ -76,11 +175,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.preventDefault();
                 addUserBtn.click();
             }
-        });
+            });
     }
+    
+    });
     
     // Check for TempData messages on page load
     checkTempDataMessages();
+    
+    /**
+     * Helper function to get inventory ID from URL if not available globally
+     */
+    function getInventoryIdFromUrl() {
+        const urlMatch = window.location.pathname.match(/\/Inventory\/Details\/(\d+)/);
+        return urlMatch ? parseInt(urlMatch[1]) : null;
+    }
     
     // Handle remove buttons
     document.addEventListener('click', function(e) {
@@ -143,7 +252,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-});
 
 /**
  * Shows a message in the status area
@@ -269,35 +377,11 @@ function loadAccessUsers() {
                 return;
             }
             
-            // Render the users
-            let html = '';
-            data.users.forEach(user => {
-                html += `
-                    <div class="access-user-item d-flex justify-content-between align-items-center p-2 border rounded mb-2">
-                        <div>
-                            <strong>${user.firstName} ${user.lastName}</strong>
-                            <br><small class="text-muted">${user.email}</small>
-                        </div>
-                        <div class="d-flex gap-2 align-items-center">
-                        
-                            <!-- Permission select dropdown (temporarily disabled)
-                            <select class="form-select form-select-sm permission-select" data-user-id="${user.id}" style="width: 120px;">
-                                <option value="Read">Read</option>
-                                <option value="Write" selected>Write</option>
-                                <option value="Manage">Manage</option>
-                                <option value="FullControl">Full Control</option>
-                            </select>
-                            -->
-                        
-                            <button class="btn btn-sm btn-outline-danger remove-access" data-user-id="${user.id}">
-                                <i class="bi bi-x-circle"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-            });
+            // Store the users for sorting
+            window.usersList = data.users;
             
-            accessUsersList.innerHTML = html;
+            // Sort and display the users
+            sortAndDisplayUsers();
         })
         .catch(error => {
             console.error('Error loading access users:', error);

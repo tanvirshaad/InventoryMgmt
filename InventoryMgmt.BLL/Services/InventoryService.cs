@@ -14,7 +14,7 @@ using InventoryMgmt.DAL;
 
 namespace InventoryMgmt.BLL.Services
 {
-    public class InventoryService : IInventoryService
+    public class InventoryService: IInventoryService
     {
         private readonly DataAccess _dataAccess;
         private readonly IMapper _mapper;
@@ -241,14 +241,5 @@ namespace InventoryMgmt.BLL.Services
             return _mapper.Map<IEnumerable<InventoryDto>>(inventories);
         }
 
-        // Access control methods have been removed and are now accessed through the AccessService property
-        
-        // Custom field methods have been removed and are now accessed through the CustomFieldService property
-        
-        // Custom ID methods have been removed and are now accessed through the CustomIdService property
-
-        // Access control methods have been removed and are now accessed through the AccessService property
-
-        // Tag methods have been removed and are now accessed through the TagService property
     }
 }

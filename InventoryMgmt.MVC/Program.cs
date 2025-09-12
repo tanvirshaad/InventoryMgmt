@@ -133,6 +133,10 @@ builder.Services.AddScoped<InventoryMgmt.BLL.Services.ICustomIdService, Inventor
 builder.Services.AddScoped<InventoryMgmt.BLL.Services.ITagService, InventoryMgmt.BLL.Services.TagService>();
 builder.Services.AddScoped<InventoryMgmt.BLL.Services.IInventoryAccessService, InventoryMgmt.BLL.Services.InventoryAccessService>();
 
+// Add Salesforce integration
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<ISalesforceService, SalesforceService>();
+
 // Add SignalR
 builder.Services.AddSignalR();
 
