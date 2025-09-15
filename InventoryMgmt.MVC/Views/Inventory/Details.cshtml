@@ -150,6 +150,13 @@
                 <i class="bi bi-download me-2"></i>Export
             </button>
         </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link @(ViewBag.CurrentTab == "api" ? "active" : "")" 
+                    id="api-tab" data-bs-toggle="tab" data-bs-target="#api" 
+                    type="button" role="tab" aria-controls="api" aria-selected="false">
+                <i class="bi bi-code-square me-2"></i>API
+            </button>
+        </li>
     </ul>
 
     <!-- Tab Content -->
@@ -663,6 +670,85 @@
                 </div>
             </div>
         </div>
+        
+        <!-- API Tab -->
+        <div class="tab-pane fade @(ViewBag.CurrentTab == "api" ? "show active" : "")" 
+             id="api" role="tabpanel" aria-labelledby="api-tab">
+            <div class="card">
+                <div class="card-body">
+                    <h5>API Access</h5>
+                    <p class="text-muted">Manage API access to this inventory for external applications like Odoo.</p>
+                    
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        External applications can use this API token to access inventory data through our API.
+                    </div>
+                    
+                    <div class="mb-4" id="api-token-section">
+                        <label class="form-label">API Token</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="api-token" placeholder="No token generated yet" 
+                                   value="@ViewBag.ApiToken" readonly>
+                            <button class="btn btn-primary" type="button" id="generate-token-btn" onclick="generateApiToken(@Model.Id)">
+                                <i class="bi bi-key me-2"></i>Generate New Token
+                            </button>
+                            <button class="btn btn-outline-secondary" type="button" id="copy-token-btn" onclick="copyApiToken()">
+                                <i class="bi bi-clipboard me-2"></i>Copy
+                            </button>
+                        </div>
+                        <div class="form-text text-warning" id="token-warning" style="display: none;">
+                            <i class="bi bi-exclamation-triangle me-1"></i>
+                            Generating a new token will invalidate any existing token.
+                        </div>
+                    </div>
+                    
+                    <h5 class="mt-4">API Endpoints</h5>
+                    <p class="text-muted">Use these endpoints to access inventory data programmatically.</p>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Endpoint</th>
+                                    <th>Description</th>
+                                    <th>Method</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>/api/InventoryApi/info?token={token}</code></td>
+                                    <td>Get basic inventory information</td>
+                                    <td><span class="badge bg-success">GET</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>/api/InventoryApi/aggregated?token={token}</code></td>
+                                    <td>Get aggregated inventory data (field statistics, etc.)</td>
+                                    <td><span class="badge bg-success">GET</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <h5 class="mt-4">Example Usage (Curl)</h5>
+                    <div class="bg-dark text-light p-3 rounded mb-3">
+                        <pre id="api-curl-example" class="mb-0"><code>curl -X GET "https://yourdomain.com/api/InventoryApi/info?token=YOUR_TOKEN_HERE"</code></pre>
+                    </div>
+                    
+                    <h5 class="mt-4">Example Usage (Python)</h5>
+                    <div class="bg-dark text-light p-3 rounded">
+                        <pre id="api-python-example" class="mb-0"><code>import requests
+
+token = "YOUR_TOKEN_HERE"
+url = "https://yourdomain.com/api/InventoryApi/aggregated"
+
+response = requests.get(url, params={"token": token})
+data = response.json()
+
+print(data)</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -863,7 +949,106 @@
                 console.log("Access tab is the current tab from ViewBag");
                 setTimeout(() => loadAccessUsers(), 500);
             }
+            
+            // Initialize API token functionality
+            loadApiToken(@Model.Id);
         });
+        
+        // Function to load the API token
+        function loadApiToken(inventoryId) {
+            // Get the current token for this inventory
+            fetch(`/api/InventoryApi/get-token/${inventoryId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.token) {
+                        // Display the token
+                        document.getElementById('api-token').value = data.token;
+                        
+                        // Update examples
+                        updateApiExamples(data.token);
+                    }
+                })
+                .catch(err => {
+                    console.error('Error loading API token:', err);
+                });
+        }
+        
+        // Function to generate a new API token
+        function generateApiToken(inventoryId) {
+            // Show confirmation if a token already exists
+            const currentToken = document.getElementById('api-token').value;
+            if (currentToken && currentToken !== "No token generated yet") {
+                if (!confirm("This will invalidate the existing token. Are you sure?")) {
+                    return;
+                }
+            }
+            
+            // Generate new token
+            fetch(`/api/InventoryApi/generate-token/${inventoryId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.token) {
+                        document.getElementById('api-token').value = data.token;
+                        document.getElementById('token-warning').style.display = 'none';
+                        
+                        // Show success message
+                        alert('New API token generated successfully!');
+                        
+                        // Update examples
+                        updateApiExamples(data.token);
+                    } else {
+                        alert('Error: ' + (data.error || 'Failed to generate token'));
+                    }
+                })
+                .catch(err => {
+                    console.error('Error generating API token:', err);
+                    alert('Error generating token. Please try again.');
+                });
+        }
+        
+        // Function to copy the API token to clipboard
+        function copyApiToken() {
+            const tokenInput = document.getElementById('api-token');
+            if (!tokenInput.value || tokenInput.value === "No token generated yet") {
+                alert('No token to copy. Please generate a token first.');
+                return;
+            }
+            
+            // Copy to clipboard
+            tokenInput.select();
+            document.execCommand('copy');
+            
+            // Show success message
+            alert('API token copied to clipboard!');
+        }
+        
+        // Function to update API examples with the current token
+        function updateApiExamples(token) {
+            if (!token) return;
+            
+            // Get the hostname dynamically
+            const hostname = window.location.origin;
+            
+            // Update curl example
+            const curlExample = document.getElementById('api-curl-example');
+            if (curlExample) {
+                curlExample.innerHTML = `<code>curl -X GET "${hostname}/api/InventoryApi/info?token=${token}"</code>`;
+            }
+            
+            // Update Python example
+            const pythonExample = document.getElementById('api-python-example');
+            if (pythonExample) {
+                pythonExample.innerHTML = `<code>import requests
+
+token = "${token}"
+url = "${hostname}/api/InventoryApi/aggregated"
+
+response = requests.get(url, params={"token": token})
+data = response.json()
+
+print(data)</code>`;
+            }
+        }
         
         // Function to add a custom ID element
         function addCustomIdElement() {

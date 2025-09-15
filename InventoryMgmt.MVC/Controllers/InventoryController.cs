@@ -24,6 +24,7 @@ namespace InventoryMgmt.MVC.Controllers
         private readonly IAuthService _authService;
         private readonly IHubContext<CommentHub> _hubContext; // Added for SignalR
         private readonly CommentService _commentService; // Added for comments
+        private readonly IApiTokenService _apiTokenService; // Added for API token
 
         public InventoryController(
             InventoryService inventoryService,
@@ -32,6 +33,7 @@ namespace InventoryMgmt.MVC.Controllers
             IAuthService authService,
             IHubContext<CommentHub> hubContext, // Added for SignalR
             CommentService commentService, // Added for comments
+            IApiTokenService apiTokenService, // Added for API token
             InventoryMgmt.BLL.Interfaces.IAuthorizationService authorizationService) : base(authorizationService)
         {
             _inventoryService = inventoryService;
@@ -40,6 +42,7 @@ namespace InventoryMgmt.MVC.Controllers
             _authService = authService;
             _hubContext = hubContext; // Added for SignalR
             _commentService = commentService; // Added for comments
+            _apiTokenService = apiTokenService; // Added for API token
         }
 
         public async Task<IActionResult> Details(int id, string tab = "items")
@@ -66,6 +69,10 @@ namespace InventoryMgmt.MVC.Controllers
             ViewBag.CurrentTab = tab;
             ViewBag.CurrentUserId = currentUserId;
             ViewBag.UserPermissions = permissions;
+            
+            // Get API token if it exists
+            var apiToken = await _apiTokenService.GetTokenForInventoryAsync(id);
+            ViewBag.ApiToken = apiToken;
 
             if (tab == "items")
             {
@@ -776,6 +783,55 @@ namespace InventoryMgmt.MVC.Controllers
             
             var result = await _inventoryService.TagService.RemoveTagFromInventoryAsync(inventoryId, tagId);
             return Json(new { success = result });
+        }
+        
+        #endregion
+        
+        #region API Token Management
+        
+        /// <summary>
+        /// Generates a new API token for the inventory
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> GenerateApiToken(int inventoryId)
+        {
+            if (!await CanCurrentUserManageInventoryAsync(inventoryId))
+            {
+                return Json(new { success = false, message = "Access denied" });
+            }
+            
+            try
+            {
+                var token = await _apiTokenService.GenerateTokenForInventoryAsync(inventoryId);
+                return Json(new { success = true, token = token });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+        
+        /// <summary>
+        /// Revokes (removes) the current API token for the inventory
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> RevokeApiToken(int inventoryId)
+        {
+            if (!await CanCurrentUserManageInventoryAsync(inventoryId))
+            {
+                return Json(new { success = false, message = "Access denied" });
+            }
+            
+            try
+            {
+                // First, nullify the token in the database
+                var result = await _apiTokenService.RevokeTokenAsync(inventoryId);
+                return Json(new { success = result });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
         
         #endregion

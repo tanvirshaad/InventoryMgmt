@@ -45,6 +45,23 @@ namespace InventoryMgmt.BLL.Services
         public ICustomFieldService CustomFieldService => _customFieldService;
         public ICustomIdService CustomIdService => _customIdService;
 
+        public async Task<IEnumerable<ItemDto>> GetInventoryItemsAsync(int inventoryId, int? page = null, int? pageSize = null)
+        {
+            // Get items from the inventory
+            // For now we'll get all items since we don't have built-in pagination in the repo
+            var items = await _dataAccess.ItemData.GetItemsByInventoryIdAsync(inventoryId);
+            
+            // Apply paging if provided
+            if (page.HasValue && pageSize.HasValue)
+            {
+                int skip = (page.Value - 1) * pageSize.Value;
+                items = items.Skip(skip).Take(pageSize.Value);
+            }
+            
+            // Map to DTOs
+            return _mapper.Map<IEnumerable<ItemDto>>(items);
+        }
+        
         public async Task<IEnumerable<InventoryDto>> GetLatestInventoriesAsync(int count)
         {
             var inventories = await _dataAccess.InventoryData.GetLatestInventoriesAsync(count);

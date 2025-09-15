@@ -168,4 +168,3 @@ D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\obj\Debug\net8.0\refint\Inven
 D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\obj\Debug\net8.0\InventoryMgmt.MVC.pdb
 D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\obj\Debug\net8.0\InventoryMgmt.MVC.genruntimeconfig.cache
 D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\obj\Debug\net8.0\ref\InventoryMgmt.MVC.dll
-D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

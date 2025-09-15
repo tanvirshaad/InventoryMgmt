@@ -53,42 +53,42 @@ namespace InventoryMgmt.DAL.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2025, 8, 31, 10, 44, 58, 790, DateTimeKind.Utc).AddTicks(3128),
+                            CreatedAt = new DateTime(2025, 9, 13, 9, 50, 59, 664, DateTimeKind.Utc).AddTicks(6531),
                             Description = "Office equipment and devices",
                             Name = "Equipment",
-                            UpdatedAt = new DateTime(2025, 8, 31, 10, 44, 58, 790, DateTimeKind.Utc).AddTicks(3130)
+                            UpdatedAt = new DateTime(2025, 9, 13, 9, 50, 59, 664, DateTimeKind.Utc).AddTicks(6533)
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2025, 8, 31, 10, 44, 58, 790, DateTimeKind.Utc).AddTicks(3134),
+                            CreatedAt = new DateTime(2025, 9, 13, 9, 50, 59, 664, DateTimeKind.Utc).AddTicks(6534),
                             Description = "Office furniture and fixtures",
                             Name = "Furniture",
-                            UpdatedAt = new DateTime(2025, 8, 31, 10, 44, 58, 790, DateTimeKind.Utc).AddTicks(3134)
+                            UpdatedAt = new DateTime(2025, 9, 13, 9, 50, 59, 664, DateTimeKind.Utc).AddTicks(6535)
                         },
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(2025, 8, 31, 10, 44, 58, 790, DateTimeKind.Utc).AddTicks(3135),
+                            CreatedAt = new DateTime(2025, 9, 13, 9, 50, 59, 664, DateTimeKind.Utc).AddTicks(6536),
                             Description = "Books and publications",
                             Name = "Books",
-                            UpdatedAt = new DateTime(2025, 8, 31, 10, 44, 58, 790, DateTimeKind.Utc).AddTicks(3136)
+                            UpdatedAt = new DateTime(2025, 9, 13, 9, 50, 59, 664, DateTimeKind.Utc).AddTicks(6536)
                         },
                         new
                         {
                             Id = 4,
-                            CreatedAt = new DateTime(2025, 8, 31, 10, 44, 58, 790, DateTimeKind.Utc).AddTicks(3137),
+                            CreatedAt = new DateTime(2025, 9, 13, 9, 50, 59, 664, DateTimeKind.Utc).AddTicks(6537),
                             Description = "Important documents and records",
                             Name = "Documents",
-                            UpdatedAt = new DateTime(2025, 8, 31, 10, 44, 58, 790, DateTimeKind.Utc).AddTicks(3137)
+                            UpdatedAt = new DateTime(2025, 9, 13, 9, 50, 59, 664, DateTimeKind.Utc).AddTicks(6537)
                         },
                         new
                         {
                             Id = 5,
-                            CreatedAt = new DateTime(2025, 8, 31, 10, 44, 58, 790, DateTimeKind.Utc).AddTicks(3138),
+                            CreatedAt = new DateTime(2025, 9, 13, 9, 50, 59, 664, DateTimeKind.Utc).AddTicks(6538),
                             Description = "Other miscellaneous items",
                             Name = "Other",
-                            UpdatedAt = new DateTime(2025, 8, 31, 10, 44, 58, 790, DateTimeKind.Utc).AddTicks(3138)
+                            UpdatedAt = new DateTime(2025, 9, 13, 9, 50, 59, 664, DateTimeKind.Utc).AddTicks(6538)
                         });
                 });
 
@@ -133,6 +133,10 @@ namespace InventoryMgmt.DAL.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ApiToken")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("BooleanField1Description")
                         .HasMaxLength(200)

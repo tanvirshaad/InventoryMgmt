@@ -49,7 +49,11 @@ if (!envLoaded)
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+    });
 
 // Configure request size limits for file uploads (10MB)
 builder.Services.Configure<IISServerOptions>(options =>
@@ -132,6 +136,8 @@ builder.Services.AddScoped<InventoryMgmt.BLL.Services.ICustomFieldService, Inven
 builder.Services.AddScoped<InventoryMgmt.BLL.Services.ICustomIdService, InventoryMgmt.BLL.Services.CustomIdService>();
 builder.Services.AddScoped<InventoryMgmt.BLL.Services.ITagService, InventoryMgmt.BLL.Services.TagService>();
 builder.Services.AddScoped<InventoryMgmt.BLL.Services.IInventoryAccessService, InventoryMgmt.BLL.Services.InventoryAccessService>();
+builder.Services.AddScoped<IApiTokenService, ApiTokenService>();
+builder.Services.AddScoped<IAggregationService, AggregationService>();
 
 // Add Salesforce integration
 builder.Services.AddHttpClient();
