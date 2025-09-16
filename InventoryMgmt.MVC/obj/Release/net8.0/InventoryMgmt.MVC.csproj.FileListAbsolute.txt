@@ -169,3 +169,13 @@ D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Release\net8.0\DotNetEnv.
 D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Release\net8.0\Microsoft.AspNetCore.Authentication.Google.dll
 D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Release\net8.0\Sprache.dll
 D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Release\net8.0\Microsoft.AspNetCore.Authentication.Facebook.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Release\net8.0\Microsoft.Graph.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Release\net8.0\Microsoft.Graph.Core.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Release\net8.0\Microsoft.Kiota.Abstractions.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Release\net8.0\Microsoft.Kiota.Authentication.Azure.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Release\net8.0\Microsoft.Kiota.Http.HttpClientLibrary.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Release\net8.0\Microsoft.Kiota.Serialization.Form.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Release\net8.0\Microsoft.Kiota.Serialization.Json.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Release\net8.0\Microsoft.Kiota.Serialization.Multipart.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Release\net8.0\Microsoft.Kiota.Serialization.Text.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Release\net8.0\Std.UriTemplate.dll

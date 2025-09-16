@@ -20,6 +20,7 @@ wwwroot\js\modal-init.js
 wwwroot\js\numeric-field-config.js
 wwwroot\js\simple-autocomplete.js
 wwwroot\js\site.js
+wwwroot\js\support-ticket.js
 wwwroot\js\tag-manager.js
 wwwroot\js\toast-utility.js
 wwwroot\lib\bootstrap\dist\css\bootstrap.css

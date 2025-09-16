@@ -104,5 +104,31 @@
       }
     ],
     "ReturnTypes": []
+  },
+  {
+    "ContainingType": "InventoryMgmt.MVC.Controllers.SupportTicketController",
+    "Method": "CreateTicket",
+    "RelativePath": "api/SupportTicket",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "model",
+        "Type": "InventoryMgmt.MVC.Models.SupportTicketFormModel",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "InventoryMgmt.MVC.Controllers.SupportTicketController",
+    "Method": "GetAdminEmails",
+    "RelativePath": "api/SupportTicket/adminEmails",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
   }
 ]

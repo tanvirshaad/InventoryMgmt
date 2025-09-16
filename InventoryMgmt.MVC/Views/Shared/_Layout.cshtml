@@ -89,6 +89,61 @@
         </main>
     </div>
 
+    <!-- Support Ticket Modal -->
+    <div class="modal fade" id="supportTicketModal" tabindex="-1" aria-labelledby="supportTicketModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="supportTicketModalLabel">
+                        <i class="bi bi-life-preserver me-2"></i>Create Support Ticket
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="supportTicketForm">
+                        <input type="hidden" id="sourceUrl" name="sourceUrl" value="" />
+                        <input type="hidden" id="inventoryId" name="inventoryId" value="" />
+                        
+                        <div class="mb-3">
+                            <label for="summary" class="form-label">Summary</label>
+                            <input type="text" class="form-control" id="summary" name="summary" required 
+                                   placeholder="Brief description of your issue" />
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="priority" class="form-label">Priority</label>
+                            <select class="form-select" id="priority" name="priority" required>
+                                <option value="">Select priority level</option>
+                                <option value="High">High</option>
+                                <option value="Average">Average</option>
+                                <option value="Low">Low</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="additionalInfo" class="form-label">Additional Details (Optional)</label>
+                            <textarea class="form-control" id="additionalInfo" name="additionalInfo" rows="3"
+                                      placeholder="Any additional context or details about your issue"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="submitSupportTicket">
+                        <i class="bi bi-send me-2"></i>Submit Ticket
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Button -->
+    <div class="position-fixed bottom-0 end-0 mb-4 me-4" style="z-index: 1030;">
+        <button class="btn btn-primary rounded-circle p-3 shadow" id="helpButton" title="Get Help">
+            <i class="bi bi-question-lg fs-5"></i>
+        </button>
+    </div>
+
     <footer class="border-top footer text-muted bg-light mt-5">
         <div class="container">
             <div class="row py-4">
@@ -99,7 +154,8 @@
                 <div class="col-md-6 text-md-end">
                     <p class="small mb-0">
                         &copy; 2025 - Inventory Management -
-                        <a asp-controller="Home" asp-action="Privacy" class="text-decoration-none">Privacy</a>
+                        <a asp-controller="Home" asp-action="Privacy" class="text-decoration-none">Privacy</a> |
+                        <a href="#" id="createSupportTicketLink" class="text-decoration-none">Create Support Ticket</a>
                     </p>
                 </div>
             </div>
@@ -114,6 +170,7 @@
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
     <script src="~/js/toast-utility.js" asp-append-version="true"></script>
     <script src="~/js/item-handler.js" asp-append-version="true"></script>
+    <script src="~/js/support-ticket.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
     

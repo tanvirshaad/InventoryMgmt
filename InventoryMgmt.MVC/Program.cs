@@ -130,6 +130,7 @@ builder.Services.AddScoped<InventoryMgmt.BLL.Interfaces.IAuthorizationService, A
 builder.Services.AddScoped<DataAccess>();
 builder.Services.AddScoped<ICustomFieldService, CustomFieldService>();
 builder.Services.AddScoped<ICustomFieldProcessor, CustomFieldProcessor>();
+builder.Services.AddScoped<ISupportTicketService, SupportTicketService>();
 
 // Register the new specialized services created during refactoring
 builder.Services.AddScoped<InventoryMgmt.BLL.Services.ICustomFieldService, InventoryMgmt.BLL.Services.CustomFieldService>();

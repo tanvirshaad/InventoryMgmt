@@ -168,3 +168,14 @@ D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\obj\Debug\net8.0\refint\Inven
 D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\obj\Debug\net8.0\InventoryMgmt.MVC.pdb
 D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\obj\Debug\net8.0\InventoryMgmt.MVC.genruntimeconfig.cache
 D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\obj\Debug\net8.0\ref\InventoryMgmt.MVC.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Debug\net8.0\Microsoft.Graph.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Debug\net8.0\Microsoft.Graph.Core.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Debug\net8.0\Microsoft.Kiota.Abstractions.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Debug\net8.0\Microsoft.Kiota.Authentication.Azure.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Debug\net8.0\Microsoft.Kiota.Http.HttpClientLibrary.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Debug\net8.0\Microsoft.Kiota.Serialization.Form.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Debug\net8.0\Microsoft.Kiota.Serialization.Json.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Debug\net8.0\Microsoft.Kiota.Serialization.Multipart.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Debug\net8.0\Microsoft.Kiota.Serialization.Text.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\bin\Debug\net8.0\Std.UriTemplate.dll
+D:\itransition\InventoryMgmt.MVC\InventoryMgmt.MVC\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
