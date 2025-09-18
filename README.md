@@ -189,8 +189,10 @@ InventoryMgmt.MVC/
     ├── EF/TableModels/             # Entity Models
     ├── Data/                       # DbContext
     └── Migrations/                 # EF Migrations
+```
 
 ### 🏭 Odoo Integration Module
+
 ```
 odoo_inventory_connector/           # Self-Hosted Odoo Module
 ├── 📋 models/                      # Odoo Data Models
@@ -207,7 +209,6 @@ odoo_inventory_connector/           # Self-Hosted Odoo Module
 ├── 🔒 security/                    # Access Control
 │   └── ir.model.access.csv         # Model permissions configuration
 └── 📄 __manifest__.py              # Module configuration and dependencies
-```
 ```
 
 ## 🎯 Design Principles
