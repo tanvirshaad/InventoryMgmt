@@ -16,6 +16,7 @@ A comprehensive, enterprise-grade inventory management system built with ASP.NET
 - [Design Principles](#-design-principles)
 - [Security Features](#-security-features)
 - [Integration Capabilities](#-integration-capabilities)
+- [Third-Party Integrations](#-third-party-integrations)
 - [Database Design](#-database-design)
 - [Getting Started](#-getting-started)
 - [Configuration](#-configuration)
@@ -124,6 +125,7 @@ A comprehensive, enterprise-grade inventory management system built with ASP.NET
 - ✅ Role-Based Access (Admin, User roles)
 - ✅ Profile Management with user preferences
 - ✅ Administrative user control and blocking
+- ✅ **Salesforce CRM Integration** for customer relationship management
 
 ### 📊 Inventory Management
 - ✅ Create inventories with custom categorization
@@ -135,6 +137,8 @@ A comprehensive, enterprise-grade inventory management system built with ASP.NET
   - 📎 Document/Image fields (3)
   - ✅ Boolean fields (3)
 - ✅ Configurable Custom ID generation
+- ✅ **API Token Generation** for external system access
+- ✅ **Odoo ERP Integration** for inventory data viewing and analysis
 
 ### 📦 Item Management
 - ✅ Full CRUD operations for items
@@ -153,12 +157,14 @@ A comprehensive, enterprise-grade inventory management system built with ASP.NET
 - ✅ RESTful API with token authentication
 - ✅ Data aggregation and statistical analysis
 - ✅ Data export capabilities
-- ✅ Integrated support ticket system with cloud storage
+- ✅ **Integrated Support Ticket System** with Power Automate workflow
+- ✅ **Cloud Storage Integration** (OneDrive/Dropbox) for automated notifications
 
 ### ⚡ Admin Features
 - ✅ Comprehensive user management
 - ✅ System monitoring and analytics
 - ✅ Configuration management
+- ✅ **Automated Email & Mobile Notifications** via Power Automate
 
 ## 📁 Project Structure
 
@@ -183,6 +189,25 @@ InventoryMgmt.MVC/
     ├── EF/TableModels/             # Entity Models
     ├── Data/                       # DbContext
     └── Migrations/                 # EF Migrations
+
+### 🏭 Odoo Integration Module
+```
+odoo_inventory_connector/           # Self-Hosted Odoo Module
+├── 📋 models/                      # Odoo Data Models
+│   ├── inventory.py                # Inventory model with field definitions
+│   ├── item.py                     # Item model with custom field values
+│   ├── field_aggregation.py        # Statistical aggregation model
+│   └── field_definition.py         # Field type and configuration model
+├── 🎨 views/                       # Odoo UI Views
+│   ├── inventory_views.xml         # Inventory list and form views
+│   ├── item_views.xml              # Item management views
+│   └── import_wizard_views.xml     # Data import wizard interface
+├── 🧙‍♂️ wizard/                       # Import Functionality
+│   └── import_inventory.py         # API token-based data import
+├── 🔒 security/                    # Access Control
+│   └── ir.model.access.csv         # Model permissions configuration
+└── 📄 __manifest__.py              # Module configuration and dependencies
+```
 ```
 
 ## 🎯 Design Principles
@@ -245,20 +270,101 @@ InventoryMgmt.MVC/
 
 ## 🔗 Integration Capabilities
 
-### 🏢 Salesforce Integration
-- **Account Creation**: Automatic Salesforce account creation
-- **Contact Management**: Sync user information
-- **Authentication**: OAuth 2.0 integration
+### 🏢 Salesforce CRM Integration
+- **Customer Relationship Management**: Profile-based account and contact creation
+- **REST API Integration**: Direct Salesforce API communication for user data sync
+- **Marketing Automation**: Enables customer data collection for newsletters and additional services
+- **OAuth 2.0 Authentication**: Secure Salesforce connectivity
+
+### 🏭 Odoo ERP Integration (Self-Hosted)
+- **Custom Odoo Module**: `odoo_inventory_connector` for inventory data management
+- **API Token-Based Access**: Per-inventory token generation for secure data access
+- **Data Aggregation**: Statistical analysis (min/max/average for numbers, popular values for text)
+- **Read-Only Viewer**: External system for inventory analytics and reporting
+- **Field Type Management**: Support for all custom field types with aggregated results
+
+### ⚡ Power Automate Workflow Integration
+- **Support Ticket Automation**: JSON-based ticket creation with cloud storage upload
+- **Multi-Cloud Support**: OneDrive and Dropbox integration for file uploads
+- **Automated Notifications**: Email alerts to administrators with formatted ticket details
+- **Mobile Notifications**: Real-time push notifications via Power Automate mobile app
+- **Context-Aware Tickets**: Automatic page link capture and inventory association
 
 ### ☁️ Cloud Storage Integration
-- **Cloudinary**: Image storage and transformation
-- **Dropbox**: Document storage for support tickets
-- **OneDrive**: Alternative document storage option
+- **Cloudinary**: Advanced image storage and transformation
+- **Dropbox API**: Document storage with automated workflow triggers
+- **OneDrive API**: Alternative cloud storage with Power Automate integration
+- **Automated File Processing**: JSON file parsing and notification generation
 
 ### 🔌 API Access
 - **RESTful Endpoints**: Full CRUD operations via API
-- **Token Authentication**: Secure API access
-- **Rate Limiting**: Configurable API usage limits
+- **Token-Based Authentication**: Per-inventory API tokens for external systems
+- **Data Aggregation API**: Statistical endpoints for external analytics
+- **Rate Limiting**: Configurable API usage limits and security controls
+
+## 🚀 Third-Party Integrations
+
+This project showcases comprehensive enterprise integration capabilities through three major third-party system integrations:
+
+### 1. 🏢 **Salesforce CRM Integration**
+**Objective**: Customer Relationship Management for marketing and additional services
+
+**Implementation**:
+- Dedicated user profile action for account creation
+- REST API integration with Salesforce
+- Automatic Account and Contact creation with user data collection
+- Secure OAuth 2.0 authentication flow
+
+**Business Value**: Enables seamless customer data synchronization for marketing campaigns and service expansion
+
+### 2. 🏭 **Odoo ERP Integration (Self-Hosted)**
+**Objective**: External inventory analytics and reporting system
+
+**Implementation**:
+- **Custom Odoo Module**: `odoo_inventory_connector` with complete data models
+- **API Token System**: Per-inventory secure access tokens
+- **Data Import Wizard**: Automated inventory data synchronization
+- **Statistical Analysis**: Advanced aggregation (min/max/average for numeric fields, popular values for text)
+- **Read-Only Dashboard**: Comprehensive inventory overview and detailed field analysis
+
+**Technical Architecture**:
+```
+┌─────────────────┐    API Token    ┌──────────────────┐
+│ InventoryMgmt   │ ──────────────► │ Self-Hosted Odoo │
+│ (ASP.NET Core)  │                 │ (Python Module)  │
+│                 │ ◄────────────── │                  │
+└─────────────────┘   Aggregated    └──────────────────┘
+                       Data
+```
+
+**Business Value**: Provides external stakeholders with read-only access to inventory analytics without exposing the main system
+
+### 3. ⚡ **Power Automate Workflow Integration**
+**Objective**: Automated support ticket system with multi-channel notifications
+
+**Implementation**:
+- **JSON Ticket Generation**: Context-aware support ticket creation
+- **Cloud Storage Upload**: Automatic file upload to OneDrive/Dropbox
+- **Power Automate Flow**: 
+  - File trigger detection
+  - JSON content parsing
+  - Gmail email generation with formatted content
+  - Mobile push notifications
+- **Admin Notification System**: Multi-channel alert distribution
+
+**Workflow Architecture**:
+```
+User Creates Ticket → JSON Generation → Cloud Upload → Power Automate Trigger → Email + Mobile Notifications
+```
+
+**Business Value**: Streamlines support operations with automated ticketing and ensures rapid admin response through multiple notification channels
+
+These integrations demonstrate:
+- **Enterprise API Integration** skills
+- **Multi-platform development** capabilities  
+- **Workflow automation** expertise
+- **Security token management** implementation
+- **Real-world business process** automation
 
 ## 🗄️ Database Design
 
@@ -360,10 +466,19 @@ SALESFORCE_CLIENT_ID=your_salesforce_client_id
 SALESFORCE_CLIENT_SECRET=your_salesforce_client_secret
 SALESFORCE_USERNAME=your_salesforce_username
 SALESFORCE_PASSWORD=your_salesforce_password
+SALESFORCE_TOKEN_ENDPOINT=https://login.salesforce.com/services/oauth2/token
+SALESFORCE_INSTANCE_URL=your_salesforce_instance_url
+SALESFORCE_API_VERSION=59.0
 
-# Support Ticket Configuration
+# Power Automate & Cloud Storage Integration
 SUPPORT_TICKET_ADMIN_EMAILS=admin@example.com
+SUPPORT_TICKET_PROVIDER=Dropbox
 DROPBOX_ACCESS_TOKEN=your_dropbox_token
+DROPBOX_UPLOAD_FOLDER_PATH=/SupportTickets
+ONEDRIVE_CLIENT_ID=your_onedrive_client_id
+ONEDRIVE_CLIENT_SECRET=your_onedrive_client_secret
+ONEDRIVE_TENANT_ID=your_tenant_id
+ONEDRIVE_UPLOAD_FOLDER_PATH=/SupportTickets
 ```
 
 ## 📚 API Documentation
@@ -408,6 +523,66 @@ Authorization: Bearer {jwt_token}
 POST /api/inventories/{id}/items
 Authorization: Bearer {jwt_token}
 Content-Type: application/json
+```
+
+### Integration APIs
+
+#### Salesforce Integration
+```http
+# Create Salesforce Account & Contact
+POST /User/CreateSalesforceAccount
+Authorization: Cookie
+Content-Type: application/json
+
+{
+  "companyName": "Example Corp",
+  "industry": "Technology",
+  "phone": "+1234567890",
+  "website": "https://example.com"
+}
+```
+
+#### Odoo Integration
+```http
+# Get Inventory Aggregated Data (for Odoo)
+GET /api/inventories/{id}/aggregated
+Authorization: Bearer {api_token}
+
+# Response includes field statistics
+{
+  "inventoryTitle": "Sample Inventory",
+  "fields": {
+    "numericField1": {
+      "fieldName": "Price",
+      "fieldType": "Numeric", 
+      "min": 10.00,
+      "max": 999.99,
+      "average": 249.75
+    },
+    "textField1": {
+      "fieldName": "Category",
+      "fieldType": "Text",
+      "popularValues": ["Electronics", "Books", "Clothing"]
+    }
+  }
+}
+```
+
+#### Support Ticket System
+```http
+# Create Support Ticket
+POST /SupportTicket/Create
+Authorization: Cookie
+Content-Type: application/json
+
+{
+  "summary": "Issue description",
+  "priority": "High",
+  "currentUrl": "https://localhost:5001/Inventory/Details/1"
+}
+
+# Generates JSON file uploaded to cloud storage
+# Triggers Power Automate workflow for notifications
 ```
 
 ## 🤝 Contributing

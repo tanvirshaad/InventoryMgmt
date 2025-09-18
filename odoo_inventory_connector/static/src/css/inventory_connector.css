@@ -1,0 +1,76 @@
+/* Inventory Connector Custom Styles */
+
+/* Fix form layout issues on large screens */
+.o_form_view .o_form_sheet_bg {
+    max-width: none !important;
+}
+
+/* Ensure proper width for form sheets */
+.o_form_view .o_form_sheet {
+    max-width: 1140px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Fix group layout in forms */
+.o_form_view .o_group {
+    width: 100%;
+}
+
+/* Ensure notebook pages take full width */
+.o_form_view .o_notebook .tab-content {
+    width: 100%;
+}
+
+/* Fix chatter positioning */
+.o_form_view .oe_chatter {
+    max-width: 1140px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Responsive adjustments for large screens */
+@media (min-width: 1200px) {
+    .o_form_view .o_form_sheet {
+        padding: 24px;
+    }
+    
+    .o_form_view .o_group .o_group {
+        width: 48%;
+        display: inline-block;
+        vertical-align: top;
+        margin-right: 4%;
+    }
+    
+    .o_form_view .o_group .o_group:last-child {
+        margin-right: 0;
+    }
+}
+
+/* Fix button box alignment */
+.o_form_view .oe_button_box {
+    position: relative;
+    float: right;
+    width: auto;
+    margin-bottom: 16px;
+}
+
+/* Ensure proper field width */
+.o_form_view .o_field_widget {
+    max-width: 100%;
+}
+
+/* Fix for many2many and one2many fields in notebooks */
+.o_form_view .o_notebook .o_field_one2many,
+.o_form_view .o_notebook .o_field_many2many {
+    width: 100%;
+}
+
+/* List view improvements */
+.o_list_view {
+    width: 100%;
+}
+
+.o_list_view .o_list_table {
+    width: 100%;
+}

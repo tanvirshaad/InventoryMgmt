@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Form View -->
+        <record id="view_inventory_connector_field_aggregation_form" model="ir.ui.view">
+            <field name="name">inventory.connector.field.aggregation.form</field>
+            <field name="model">inventory.connector.field.aggregation</field>
+            <field name="arch" type="xml">
+                <form string="Field Aggregation">
+                    <sheet>
+                        <group>
+                            <field name="field_name"/>
+                            <field name="field_type"/>
+                            <field name="inventory_id"/>
+                        </group>
+                        <group string="Numeric Field Aggregations" invisible="field_type != 'numeric'">
+                            <field name="min_value"/>
+                            <field name="max_value"/>
+                            <field name="average_value"/>
+                            <field name="median_value"/>
+                        </group>
+                        <group string="Boolean Field Aggregations" invisible="field_type != 'boolean'">
+                            <field name="true_count"/>
+                            <field name="false_count"/>
+                            <field name="true_percentage"/>
+                        </group>
+                        <group string="Text Field Aggregations" invisible="field_type not in ('text', 'multiline')">
+                            <field name="common_values_json"/>
+                        </group>
+                        <group string="Display">
+                            <field name="display_aggregation"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- List View -->
+        <record id="view_inventory_connector_field_aggregation_tree" model="ir.ui.view">
+            <field name="name">inventory.connector.field.aggregation.list</field>
+            <field name="model">inventory.connector.field.aggregation</field>
+            <field name="arch" type="xml">
+                <list string="Field Aggregations">
+                    <field name="field_name"/>
+                    <field name="field_type"/>
+                    <field name="inventory_id"/>
+                    <field name="display_aggregation"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- Search View -->
+        <record id="view_inventory_connector_field_aggregation_search" model="ir.ui.view">
+            <field name="name">inventory.connector.field.aggregation.search</field>
+            <field name="model">inventory.connector.field.aggregation</field>
+            <field name="arch" type="xml">
+                <search string="Search Field Aggregations">
+                    <field name="field_name"/>
+                    <field name="field_type"/>
+                    <field name="inventory_id"/>
+                    <filter string="Numeric Fields" name="numeric_fields" domain="[('field_type', '=', 'numeric')]"/>
+                    <filter string="Boolean Fields" name="boolean_fields" domain="[('field_type', '=', 'boolean')]"/>
+                    <filter string="Text Fields" name="text_fields" domain="[('field_type', 'in', ['text', 'multiline'])]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Field Type" name="group_by_type" context="{'group_by': 'field_type'}"/>
+                        <filter string="Inventory" name="group_by_inventory" context="{'group_by': 'inventory_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Action -->
+        <record id="action_inventory_connector_field_aggregation" model="ir.actions.act_window">
+            <field name="name">Field Aggregations</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">inventory.connector.field.aggregation</field>
+            <field name="view_mode">list,form</field>
+            <field name="context">{}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No field aggregations found
+                </p>
+                <p>
+                    Field aggregations are automatically imported when you synchronize an inventory.
+                </p>
+            </field>
+        </record>
+    </data>
+</odoo>

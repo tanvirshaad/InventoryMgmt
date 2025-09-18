@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Form View -->
+        <record id="view_inventory_connector_field_definition_form" model="ir.ui.view">
+            <field name="name">inventory.connector.field.definition.form</field>
+            <field name="model">inventory.connector.field.definition</field>
+            <field name="arch" type="xml">
+                <form string="Field Definition">
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                            <field name="field_type"/>
+                            <field name="description"/>
+                            <field name="show_in_table"/>
+                            <field name="sequence"/>
+                            <field name="inventory_id"/>
+                        </group>
+                        <group string="Numeric Field Settings" invisible="field_type != 'numeric'">
+                            <field name="min_value" required="field_type == 'numeric'"/>
+                            <field name="max_value" required="field_type == 'numeric'"/>
+                            <field name="is_integer"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- List View -->
+        <record id="view_inventory_connector_field_definition_tree" model="ir.ui.view">
+            <field name="name">inventory.connector.field.definition.list</field>
+            <field name="model">inventory.connector.field.definition</field>
+            <field name="arch" type="xml">
+                <list string="Field Definitions">
+                    <field name="sequence" widget="handle"/>
+                    <field name="name"/>
+                    <field name="field_type"/>
+                    <field name="description"/>
+                    <field name="show_in_table"/>
+                    <field name="inventory_id"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- Search View -->
+        <record id="view_inventory_connector_field_definition_search" model="ir.ui.view">
+            <field name="name">inventory.connector.field.definition.search</field>
+            <field name="model">inventory.connector.field.definition</field>
+            <field name="arch" type="xml">
+                <search string="Search Field Definitions">
+                    <field name="name"/>
+                    <field name="field_type"/>
+                    <field name="inventory_id"/>
+                    <filter string="Text Fields" name="text_fields" domain="[('field_type', '=', 'text')]"/>
+                    <filter string="Numeric Fields" name="numeric_fields" domain="[('field_type', '=', 'numeric')]"/>
+                    <filter string="Boolean Fields" name="boolean_fields" domain="[('field_type', '=', 'boolean')]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Field Type" name="group_by_type" context="{'group_by': 'field_type'}"/>
+                        <filter string="Inventory" name="group_by_inventory" context="{'group_by': 'inventory_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Action -->
+        <record id="action_inventory_connector_field_definition" model="ir.actions.act_window">
+            <field name="name">Field Definitions</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">inventory.connector.field.definition</field>
+            <field name="view_mode">list,form</field>
+            <field name="context">{}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No field definitions found
+                </p>
+                <p>
+                    Field definitions are automatically imported when you synchronize an inventory.
+                </p>
+            </field>
+        </record>
+    </data>
+</odoo>

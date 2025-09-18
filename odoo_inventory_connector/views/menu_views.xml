@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Menu Structure -->
+        <menuitem id="menu_inventory_connector_root" 
+                  name="Inventory Connector" 
+                  sequence="100"/>
+                  
+        <menuitem id="menu_inventory_connector_main" 
+                  name="Inventories" 
+                  parent="menu_inventory_connector_root" 
+                  sequence="10"/>
+                  
+        <menuitem id="menu_inventory_connector_configuration" 
+                  name="Configuration" 
+                  parent="menu_inventory_connector_root" 
+                  sequence="100"/>
+                  
+        <!-- Inventory Menu Items -->
+        <menuitem id="menu_inventory_connector_inventory" 
+                  name="Inventories" 
+                  parent="menu_inventory_connector_main" 
+                  action="action_inventory_connector_inventory" 
+                  sequence="10"/>
+                  
+        <menuitem id="menu_inventory_connector_items" 
+                  name="Items" 
+                  parent="menu_inventory_connector_main" 
+                  action="action_inventory_connector_item" 
+                  sequence="20"/>
+                  
+        <!-- Configuration Menu Items -->
+        <menuitem id="menu_inventory_connector_field_definition" 
+                  name="Field Definitions" 
+                  parent="menu_inventory_connector_configuration" 
+                  action="action_inventory_connector_field_definition" 
+                  sequence="10"/>
+                  
+        <menuitem id="menu_inventory_connector_field_aggregation" 
+                  name="Field Aggregations" 
+                  parent="menu_inventory_connector_configuration" 
+                  action="action_inventory_connector_field_aggregation" 
+                  sequence="20"/>
+                  
+        <!-- Import Wizard -->
+        <menuitem id="menu_inventory_connector_import" 
+                  name="Import Inventory" 
+                  parent="menu_inventory_connector_main" 
+                  action="action_inventory_connector_import_wizard" 
+                  sequence="100"/>
+    </data>
+</odoo>

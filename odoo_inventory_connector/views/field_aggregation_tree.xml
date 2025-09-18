@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- List view for Field Aggregations -->
+        <record id="view_field_aggregation_tree" model="ir.ui.view">
+            <field name="name">inventory.field.aggregation.list</field>
+            <field name="model">inventory.field.aggregation</field>
+            <field name="arch" type="xml">
+                <list string="Field Aggregations">
+                    <field name="field_name"/>
+                    <field name="field_type"/>
+                    <field name="display_aggregation"/>
+                </list>
+            </field>
+        </record>
+    </data>
+</odoo>
